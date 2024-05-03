@@ -1,0 +1,12 @@
+User
+
+1. Username = Prime (Admin)
+   Pass = 12345 
+2. Username = Robs (Admin)
+   Pass = 12345
+3. Username = Hanz (Admin)
+   Pass = 12345
+
+
+GIT PULL :
+git pull https://github.com/M4rc000/BookMSystem.git
