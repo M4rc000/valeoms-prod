@@ -50,8 +50,12 @@ class Auth extends CI_Controller {
                    $this->session->set_userdata($data);
                     if ($user['role_id'] == 1) {
                         redirect('admin');
-                    } else {
-                        redirect('user');
+                    }
+                    elseif ($user['role_id'] == 2) {
+                        redirect('warehouse');
+                    }
+                    else {
+                        redirect('production');
                     }
                 } else {
                     $this->session->set_flashdata('wrong_password','<div class="alert alert-danger alert-dismissible fade show" role="alert">
@@ -92,8 +96,6 @@ class Auth extends CI_Controller {
         
         $this->session->set_flashdata('logout','<div class="alert alert-danger alert-dismissible fade show" role="alert">
         You have been logout!
-        <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-        <span aria-hidden="true">&times;</span>
         </button>
         </div>');
         redirect('auth');
