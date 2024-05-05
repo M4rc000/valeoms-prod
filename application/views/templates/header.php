@@ -8,8 +8,8 @@
   <title><?=$title;?> | Valeo Management System</title>
 
   <!-- Favicons -->
-  <link href="<?=base_url('assets');?>/img/favicon.png" rel="icon">
-  <link href="<?=base_url('assets');?>/img/apple-touch-icon.png" rel="apple-touch-icon">
+  <link href="<?=base_url('assets');?>/img/valeo.png" rel="icon">
+  <!-- <link href="<?=base_url('assets');?>/img/apple-touch-icon.png" rel="apple-touch-icon"> -->
 
   <!-- Google Fonts -->
   <link href="https://fonts.gstatic.com" rel="preconnect">

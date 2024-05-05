@@ -159,7 +159,7 @@
 
 	</li><!-- End Messages Nav -->
 
-	<li class="nav-item dropdown pe-3">
+	<li class="nav-item dropdown pe-4">
 
 	  <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
 		<img src="<?=base_url('assets');?>/img/man.png" alt="Profile" class="rounded-circle">
@@ -168,12 +168,12 @@
 
 	  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
 		<li class="dropdown-header">
-		  <h6><?=($user['name']);?></h6>
+		  <h6><?=$name['name'];?></h6>
 		  <span>
 			<?php
-				if ($user['role_id'] == 1) {
+				if ($name['role_id'] == 1) {
 					echo 'Administrator';
-				} elseif ($user['role_id'] == 2) {
+				} elseif ($name['role_id'] == 2) {
 					echo 'Warehouse';
 				} else {
 					echo 'Production';
@@ -208,13 +208,6 @@
 
 	  </ul><!-- End Profile Dropdown Items -->
 	</li><!-- End Profile Nav -->
-
-	<li class="nav-item d-block ps-2 pe-3">
-	  <a class="nav-link nav-icon search-bar-toggle" href="#">
-		<i class="bi bi-moon-stars-fill"></i>
-	  </a>
-	</li>
-	<!-- End Dark Mode -->
 
   </ul>
 </nav><!-- End Icons Navigation -->
