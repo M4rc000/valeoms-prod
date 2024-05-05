@@ -34,6 +34,10 @@
   * Author: BootstrapMade.com
   * License: https://bootstrapmade.com/license/
   ======================================================== -->
+
+
+  <!-- JQUERY -->
+  <script src="<?=base_url('assets');?>/vendor/jquery/jquery.min.js"></script>
 </head>
 
 <body>

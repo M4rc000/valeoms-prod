@@ -21,7 +21,19 @@
 
   <!-- Template Main JS File -->
   <script src="<?=base_url('assets');?>/js/main.js"></script>
-
+  <script>
+    $(document).ready(function(){
+        $(".search-bar-toggle").click(function(){
+            $("body").toggleClass("dark-mode");
+            var currentIconClass = $(this).find("i").attr("class");
+            if(currentIconClass === "bi bi-moon-stars-fill") {
+                $(this).find("i").removeClass("bi-moon-stars-fill").addClass("bi-sun");
+            } else {
+                $(this).find("i").removeClass("bi-sun").addClass("bi-moon-stars-fill");
+            }
+        });
+    });
+  </script>
 </body>
 
 </html>

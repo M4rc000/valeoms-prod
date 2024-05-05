@@ -1,16 +1,4 @@
-<div class="content-wrapper">
-	<div class="row">
-		<div class="col-sm">
-			<div class="card shadow" style="border-bottom: 2px solid #4b49ac; height: 40px; border-radius: 5px">
-				<div class="card-body">
-					<h5 class="text-left mb-5" style="line-height: 0px; font-size: 14px; font-weight: 100;">
-						<span style="font-weight: 700;"><?= ucfirst($menu); ?></span> / <?= $title; ?>
-					</h5>
-				</div>
-			</div>
-		</div>
-	</div>
-	<br>
+<!-- <div class="content-wrapper">
 	<div class="row">
 		<div class="col-lg grid-margin stretch-card">
 			<div class="card shadow" style="border-left: 2px solid #ffc100;">
@@ -72,9 +60,50 @@
 			</div>
 		</div>
 	</div>
-</div>
+</div> -->
 
-<!-- content-wrapper ends -->
+
+<section class="section">
+      <div class="row">
+        <div class="col-lg-12">
+          <div class="card">
+            <div class="card-body">
+              <table class="table datatable">
+                <thead>
+                  <tr>
+                    <th>
+                      <b>N</b>ame
+                    </th>
+                    <th>Ext.</th>
+                    <th>City</th>
+                    <th data-type="date" data-format="YYYY/DD/MM">Start Date</th>
+                    <th>Completion</th>
+                  </tr>
+                </thead>
+                <tbody>
+                  <tr>
+                    <td>Unity Pugh</td>
+                    <td>9958</td>
+                    <td>Curicó</td>
+                    <td>2005/02/11</td>
+                    <td>37%</td>
+                  </tr>
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
+    </section>
+
+
+
+
+
+
+
+
+
 
 <!-- ADD MODAL-->
 <div class="modal fade" id="AddModal" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style="margin-top: -5rem">

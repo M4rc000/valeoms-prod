@@ -1,17 +1,5 @@
 <div class="content-wrapper">
 	<div class="row">
-		<div class="col-sm">
-			<div class="card shadow" style="border-bottom: 2px solid #4b49ac; height: 40px; border-radius: 5px">
-				<div class="card-body">
-					<h5 class="text-left mb-5" style="line-height: 0px; font-size: 14px; font-weight: 100;">
-						<span style="font-weight: 700;"><?= ucfirst($menus); ?></span> / <?= $title; ?>
-					</h5>
-				</div>
-			</div>
-		</div>
-	</div>
-	<br>
-	<div class="row">
 		<div class="col-lg grid-margin stretch-card">
 			<div class="card shadow" style="border-left: 2px solid #ffc100;">
 				<div class="card-body">

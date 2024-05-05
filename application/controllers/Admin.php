@@ -14,6 +14,7 @@ class Admin extends CI_Controller {
 	public function index()
 	{
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
         $url = $_SERVER['REQUEST_URI'];
         $adminUrl = '/admin';

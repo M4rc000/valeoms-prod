@@ -19,8 +19,7 @@ class User extends CI_Controller {
             exit();
         }
 
-        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
-        $data['countries'] = $this->db->get('countries')->result_array();
+        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['menus'] = $this->uri->segment(1);
         
         $data['title'] = 'My Profile';
@@ -34,9 +33,8 @@ class User extends CI_Controller {
 	
 	public function change_password()
 	{
-        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
+        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['title'] = 'Change Password';
-        $data['countries'] = $this->db->get('countries')->result_array();
         $data['menus'] = $this->uri->segment(1); 
         
         $this->load->view('templates/header', $data);
@@ -48,7 +46,7 @@ class User extends CI_Controller {
 
     public function friend_list()
     {
-        $data['user'] = $this->db->get_where('user', ['email' => $this->session->userdata('email')])->row_array();
+        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['title'] = 'Friend List'; 
         
         $data['menus'] = $this->uri->segment(1); 

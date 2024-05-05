@@ -32,7 +32,7 @@
 
         <?php foreach ($subMenu as $sm) : ?>   
         <li class="nav-item">
-          <a class="nav-link collapsed" href="users-profile.html">
+          <a class="nav-link collapsed" href="<?= base_url($sm['url']); ?>">
             <i class="<?= $sm['icon']; ?>"></i>
             <span>&nbsp;&nbsp;&nbsp;<?= $sm['title']; ?></span>
           </a>
@@ -44,3 +44,14 @@
   </aside><!-- End Sidebar-->
 
   <main id="main" class="main">
+  <div class="pagetitle">
+      <h1><?=$title;?></h1>
+      <nav>
+        <ol class="breadcrumb">
+          <li class="breadcrumb-item">
+            <a><?=ucfirst(strtolower(explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'))[2]));?></a>
+          </li>
+          <li class="breadcrumb-item active"><?=$title;?></li>
+        </ol>
+      </nav>
+    </div><!-- End Page Title -->
