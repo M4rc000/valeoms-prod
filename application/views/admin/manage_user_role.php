@@ -43,8 +43,8 @@
                     <td><?=$role['upddt'];?></td>
                     <td><?=$role['updby'];?></td>
 					<td>
-						<button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#editModal<?=$role['id'];?>">
-							<i class="bx bxs-edit" style="color: white;"></i>
+						<button class="btn btn-warning" data-bs-toggle="modal" data-bs-target="#configModal<?=$role['id'];?>">
+							<i class="bx bxs-wrench" style="color: white;"></i>
 						</button>
 						<button class="btn btn-success ms-1" data-bs-toggle="modal" data-bs-target="#editModal<?=$role['id'];?>">
 							<i class="bx bxs-edit" style="color: white;"></i>
@@ -71,14 +71,16 @@
 		<div class="modal-content">
 	<?= form_open_multipart('admin/AddRole'); ?>
 		<div class="modal-header">
-			<h5 class="modal-title">Add User</h5>
+			<h5 class="modal-title">Add Role</h5>
 			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		</div>
 		<div class="modal-body">
+			<!-- GET USER -->
+			<input type="text" class="form-control" id="user" name="user" value="<?=$name['username'];?>" hidden>
 			<div class="row ps-2">
 				<div class="col-4">
 					<label for="id" class="form-label">ID</label>
-					<input type="text" class="form-control" id="id" name="id" readonly>
+					<input type="text" class="form-control" id="id" name="id">
 				</div>
 				<div class="col-4">
 					<label for="role" class="form-label">Role</label>
@@ -88,7 +90,7 @@
 		</div>
 		<div class="modal-footer">
 			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-			<button type="button" class="btn btn-primary">Save changes</button>
+			<button type="submit" class="btn btn-primary">Save changes</button>
 		</div>
 	</form>
 		</div>

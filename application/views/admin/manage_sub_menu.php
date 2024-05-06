@@ -59,7 +59,7 @@
 							<td><?=$sb['title'];?></td>
 							<td><?=$sb['url'];?></td>
 							<td><i class="<?=$sb['icon'];?>"></i></td>
-							<td><?=$sb['is_active'] == 1 ? '<i class="bx bxs-check-circle ps-4" style="color: #012970"></i>' : '<i class="bx bxs-x-circle" style="color: #012970"></i>'; ?></td>
+							<td><?=$sb['is_active'] == 1 ? '<i class="bx bxs-check-circle ps-4" style="color: #012970"></i>' : '<i class="bx bxs-x-circle ps-4" style="color: #012970"></i>'; ?></td>
 							<td>
 								<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editModal<?=$sb['id'];?>">
 									<i class="bx bxs-edit" style="color: white;"></i>
@@ -152,13 +152,32 @@
 				<div class="row ps-2">
 					<div class="col-4">
 						<label for="menu_id" class="form-label">Menu ID</label>
-						<select id="menu_id" class="form-select" required name="menu_id">
-							<option value=""></option>
-						</select>
+						<input type="text" class="form-control" id="menu_id" name="menu_id" value="<?=$sb['menu_id'];?>">
+						<input type="text" class="form-control" id="id" name="id" value="<?=$sb['id'];?>" hidden>
 					</div>
 					<div class="col-4">
 						<label for="title" class="form-label">Title</label>
-						<input type="text" class="form-control" id="title" name="title" value="<?=$menu['menu'];?>">
+						<input type="text" class="form-control" id="title" name="title" value="<?=$sb['title'];?>">
+					</div>
+					<div class="col-4">
+						<label for="url" class="form-label">Url</label>
+						<input type="text" class="form-control" id="url" name="url" value="<?=$sb['url'];?>">
+					</div>
+				</div>
+				<div class="row ps-2 mt-4">
+					<div class="col-4">
+						<label for="icon" class="form-label">Icon</label>
+						<div class="input-group mb-3">
+							<span class="input-group-text icon-show" id="basic-addon1"></span>
+							<input type="text" class="form-control" aria-label="Username" aria-describedby="basic-addon1" id="icon" name="icon" value="<?=$sb['icon'];?>">
+						</div>
+					</div>
+					<div class="col-4">
+						<label for="active" class="form-label">Active</label>
+						<select id="active" class="form-select" required name="active">
+							<option <?= $sb['is_active'] == 1 ? 'selected' : '';?> value="1">Active</option>
+							<option <?= $sb['is_active'] == 0 ? 'selected' : '';?> value="0">Not active</option>
+						</select>
 					</div>
 				</div>
 			</div>
@@ -173,18 +192,20 @@
 <?php endforeach; ?>
 
 <!-- DELETE CONFIRM MODAL-->
-<?php foreach($submenus as $menu) : ?>
-	<?= form_open_multipart('admin/DeleteMenu'); ?>
-		<div class="modal fade" id="deleteModal<?= $menu['id']; ?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+<?php foreach($submenus as $sb) : ?>
+	<?= form_open_multipart('admin/DeleteSubMenu'); ?>
+		<div class="modal fade" id="deleteModal<?= $sb['id']; ?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 			<div class="modal-dialog">
 				<div class="modal-content">
 				<div class="modal-header">
 					<h4 class="modal-title pb-0 mb-0" id="exampleModalLabel">Confirm to delete ?</h4>
 				</div>
 				<div class="modal-body">
-					<input type="text" name="id" id="id" value="<?= $menu['id']; ?>" style="display: none;">
-					<p><b>ID</b> : <?=$menu['id'];?></p>
-					<p><b>Menu</b> : <?=$menu['menu'];?></p>
+					<input type="text" name="id" id="id" value="<?= $sb['id']; ?>" style="display: none;">
+					<p><b>Menu ID</b> : <?=$sb['menu_id'];?></p>
+					<p><b>Title</b> : <?=$sb['title'];?></p>
+					<p><b>Url</b> : <?=$sb['url'];?></p>
+					<p><b>Icon</b> : <i class="<?=$sb['icon'];?>"></i></p>
 				</div>
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>

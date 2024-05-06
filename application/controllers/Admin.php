@@ -156,7 +156,7 @@ class Admin extends CI_Controller {
         
 
         // MANAGE USER ROLE
-        public function addUserRole() {
+        public function addRole() {
             $id = $this->input->post('role_id');
             $role = $this->input->post('role');
 
@@ -164,7 +164,9 @@ class Admin extends CI_Controller {
                 'id' => $id,
                 'role' => $role,
                 'crtdt' => date('d-m-Y h:i'),
-                'crtby' => $this->input->post('crtby')
+                'crtby' => $this->input->post('user'),
+                'upddt' => date('d-m-Y h:i'),
+                'updby' => $this->input->post('user')
             );
 
             if($this->db->get_where('user_role', array('role' => $role, 'id' => $id))->num_rows() > 0){
@@ -187,7 +189,7 @@ class Admin extends CI_Controller {
             redirect('admin/manage_role');
         }
 
-        public function editUserRole() {
+        public function editRole() {
             $id = $this->input->post('id');
             $upload_image = $_FILES['img']['name'];
                 
@@ -236,7 +238,7 @@ class Admin extends CI_Controller {
             redirect('admin/manage_user'); 
         }
 
-        public function deleteUserRole() {
+        public function deleteRole() {
             $this->load->model('Admin_model','AModel');
         
             $id = $this->input->post('id');
@@ -345,7 +347,7 @@ class Admin extends CI_Controller {
             header("Location: " . base_url('admin/manage_menu'));
         }
 
-        // MANAGE MENU
+        // MANAGE SUBMENU
         public function AddSubMenu() {
             $Data = array(
                 'menu_id' => $this->input->post('menu_id'),
@@ -370,29 +372,33 @@ class Admin extends CI_Controller {
         public function editSubMenu() {
             $id = $this->input->post('id');
             $Data = array(
-                'menu' => $this->input->post('menu'),
+                'menu_id' => $this->input->post('menu_id'),
+                'title' => $this->input->post('title'),
+                'url' => $this->input->post('url'),
+                'icon' => $this->input->post('icon'),
+                'is_active' => $this->input->post('active'),
                 'upddt' => date('d-m-Y H:i'),
                 'updby' => $this->input->post('user')
             );
 
-            $this->AModel->updateData('user_menu', $id, $Data);
+            $this->AModel->updateData('user_sub_menu', $id, $Data);
             $this->session->set_flashdata('EDIT','<div class="alert alert-warning alert-dismissible fade show" role="alert" style="width: 40%">
-            <i class="bi bi-check-circle me-1"></i> Menu successfully updated
+            <i class="bi bi-check-circle me-1"></i> Submenu successfully updated
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>');
-            redirect('admin/manage_menu');
+            redirect('admin/manage_sub_menu');
         }
 
-        public function deleteSubMenu() {
+        public function DeleteSubMenu() {
             $this->load->model('Admin_model','AModel');
         
             $id = $this->input->post('id');
         
-            $this->AModel->deleteData('user_menu', $id);
+            $this->AModel->deleteData('user_sub_menu', $id);
             $this->session->set_flashdata('DELETED','<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 40%">
-            <i class="bi bi-check-circle me-1"></i> Menu successfully deleted
+            <i class="bi bi-check-circle me-1"></i> Submenu successfully deleted
             <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>');
-            header("Location: " . base_url('admin/manage_menu'));
+            header("Location: " . base_url('admin/manage_sub_menu'));
         }
 }
