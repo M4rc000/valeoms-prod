@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 05, 2024 at 09:39 PM
+-- Generation Time: May 06, 2024 at 10:36 AM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.1
 
@@ -137,31 +137,36 @@ CREATE TABLE `user_sub_menu` (
   `title` varchar(20) NOT NULL,
   `url` varchar(50) NOT NULL,
   `icon` varchar(50) NOT NULL,
-  `is_active` int(1) NOT NULL
+  `is_active` int(1) NOT NULL,
+  `crtdt` varchar(128) NOT NULL,
+  `crtby` varchar(128) NOT NULL,
+  `upddt` varchar(128) NOT NULL,
+  `updby` varchar(128) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 --
 -- Dumping data for table `user_sub_menu`
 --
 
-INSERT INTO `user_sub_menu` (`id`, `menu_id`, `title`, `url`, `icon`, `is_active`) VALUES
-(1, 1, 'Dashboard', 'admin/', 'bx bxs-dashboard', 1),
-(2, 1, 'Manage User', 'admin/manage_user', 'bx bxs-group', 1),
-(3, 1, 'Manage Role', 'admin/manage_role', 'bx bxs-purchase-tag', 1),
-(4, 1, 'Manage Menu', 'admin/manage_menu', 'bx bx-menu', 1),
-(5, 1, 'Manage Sub-menu', 'admin/manage_sub_menu', 'bx bx-menu-alt-right', 1),
-(6, 1, 'Manage Books', 'admin/manage_books', 'mdi mdi-book-open-page-variant', 1),
-(7, 2, 'Receiving Material', 'warehouse/receiving_material', 'bx bxl-dropbox', 1),
-(8, 2, 'List Storage', 'warehouse/list_storage', 'bx bxs-cabinet', 1),
-(9, 2, 'List Material Report', 'warehouse/list_material_report', 'bx bxs-report', 1),
-(10, 2, 'Re-Grouping', 'warehouse/regrouping', 'bx  bxs-collection', 1),
-(11, 2, 'Cycle Count', 'warehouse/cycle_count', 'bx bx-recycle', 1),
-(12, 2, 'Production Request', 'warehouse/production_request', 'bx bxs-archive-in', 1),
-(13, 3, 'Material Request', 'production/material_request', 'bx bxs-card', 1),
-(14, 3, 'Kitting', 'production/kitting', 'bi bi-inbox', 1),
-(15, 3, 'Kanban Box', 'production/kanban_box', 'bi bi-inbox-fill', 1),
-(16, 3, 'Material Return', 'production/material_return', 'bi bi-arrow-repeat', 1),
-(17, 1, 'Manage Storage', 'admin/manage_storage', 'bi bi-bounding-box', 1);
+INSERT INTO `user_sub_menu` (`id`, `menu_id`, `title`, `url`, `icon`, `is_active`, `crtdt`, `crtby`, `upddt`, `updby`) VALUES
+(1, 1, 'Dashboard', 'admin/', 'bx bxs-dashboard', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(2, 1, 'Manage User', 'admin/manage_user', 'bx bxs-group', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(3, 1, 'Manage Role', 'admin/manage_role', 'bx bxs-purchase-tag', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(4, 1, 'Manage Menu', 'admin/manage_menu', 'bx bx-menu', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(5, 1, 'Manage Sub-menu', 'admin/manage_sub_menu', 'bx bx-menu-alt-right', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(6, 1, 'Manage Books', 'admin/manage_books', 'mdi mdi-book-open-page-variant', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(7, 1, 'Manage Storage', 'admin/manage_storage', 'bi bi-bounding-box', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(8, 2, 'Receiving Material', 'warehouse/receiving_material', 'bx bxl-dropbox', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(9, 2, 'List Storage', 'warehouse/list_storage', 'bx bxs-cabinet', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(10, 2, 'List Material Report', 'warehouse/list_material_report', 'bx bxs-report', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(11, 2, 'Re-Grouping', 'warehouse/regrouping', 'bx  bxs-collection', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(12, 2, 'Cycle Count', 'warehouse/cycle_count', 'bx bx-recycle', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(13, 2, 'Production Request', 'warehouse/production_request', 'bx bxs-archive-in', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(14, 3, 'Material Request', 'production/material_request', 'bx bxs-card', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(15, 3, 'Kitting', 'production/kitting', 'bi bi-inbox', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(16, 3, 'Kanban Box', 'production/kanban_box', 'bi bi-inbox-fill', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(17, 3, 'Material Return', 'production/material_return', 'bi bi-arrow-repeat', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(18, 5, 'Profile', 'user/profile', 'bx bxs-archive-in', 1, '06-05-2024 15:34', 'Prime', '06-05-2024 15:34', 'Prime');
 
 --
 -- Indexes for dumped tables
@@ -214,12 +219,6 @@ ALTER TABLE `user_access_menu`
   MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
--- AUTO_INCREMENT for table `user_menu`
---
-ALTER TABLE `user_menu`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=6;
-
---
 -- AUTO_INCREMENT for table `user_role`
 --
 ALTER TABLE `user_role`
@@ -229,7 +228,7 @@ ALTER TABLE `user_role`
 -- AUTO_INCREMENT for table `user_sub_menu`
 --
 ALTER TABLE `user_sub_menu`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=18;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;

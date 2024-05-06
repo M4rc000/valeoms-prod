@@ -84,12 +84,11 @@ class Admin extends CI_Controller {
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
 
-        $data['menus'] = $this->uri->segment(1);
         $data['title'] = 'Manage Sub-Menu';
-
         $this->load->model('Admin_model','AModel');
         
-        $data['submenu'] = $this->AModel->getAllSubMenu();
+        $data['menus'] = $this->AModel->getAllMenu();
+        $data['submenus'] = $this->AModel->getAllSubMenu();
 
         $this->load->view('templates/header', $data);
         $this->load->view('templates/navbar', $data);   
@@ -114,7 +113,7 @@ class Admin extends CI_Controller {
             );
 
             $this->AModel->insertData('user', $Data);
-            $this->session->set_flashdata('SUCCESS','<div class="alert alert-success alert-dismissible fade show mb-2" id="dismiss" role="alert">
+            $this->session->set_flashdata('SUCCESS','<div class="alert alert-success alert-dismissible fade show mb-2" id="dismiss" role="alert" style="width: 40%">
                 <i class="bi bi-check-circle me-1"></i> New User successfully added
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>');
@@ -134,7 +133,7 @@ class Admin extends CI_Controller {
                 );
 
             $this->AModel->updateData('user', $id, $Data);
-            $this->session->set_flashdata('EDIT','<div class="alert alert-warning alert-dismissible fade show" role="alert">
+            $this->session->set_flashdata('EDIT','<div class="alert alert-warning alert-dismissible fade show" role="alert" style="width: 40%">
                 <i class="bi bi-check-circle me-1"></i> User successfully updated
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>');
@@ -147,7 +146,7 @@ class Admin extends CI_Controller {
             $id = $this->input->post('id');
             $this->AModel->deleteData('user', $id);
         
-            $this->session->set_flashdata('DELETED','<div class="alert alert-danger alert-dismissible fade show" role="alert">
+            $this->session->set_flashdata('DELETED','<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 40%">
             <i class="bi bi-check-circle me-1"></i> User successfully deleted
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>');
@@ -299,10 +298,10 @@ class Admin extends CI_Controller {
 
 
         // MANAGE MENU
-        public function addMenu() {
-
+        public function AddMenu() {
             $Data = array(
-                'menu' => $this->input->post('name'),
+                'id' => $this->input->post('id'),
+                'menu' => $this->input->post('menu'),
                 'crtdt' => date('d-m-Y H:i'),
                 'crtby' => $this->input->post('user'),
                 'upddt' => date('d-m-Y H:i'),
@@ -310,11 +309,9 @@ class Admin extends CI_Controller {
             );
 
             $this->AModel->insertData('user_menu', $Data);
-            $this->session->set_flashdata('SUCCESS','<div class="alert alert-success alert-dismissible fade show" role="alert">
-                New Menu successfully added
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
+            $this->session->set_flashdata('SUCCESS','<div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
+            <i class="bi bi-check-circle me-1"></i> New menu successfully added
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>');
             redirect('admin/manage_menu');
         }
@@ -322,17 +319,15 @@ class Admin extends CI_Controller {
         public function editMenu() {
             $id = $this->input->post('id');
             $Data = array(
-                'menu' => $this->input->post('name'),
+                'menu' => $this->input->post('menu'),
                 'upddt' => date('d-m-Y H:i'),
                 'updby' => $this->input->post('user')
             );
 
             $this->AModel->updateData('user_menu', $id, $Data);
-            $this->session->set_flashdata('EDIT','<div class="alert alert-success alert-dismissible fade show" role="alert">
-                Menu successfully updated
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
+            $this->session->set_flashdata('EDIT','<div class="alert alert-warning alert-dismissible fade show" role="alert" style="width: 40%">
+            <i class="bi bi-check-circle me-1"></i> Menu successfully updated
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>');
             redirect('admin/manage_menu');
         }
@@ -343,11 +338,60 @@ class Admin extends CI_Controller {
             $id = $this->input->post('id');
         
             $this->AModel->deleteData('user_menu', $id);
-            $this->session->set_flashdata('DELETED','<div class="alert alert-success alert-dismissible fade show" role="alert">
-            User successfully deleted
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-            </button>
+            $this->session->set_flashdata('DELETED','<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 40%">
+            <i class="bi bi-check-circle me-1"></i> Menu successfully deleted
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>');
+            header("Location: " . base_url('admin/manage_menu'));
+        }
+
+        // MANAGE MENU
+        public function AddSubMenu() {
+            $Data = array(
+                'menu_id' => $this->input->post('menu_id'),
+                'title' => $this->input->post('title'),
+                'url' => $this->input->post('url'),
+                'icon' => $this->input->post('icon'),
+                'is_active' => $this->input->post('active'),
+                'crtdt' => date('d-m-Y H:i'),
+                'crtby' => $this->input->post('user'),
+                'upddt' => date('d-m-Y H:i'),
+                'updby' => $this->input->post('user')
+            );
+
+            $this->AModel->insertData('user_sub_menu', $Data);
+            $this->session->set_flashdata('SUCCESS','<div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
+            <i class="bi bi-check-circle me-1"></i> New submenu successfully added
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>');
+            redirect('admin/manage_sub_menu');
+        }
+
+        public function editSubMenu() {
+            $id = $this->input->post('id');
+            $Data = array(
+                'menu' => $this->input->post('menu'),
+                'upddt' => date('d-m-Y H:i'),
+                'updby' => $this->input->post('user')
+            );
+
+            $this->AModel->updateData('user_menu', $id, $Data);
+            $this->session->set_flashdata('EDIT','<div class="alert alert-warning alert-dismissible fade show" role="alert" style="width: 40%">
+            <i class="bi bi-check-circle me-1"></i> Menu successfully updated
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>');
+            redirect('admin/manage_menu');
+        }
+
+        public function deleteSubMenu() {
+            $this->load->model('Admin_model','AModel');
+        
+            $id = $this->input->post('id');
+        
+            $this->AModel->deleteData('user_menu', $id);
+            $this->session->set_flashdata('DELETED','<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 40%">
+            <i class="bi bi-check-circle me-1"></i> Menu successfully deleted
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>');
             header("Location: " . base_url('admin/manage_menu'));
         }

@@ -24,18 +24,26 @@
               <table class="table datatable">
                 <thead>
                   <tr>
-                    <th>#</th>
-                    <th>ID</th>
-                    <th>Menu</th>
-                    <th>Action</th>
+                    <th class="text-center">#</th>
+                    <th class="text-center">ID</th>
+                    <th class="text-center">Menu</th>
+                    <th class="text-center">CrtDt</th>
+                    <th class="text-center">CrtBy</th>
+                    <th class="text-center">UpdDt</th>
+                    <th class="text-center">UpdBy</th>
+                    <th class="text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody>
 					<?php $number = 0; foreach($menus as $menu) : $number++?>
-						<tr>
+						<tr class="text-center">
 							<td><?=$number;?></td>
 							<td><?=$menu['id'];?></td>
 							<td><?=$menu['menu'];?></td>
+							<td><?= date('d M Y H:i', strtotime($menu['crtdt'])); ?></td>
+							<td><?= $menu['crtby'];?></td>
+							<td><?= date('d M Y H:i', strtotime($menu['upddt'])); ?></td>
+							<td><?= $menu['updby'];?></td>
 							<td>
 								<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editModal<?=$menu['id'];?>">
 									<i class="bx bxs-edit" style="color: white;"></i>
@@ -66,9 +74,11 @@
 			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 		</div>
 		<div class="modal-body">
+			<!-- GET USER -->
+			<input type="text" class="form-control" id="user" name="user" value="<?=$user['username'];?>" hidden> 
 			<div class="row ps-2">
 				<div class="col-4">
-					<label for="id" class="form-label">ID</label>
+					<label for="id" class="form-label">Menu ID</label>
 					<input type="text" class="form-control" id="id" name="id" required>
 				</div>
 				<div class="col-4">
@@ -97,6 +107,8 @@
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
+			<!-- GET USER -->
+			<input type="text" class="form-control" id="user" name="user" value="<?=$user['username'];?>" hidden> 
 				<div class="row ps-2">
 					<div class="col-4">
 						<label for="menu" class="form-label">ID</label>
