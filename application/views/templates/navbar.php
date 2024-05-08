@@ -168,9 +168,12 @@
 
 	  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
 		<li class="dropdown-header">
-		  <h6><?=$name['name'];?></h6>
-		  <span>
+		<h6>
+			<?= isset($name['name']) ? $name['name'] : $this->session->userdata('username'); ?>
+		</h6>
+		<span>
 			<?php
+			if (isset($name['name'])) {
 				if ($name['role_id'] == 1) {
 					echo 'Administrator';
 				} elseif ($name['role_id'] == 2) {
@@ -178,8 +181,11 @@
 				} else {
 					echo 'Production';
 				}
+			} else {
+				echo 'Unknown';
+			}
 			?>
-		  </span>
+		</span>
 		</li>
 		<li>
 		  <hr class="dropdown-divider">
