@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: May 09, 2024 at 11:51 AM
+-- Generation Time: May 11, 2024 at 02:16 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.1
 
@@ -20,6 +20,185 @@ SET time_zone = "+00:00";
 --
 -- Database: `valeo-app`
 --
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `bom`
+--
+
+CREATE TABLE `bom` (
+  `Id_bom` int(11) NOT NULL,
+  `Id_material` varchar(15) NOT NULL,
+  `Material_desc` varchar(128) NOT NULL,
+  `Material_type` varchar(128) NOT NULL,
+  `Qty` int(11) NOT NULL,
+  `Uom` varchar(5) NOT NULL,
+  `Id_fg` varchar(20) NOT NULL,
+  `Fg_desc` varchar(128) NOT NULL,
+  `Crtdt` varchar(128) NOT NULL,
+  `Crtby` varchar(128) NOT NULL,
+  `Upddt` varchar(128) NOT NULL,
+  `Updby` varchar(128) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `bom`
+--
+
+INSERT INTO `bom` (`Id_bom`, `Id_material`, `Material_desc`, `Material_type`, `Qty`, `Uom`, `Id_fg`, `Fg_desc`, `Crtdt`, `Crtby`, `Upddt`, `Updby`) VALUES
+(1, 'S0041221794', 'LEVER. TSL14', 'COMP', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(2, 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', 'COMP', 2, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(3, 'S0561217579', 'LEVER REST. TSL12', 'SFIN', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(4, 'S9101217395', 'SCREW M/SWITCH. RSML14', 'COMP', 2, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(5, 'S9221217787', 'FLANGE NUT. RSML14', 'COMP', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(6, 'S9311220298', 'ADJUST WASHER. TSL12', 'COMP', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(7, 'S9991195350', 'GREASE.CM55', 'SFIN', 3, 'G', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(8, 'K306127', 'LIQUID GREASE.CM-55', 'COMP', 3, 'G', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(9, 'S1001223013', 'INDUCTOR ASSY. GAMMA2 N/ISG', 'SFIN', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(10, 'S1081204174', 'MAGNET. TSL12', 'COMP', 4, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(11, 'S1091206541', 'HOLDER. TSL12', 'COMP', 4, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(12, 'S1011223014', 'YOKE MC. GAMMA2 N/ISG', 'COMP', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(13, 'S2001215878', 'ARMARURE ASSY. TSL12', 'SFIN', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(14, 'S5001223287', 'C/REAR PART ASS\'Y.GAMMA2 N/ISG', 'SFIN', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(15, 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', 'SFIN', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(16, 'S0131221795', 'DRIVE SHAFT ASSY. TSL14', 'SFIN', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(17, 'S0151215894', 'INTERNAL GEAR ASSY. TSL12', 'SFIN', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(18, 'S0641221871', 'DRIVE SHAFT MC.TSL14', 'COMP', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(19, 'K300821', 'STEEL BALL.Y-2 24L', 'COMP', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(20, 'S9011198356', 'DRIVE SHAFT BUSH. RSML14', 'COMP', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(21, 'S305190484', 'SATELLITE PIN. TSL', 'COMP', 3, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(22, 'S0141206243', 'SATELLITE GEAR. TSL12', 'COMP', 3, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(23, 'S0571205800', 'GASKET SHEET. TSL12', 'COMP', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(24, 'K306127', 'LIQUID GREASE.CM-55', 'COMP', 0, 'G', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(25, 'S3001216692', 'ORC ASS\'Y.GAMMA2 N/ISG', 'SFIN', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(26, 'S0261217546', 'STOPPER. TSL12', 'COMP', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(27, '4EM1771', 'STOP RING.D-3', 'COMP', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(28, 'K306127', 'LIQUID GREASE.CM-55', 'COMP', 2, 'G', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(29, 'A466035', 'F/BRKT ASS\'Y. GAMMA2 INA.', 'SFIN', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(30, 'S4001215783', 'M/SWITCH ASS\'Y. GAMMA2 N/ISG', 'SFIN', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(31, 'A474429', 'N/PLATE. GAMMA2 INA. 2M600', 'COMP', 1, 'PC', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(32, 'S0041221794', 'LEVER. TSL14', 'COMP', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(33, 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', 'COMP', 2, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(34, 'S0561217579', 'LEVER REST. TSL12', 'SFIN', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(35, 'S9101217395', 'SCREW M/SWITCH. RSML14', 'COMP', 2, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(36, 'S9221217787', 'FLANGE NUT. RSML14', 'COMP', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(37, 'S9311220298', 'ADJUST WASHER. TSL12', 'COMP', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(38, 'S9991195350', 'GREASE.CM55', 'SFIN', 3, 'G', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(39, 'K306127', 'LIQUID GREASE.CM-55', 'COMP', 3, 'G', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(40, 'S1001223013', 'INDUCTOR ASSY. GAMMA2 N/ISG', 'SFIN', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(41, 'S1081204174', 'MAGNET. TSL12', 'COMP', 4, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(42, 'S1091206541', 'HOLDER. TSL12', 'COMP', 4, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(43, 'S1011223014', 'YOKE MC. GAMMA2 N/ISG', 'COMP', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(44, 'S2001215878', 'ARMARURE ASSY. TSL12', 'SFIN', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(45, 'S5001223287', 'C/REAR PART ASS\'Y.GAMMA2 N/ISG', 'SFIN', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(46, 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', 'SFIN', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(47, 'S0131221795', 'DRIVE SHAFT ASSY. TSL14', 'SFIN', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(48, 'S0151215894', 'INTERNAL GEAR ASSY. TSL12', 'SFIN', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(49, 'S0641221871', 'DRIVE SHAFT MC.TSL14', 'COMP', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(50, 'K300821', 'STEEL BALL.Y-2 24L', 'COMP', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(51, 'S9011198356', 'DRIVE SHAFT BUSH. RSML14', 'COMP', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(52, 'S305190484', 'SATELLITE PIN. TSL', 'COMP', 3, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(53, 'S0141206243', 'SATELLITE GEAR. TSL12', 'COMP', 3, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(54, 'S0571205800', 'GASKET SHEET. TSL12', 'COMP', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(55, 'K306127', 'LIQUID GREASE.CM-55', 'COMP', 0, 'G', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(56, 'S3001216692', 'ORC ASS\'Y.GAMMA2 N/ISG', 'SFIN', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(57, 'S0261217546', 'STOPPER. TSL12', 'COMP', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(58, '4EM1771', 'STOP RING.D-3', 'COMP', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(59, 'K306127', 'LIQUID GREASE.CM-55', 'COMP', 2, 'G', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(60, 'A466035', 'F/BRKT ASS\'Y. GAMMA2 INA.', 'SFIN', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(61, 'A466045', 'M/SWITCH ASS\'Y. GAMMA2 INA. 2M610', 'SFIN', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(62, 'A466099', 'N/PLATE. GAMMA2 INA. 2M610', 'COMP', 1, 'PC', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(63, 'S0131221795', 'DRIVE SHAFT ASSY. TSL14', 'SFIN', 1, 'PC', 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(64, 'S0151215894', 'INTERNAL GEAR ASSY. TSL12', 'SFIN', 1, 'PC', 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(65, 'S0641221871', 'DRIVE SHAFT MC.TSL14', 'COMP', 1, 'PC', 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(66, 'K300821', 'STEEL BALL.Y-2 24L', 'COMP', 1, 'PC', 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(67, 'S9011198356', 'DRIVE SHAFT BUSH. RSML14', 'COMP', 1, 'PC', 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(68, 'S305190484', 'SATELLITE PIN. TSL', 'COMP', 3, 'PC', 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(69, 'S0141206243', 'SATELLITE GEAR. TSL12', 'COMP', 3, 'PC', 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(70, 'S0571205800', 'GASKET SHEET. TSL12', 'COMP', 1, 'PC', 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(71, 'K306127', 'LIQUID GREASE.CM-55', 'COMP', 0, 'G', 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(72, 'S3001216692', 'ORC ASS\'Y.GAMMA2 N/ISG', 'SFIN', 1, 'PC', 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(73, 'S0261217546', 'STOPPER. TSL12', 'COMP', 1, 'PC', 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(74, '4EM1771', 'STOP RING.D-3', 'COMP', 1, 'PC', 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(75, 'K306127', 'LIQUID GREASE.CM-55', 'COMP', 2, 'G', 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(76, 'B1002655151', 'SCREW.Tightenning for Reg. M5', 'COMP', 2, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(77, 'B1052655150', 'STUD BOLT. TG', 'COMP', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(78, 'B1402655331', 'FLANGE NUT. M5X0.8P', 'COMP', 2, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(79, 'B7202547855', 'THROUGH BOLT. FG10T', 'COMP', 4, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(80, 'B8002711802', 'COVER.KAPPA IMP3 70A', 'SFIN', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(81, 'K303003', 'SILICONE.SG7K TG for REG.SI4VA', 'COMP', 0, 'G', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(82, 'A720559', 'N/PLATE. GAMMA2 INA 110A SOLID. FG12T', 'COMP', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(83, '571267', 'RECTIFIER ASS\'Y. GAMMA2 INA 110A. FG12T', 'SFIN', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(84, 'B1052655150', 'STUD BOLT. TG', 'COMP', 2, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(85, 'C0002713946', 'R/BRACKET ASS\'Y.GAMMA2 110A SOLID FG12T+', 'SFIN', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(86, 'C0062546997', 'LOCATION PIN.Delta TG-11', 'COMP', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(87, 'C0102711796', 'R/BRACKET M/C.GAMMA2 110A SOLID FG12t+', 'SFIN', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(88, 'C0302545308', 'BEAR\'G COVER.TG9, 11', 'COMP', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(89, 'C0352656049', 'SEAL.SG7K, TG', 'COMP', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(90, 'C8002620517', 'DAMPER. 33mm', 'COMP', 4, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(91, '571268', 'C/BOARD ASSY.GAMMA2 INA 110A SOLID FG12T', 'SFIN', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(92, 'K407179', 'MOLD. M-150', 'COMP', 2, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(93, 'D6292549591', 'CIRCUIT BOARD.DELTA TG11', 'SFIN', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(94, 'D7182655870', 'HEAT SINK M/C.GAMMA', 'SFIN', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(95, 'D7302655143', 'TERMINAL B+.Delta TG-11', 'COMP', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(96, 'K410446', 'DIODE-.ACTRON 35A 225', 'COMP', 3, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(97, 'K410445', 'DIODE+.ACTRON 35A 225', 'COMP', 3, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(98, '531248', 'COM F/HOUS\'G.GAMMA2 INA 110A SOLID FG12T', 'SFIN', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(99, '531250', 'F/BRKT ASS\'Y.GAMMA2 INA 110A SOLID FG12T', 'SFIN', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(100, 'E0002609969X', 'STATOR ASS\'Y. FG12T', 'SFIN', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(101, 'E1002609967X', 'STATOR WINDING. FG12T (Varnished)', 'SFIN', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(102, 'K306128', 'PAINT.TG.Primalcro BS Black.2604139', 'COMP', 1, 'G', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(103, 'E3222608761', 'INSULATION TUBE. D3.0 YELLOW SPT 2608761', 'COMP', 3, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(104, 'K200960', 'INGOT SOLDER. S-230.SN99. 444g', 'COMP', 1, 'G', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(105, 'K305471', 'FLUX.JS-75(MF). N1812725471', 'COMP', 0, 'G', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(106, 'G4022711794', 'F/BRACKET M/C.GAMMA2 110A SOLID FG12T+', 'SFIN', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(107, 'G5102609913', 'JOINT.FG10T', 'COMP', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(108, 'K306141', 'RESIN A. TG11. SYLGARD 567A', 'COMP', 0, 'KG', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(109, 'K306142', 'RESIN B. TG11. SYLGARD 567B', 'COMP', 0, 'KG', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(110, 'N0002721055', 'REGULATOR ASS\'Y. GAMMA2 110A', 'SFIN', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(111, 'N9002608314', 'SLIP RING GUIDE.R-ENG', 'SFIN', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(112, '531251', 'ROTOR ASS\'Y. GAMMA2 INA 110A SOLID FG12T', 'SFIN', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(113, 'L0002710027', 'PULLEY.NU-ID AMS FG10T', 'COMP', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(114, 'B0102611303', 'SPACER-P. NU.FG10T', 'COMP', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(115, 'B1402624533', 'NUT HEX.Tightennning Pulley.LAMBDA2', 'COMP', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(116, 'L0302624549', 'SHAFT CAP.LAMBDA2 FR.A3WG5 GR25', 'COMP', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(117, 'G4042605332', 'BALL BEARING-F.BLUE.B17-102A7-A HAB', 'COMP', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(118, 'G4062601799', 'RETAINER.TG11', 'COMP', 1, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
+(119, 'G4082655149', 'SCREW.TG', 'COMP', 4, 'PC', 'A000531245', 'ALT. GAMMA2 INA 110A SOLID. 2M600. FG12T', '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `box`
+--
+
+CREATE TABLE `box` (
+  `id_box` int(11) NOT NULL,
+  `weight` int(11) NOT NULL,
+  `sloc` varchar(120) NOT NULL,
+  `crtdt` varchar(128) NOT NULL,
+  `crtby` varchar(128) NOT NULL,
+  `upddt` varchar(128) NOT NULL,
+  `updby` varchar(128) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `box_detail`
+--
+
+CREATE TABLE `box_detail` (
+  `id_box_detail` int(11) NOT NULL,
+  `id_material` varchar(128) NOT NULL,
+  `material_desc` varchar(128) NOT NULL,
+  `crtdt` varchar(128) NOT NULL,
+  `crtby` varchar(128) NOT NULL,
+  `uptdt` varchar(128) NOT NULL,
+  `uptby` varchar(128) NOT NULL,
+  `id_box` int(11) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -2207,6 +2386,30 @@ INSERT INTO `material_list` (`Id_material`, `Material_desc`, `Material_type`, `U
 -- --------------------------------------------------------
 
 --
+-- Table structure for table `receiving_material`
+--
+
+CREATE TABLE `receiving_material` (
+  `id_box` int(11) NOT NULL,
+  `reference_number` int(11) NOT NULL,
+  `material` varchar(100) NOT NULL,
+  `qty` int(11) NOT NULL,
+  `uom` varchar(100) NOT NULL,
+  `s_loc` varchar(10) DEFAULT NULL,
+  `barcode` varchar(100) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `receiving_material`
+--
+
+INSERT INTO `receiving_material` (`id_box`, `reference_number`, `material`, `qty`, `uom`, `s_loc`, `barcode`) VALUES
+(0, 1199781, 'PLUNGER ASSY -VW', 200, 'PC', NULL, NULL),
+(0, 1197170, 'NAME PLATE TQ (A-ENG)', 400, 'PC', NULL, NULL);
+
+-- --------------------------------------------------------
+
+--
 -- Table structure for table `user`
 --
 
@@ -2255,7 +2458,9 @@ INSERT INTO `user_access_menu` (`id`, `role_id`, `menu_id`) VALUES
 (5, 2, 2),
 (6, 2, 5),
 (7, 3, 3),
-(8, 3, 5);
+(8, 3, 5),
+(9, 1, 6),
+(10, 1, 7);
 
 -- --------------------------------------------------------
 
@@ -2281,7 +2486,9 @@ INSERT INTO `user_menu` (`id`, `menu`, `crtdt`, `crtby`, `upddt`, `updby`) VALUE
 (2, 'Warehouse', '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
 (3, 'Production', '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
 (4, 'Finished Good', '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
-(5, 'User', '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System');
+(5, 'User', '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(6, 'Quality', '11-05-2024 10:49', 'System', '11-05-2024 10:49', 'System'),
+(7, 'Master', '11-05-2024 10:59', 'Prime', '11-05-2024 11:00', 'Prime');
 
 -- --------------------------------------------------------
 
@@ -2337,7 +2544,7 @@ INSERT INTO `user_sub_menu` (`id`, `menu_id`, `title`, `url`, `icon`, `is_active
 (3, 1, 'Manage Role', 'admin/manage_role', 'bx bxs-purchase-tag', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
 (4, 1, 'Manage Menu', 'admin/manage_menu', 'bx bx-menu', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
 (5, 1, 'Manage Sub-menu', 'admin/manage_sub_menu', 'bx bx-menu-alt-right', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
-(6, 1, 'Manage Books', 'admin/manage_books', 'mdi mdi-book-open-page-variant', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
+(6, 1, 'Manage Production Re', 'admin/manage_production_request', 'bx bx-task', 1, '2024-05-04 01:00', 'System', '11-05-2024 10:56', 'Prime'),
 (7, 1, 'Manage Storage', 'admin/manage_storage', 'bi bi-bounding-box', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
 (8, 2, 'Receiving Material', 'warehouse/', 'bx bxl-dropbox', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
 (9, 2, 'List Storage', 'warehouse/list_storage', 'bx bxs-cabinet', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
@@ -2348,11 +2555,33 @@ INSERT INTO `user_sub_menu` (`id`, `menu_id`, `title`, `url`, `icon`, `is_active
 (14, 3, 'Material Request', 'production/', 'bx bxs-card', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
 (15, 3, 'Kitting', 'production/kitting', 'bi bi-inbox', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
 (16, 3, 'Kanban Box', 'production/kanban_box', 'bi bi-inbox-fill', 1, '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
-(17, 3, 'Material Return', 'production/material_return', 'bi bi-arrow-repeat', 1, '2024-05-04 01:00', 'System', '06-05-2024 21:40', 'Prime');
+(17, 3, 'Material Return', 'production/material_return', 'bi bi-arrow-repeat', 1, '2024-05-04 01:00', 'System', '06-05-2024 21:40', 'Prime'),
+(19, 6, 'Material Request', 'quality/material_request', 'bx bxl-dropbox', 1, '11-05-2024 10:54', 'Prime', '11-05-2024 10:54', 'Prime'),
+(20, 6, 'Return to warehouse', 'quality/return_to_warehouse', 'bi bi-arrow-repeat', 1, '11-05-2024 10:54', 'Prime', '11-05-2024 10:54', 'Prime'),
+(21, 7, 'List Material', 'master/', 'bx bx-list-ol', 1, '11-05-2024 11:01', 'Prime', '11-05-2024 11:01', 'Prime');
 
 --
 -- Indexes for dumped tables
 --
+
+--
+-- Indexes for table `bom`
+--
+ALTER TABLE `bom`
+  ADD PRIMARY KEY (`Id_bom`);
+
+--
+-- Indexes for table `box`
+--
+ALTER TABLE `box`
+  ADD PRIMARY KEY (`id_box`);
+
+--
+-- Indexes for table `box_detail`
+--
+ALTER TABLE `box_detail`
+  ADD PRIMARY KEY (`id_box_detail`),
+  ADD UNIQUE KEY `id_box` (`id_box`);
 
 --
 -- Indexes for table `master_bom`
@@ -2401,6 +2630,12 @@ ALTER TABLE `user_sub_menu`
 --
 
 --
+-- AUTO_INCREMENT for table `bom`
+--
+ALTER TABLE `bom`
+  MODIFY `Id_bom` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=120;
+
+--
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
@@ -2410,13 +2645,13 @@ ALTER TABLE `user`
 -- AUTO_INCREMENT for table `user_access_menu`
 --
 ALTER TABLE `user_access_menu`
-  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
+  MODIFY `id` int(2) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=11;
 
 --
 -- AUTO_INCREMENT for table `user_sub_menu`
 --
 ALTER TABLE `user_sub_menu`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=19;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=22;
 COMMIT;
 
 /*!40101 SET CHARACTER_SET_CLIENT=@OLD_CHARACTER_SET_CLIENT */;
