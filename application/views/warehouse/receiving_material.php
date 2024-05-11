@@ -270,7 +270,7 @@
 		$('#material').val("");
 		$('#uom').val("");
 		$.ajax({
-			url: '<?= base_url('Warehouse/get_material_data'); ?>',
+			url: '<?php echo base_url('Warehouse/get_material_data'); ?>',
 			type: 'post',
 			dataType: 'json',
 			data: {

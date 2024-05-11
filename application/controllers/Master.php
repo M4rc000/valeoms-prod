@@ -25,4 +25,19 @@ class Master extends CI_Controller {
         $this->load->view('master/material_list', $data);
         $this->load->view('templates/footer');
 	}
+
+	public function bom()
+	{
+        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+
+        $data['title'] = 'BOM';
+        $data['bom'] = $this->MModel->getBom();
+        
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/navbar');   
+        $this->load->view('templates/sidebar');   
+        $this->load->view('master/bom', $data);
+        $this->load->view('templates/footer');
+	}
 }

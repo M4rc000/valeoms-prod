@@ -8,7 +8,7 @@
                         <input type="text" class="form-control" id="product_id">
                     </div>
                     <div class="col-sm-3">
-                        <button type="submit" class="btn btn-success" onclick="getData()">Search</button>
+                        <button type="submit" class="btn btn-success" onclick="getProduct()">Search</button>
                     </div>
                 </div>
                 <div class="row mt-5 ms-4">
@@ -30,25 +30,32 @@
 
 
 <script>
-    function getData() {
-        var product_id = $('#product_id').val();
+    // MENDAPATKAN PRODUCT BERDASARKAN ID
+    function getProduct() {
+		var productID = $('#product_id').val();
+		$.ajax({
+			url: '<?= base_url('production/getProduct'); ?>',
+			type: 'post',
+			dataType: 'json',
+			data: {
+				productID : productID
+			},
+			success: function(res) {
+                var productId = res[0].Id_fg;
+                var productDescription = res[0].Fg_desc;
 
-        $.ajax({
-            url: '<?=base_url();?>production/',
-            type: 'POST',
-            data: {
-                product_id 
-            },
-            beforeSend: function () {
-                $('#data').html(
-                    "<b>Product Description :  </b>"+ product_id +"<br><br><div class='row mb-3'><label for='inputText' class='col-sm-3 col-form-label'>Qty Production Planning</label><div class='col-sm-2'><input type='text' class='form-control' id='qty'></div><div class='col-sm-4'><button type='submit' class='btn btn-success' onclick='getCalculate()'>Calculate</button></div></div>"
-                );
-            },
-            success: function (data) {
-                console.log(product_id);
-            }
-        });
-    }
+                // Construct HTML content to append
+                var htmlContent = '<p><b>Product ID:</b> ' + productId + '</p>';
+                htmlContent += '<p><b>Product Description:</b> ' + productDescription + '</p>';
+
+                // Append the HTML content to the div with id "data"
+                $('#data').empty().append(htmlContent);
+			},
+			error: function(xhr, ajaxOptions, thrownError) {
+				alert(thrownError);
+			}
+		})
+	}
 
     function getCalculate() {
         var qty = $('#qty').val();

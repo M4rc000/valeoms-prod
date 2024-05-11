@@ -23,4 +23,12 @@ class Production extends CI_Controller {
         $this->load->view('production/material_request', $data);
         $this->load->view('templates/footer');
 	}   
+
+    function getProduct()
+    {
+        $productID = $this->input->post('productID');
+        $result = $this->db->query("SELECT Id_fg, Fg_desc FROM bom WHERE Id_fg = '$productID'")->result_array();
+       
+        echo json_encode($result);
+    }
 }
