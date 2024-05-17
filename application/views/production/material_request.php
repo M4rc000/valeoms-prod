@@ -67,7 +67,6 @@
         });
     }
 
-
     function calculateData(){
         var qty = $('#qty').val();
 		$.ajax({

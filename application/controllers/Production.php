@@ -31,4 +31,46 @@ class Production extends CI_Controller {
        
         echo json_encode($result);
     }
+
+    public function kitting(){
+        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+        
+        $data['title'] = 'Kitting';
+
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/navbar', $data);   
+        $this->load->view('templates/sidebar', $data);   
+        $this->load->view('production/kitting', $data);
+        $this->load->view('templates/footer');
+    }
+
+    function getBox()
+    {
+        $boxID = $this->input->post('boxID');
+        $result = $this->db->query("SELECT * FROM box WHERE Id_box = '$boxID'")->result_array();
+       
+        echo json_encode($result);
+    }
+
+    function getReqNo()
+    {
+        $reqNo = $this->input->post('reqNo');
+        $result = $this->db->query("SELECT * FROM material_request WHERE Req_no = '$reqNo'")->result_array();
+       
+        echo json_encode($result);
+    }
+
+    public function kanban_box(){
+        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+        
+        $data['title'] = 'Kanban Box';
+
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/navbar', $data);   
+        $this->load->view('templates/sidebar', $data);   
+        $this->load->view('production/kanban_box', $data);
+        $this->load->view('templates/footer');
+    }
 }

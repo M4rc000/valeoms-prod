@@ -23,6 +23,8 @@
   <link href="<?=base_url('assets');?>/vendor/quill/quill.bubble.css" rel="stylesheet">
   <link href="<?=base_url('assets');?>/vendor/remixicon/remixicon.css" rel="stylesheet">
   <link href="<?=base_url('assets');?>/vendor/simple-datatables/style.css" rel="stylesheet">
+  <link rel="stylesheet" href="<?=base_url('assets');?>/vendor/select2/select2.css">
+  <link rel="stylesheet" href="<?=base_url('assets');?>/vendor/datatables/datatables.css">
 
   <!-- Template Main CSS File -->
   <link href="<?=base_url('assets');?>/css/style.css" rel="stylesheet">

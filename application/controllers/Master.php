@@ -113,6 +113,7 @@ class Master extends CI_Controller {
 
         $data['title'] = 'BOM';
         $data['bom'] = $this->MModel->getBom();
+        $data['materials'] = $this->MModel->getListMaterial();
         
         $this->load->view('templates/header', $data);
         $this->load->view('templates/navbar');   
@@ -121,4 +122,47 @@ class Master extends CI_Controller {
         $this->load->view('templates/footer');
 	}
 
+
+    // READ BOM
+    public function getBomList(){
+        $Id_product = htmlspecialchars($this->input->post('Id_product'));
+        $result = $this->db->query("SELECT * FROM bom WHERE Id_fg = '$Id_product' AND is_active = 1")->result_array();
+       
+        echo json_encode($result);
+    }    
+
+    // UPDATE Material BOM
+    public function EditBomMaterial(){
+        $id = $this->input->post('id');
+        
+        $Data = array(
+            'Id_fg' => $this->input->post('id_fg'),
+            'Id_material' => $this->input->post('material_id'),
+            'Material_desc' => $this->input->post('material_desc'),
+            'Material_type' => $this->input->post('material_type'),
+            'Uom' => $this->input->post('uom'),
+            'Qty' => $this->input->post('qty'),
+            'Upddt' => date('Y-d-m H:i'),
+            'Updby' => $this->input->post('user')
+        );
+
+        $this->db->where('Id_bom',$id);  
+        $this->db->update('bom', $Data);
+
+        $this->session->set_flashdata('EDIT',
+        '
+        <div class="row mt-2">
+            <div class="col-md">
+                <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
+                    <i class="bi bi-check-circle me-1"></i> Material Bom successfully updated
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+            </div>
+        </div>
+        ');
+        
+        redirect('master/bom');
+    }
+
+    // DELETE Material BOM
 }

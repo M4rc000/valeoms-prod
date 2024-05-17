@@ -1,44 +1,43 @@
-  <section class="section">
-    <div class="row">
-      <div class="col-lg-12">
-        <div class="card">
-          <div class="card-body">
-            <div class="row">
-              <div class="col-md mt-3">
-                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
-                  New Material
-                </button>
-              </div>
+<section class="section">
+  <div class="row">
+    <div class="col-lg-12">
+      <div class="card">
+        <div class="card-body">
+          <div class="row">
+            <div class="col-md mt-3">
+              <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
+                New Material
+              </button>
             </div>
-            <?php if ($this->session->flashdata('Error') != '') { ?>
-              <?= $this->session->flashdata('Error'); ?>
-            <?php } ?>
-            <?php if ($this->session->flashdata('EDIT') != '') { ?>
-              <?= $this->session->flashdata('EDIT'); ?>
-            <?php } ?>
-            <?php if ($this->session->flashdata('DELETED') != '') { ?>
-              <?= $this->session->flashdata('DELETED'); ?>
-            <?php } ?>
-            <div class="row justify-content-center mt-4 me-0 ml-0">
-              <label for="inputText" class="col-md-2 col-form-label">
-                <b>Material ID</b>
-              </label>
-              <div class="col-md-5">
-                <input type="text" class="form-control" id="id_material">
-              </div>
-              <div class="col-md-3">
-                <button class="btn btn-success" onclick="getMaterialList()">Search</button>
-              </div>
-              
-            </div> 
-            <div class="row">
-              <div id="data"></div>
+          </div>
+          <?php if ($this->session->flashdata('Error') != '') { ?>
+            <?= $this->session->flashdata('Error'); ?>
+          <?php } ?>
+          <?php if ($this->session->flashdata('EDIT') != '') { ?>
+            <?= $this->session->flashdata('EDIT'); ?>
+          <?php } ?>
+          <?php if ($this->session->flashdata('DELETED') != '') { ?>
+            <?= $this->session->flashdata('DELETED'); ?>
+          <?php } ?>
+          <div class="row justify-content-center mt-4 me-0 ml-0">
+            <label for="inputText" class="col-md-2 col-form-label">
+              <b>Material ID</b>
+            </label>
+            <div class="col-md-5">
+              <input type="text" class="form-control" id="id_material">
             </div>
+            <div class="col-md-3">
+              <button class="btn btn-success" onclick="getMaterialList()">Search</button>
+            </div>
+          </div> 
+          <div class="row">
+            <div id="data"></div>
           </div>
         </div>
       </div>
     </div>
-  </section>
+  </div>
+</section>
 
 <script>
   function getMaterialList(){
