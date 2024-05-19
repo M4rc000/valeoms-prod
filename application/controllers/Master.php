@@ -1,5 +1,6 @@
 <?php
 defined('BASEPATH') OR exit('No direct script access allowed');
+date_default_timezone_set('Asia/Jakarta');
 
 class Master extends CI_Controller {
 
@@ -166,7 +167,6 @@ class Master extends CI_Controller {
         redirect('master/bom');
     }
 
-
     // READ BOM
     public function getBomList(){
         $Id_product = htmlspecialchars($this->input->post('Id_product'));
@@ -209,6 +209,27 @@ class Master extends CI_Controller {
     }
 
     // DELETE Material BOM
+    public function deleteMaterialBom(){
+        $id = $this->input->post('id');
 
+        $Data = [
+            'is_active' => 0,
+            'Upddt' => date('Y-d-m H:i'),
+            'Updby' => $this->input->post('user')
+        ];
+
+
+        $this->db->where('Id_bom',$id);  
+        $this->db->update('bom', $Data);
+        $this->session->set_flashdata('DELETED',
+        '
+        <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
+        <i class="bi bi-check-circle me-1"></i> BOM\'s Material successfully deleted
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+        </div>
+        ');
+
+        redirect('master/bom');
+    }
 
 }

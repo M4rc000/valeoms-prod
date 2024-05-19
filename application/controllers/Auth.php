@@ -59,32 +59,37 @@ class Auth extends CI_Controller {
                         redirect('production');
                     }
                 } else {
-                    $this->session->set_flashdata('wrong_password','<div class="alert alert-danger alert-dismissible fade show" role="alert">
-                    Your password is wrong!
-                    <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                    <span aria-hidden="true">&times;</span>
-                    </button>
-                    </div>');
+                    $this->session->set_flashdata('wrong_password',
+                    '
+                    <div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 100%">
+                        <i class="bi bi-x-circle me-1"></i> Your password is wrong!
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                    '
+                    );
                     // echo "password is wrong";
                     redirect('auth');
                 }
             } else {
-                $this->session->set_flashdata('wrong_username','<div class="alert alert-danger alert-dismissible fade show" role="alert">
-                Your username has not been activated
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-                </div>');
+                $this->session->set_flashdata('wrong_username',
+                '
+                <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
+                    <i class="bi bi-x-circle me-1"></i> Your username has not been activated
+                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                </div>
+                ');
                 // echo "username is wrong";
                 redirect('auth');
             }
         } else {
-            $this->session->set_flashdata('not_active_username','<div class="alert alert-danger alert-dismissible fade show" role="alert">
-            Your username has not been activated
-            <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-            <span aria-hidden="true">&times;</span>
-            </button>
-            </div>');
+            $this->session->set_flashdata('not_active_username',
+            '
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
+                <i class="bi bi-x-circle me-1"></i> Your username has not been activated
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            '
+            );
             redirect('auth');
         }
     }
@@ -95,9 +100,10 @@ class Auth extends CI_Controller {
         $this->session->unset_userdata('username');
         $this->session->unset_userdata('role_id');
         
-        $this->session->set_flashdata('logout','<div class="alert alert-danger alert-dismissible fade show" role="alert">
-        You have been logout!
-        </button>
+        $this->session->set_flashdata('logout',
+        '<div class="alert alert-danger alert-dismissible fade show" role="alert">
+            You have been logout!
+            </button>
         </div>');
         redirect('auth');
     }
