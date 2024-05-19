@@ -113,6 +113,7 @@ class Master extends CI_Controller {
 
         $data['title'] = 'BOM';
         $data['bom'] = $this->MModel->getBom();
+        $data['bom_distint'] = $this->MModel->getBomDistinct();
         $data['materials'] = $this->MModel->getListMaterial();
         
         $this->load->view('templates/header', $data);
@@ -121,6 +122,49 @@ class Master extends CI_Controller {
         $this->load->view('master/bom', $data);
         $this->load->view('templates/footer');
 	}
+
+    // ADD BOM MATERIAL
+        // SEARCH PRODUCT DESCRIPTION AUTOMATICALLY
+        function getProductDesc(){
+            $productId = htmlspecialchars($this->input->post('productId'));
+            $result = $this->db->query("SELECT Fg_desc FROM bom WHERE Id_fg = '$productId' AND is_active = 1")->result_array();
+        
+            echo json_encode($result);
+        }
+        
+        function getMaterialDesc(){
+            $materialID = htmlspecialchars($this->input->post('materialID'));
+            $result = $this->db->query("SELECT Material_desc, Material_type, Uom FROM material_list WHERE Id_material = '$materialID' AND is_active = 1")->result_array();
+        
+            echo json_encode($result);
+        }
+    
+    function AddMaterialBom(){
+        $Data = array(
+            'Id_fg' => $this->input->post('product_id'),
+            'Fg_desc' => $this->input->post('fg_desc'),
+            'is_active' => 1,
+            'Id_material' => $this->input->post('material_id'),
+            'Material_desc' => $this->input->post('material_desc'),
+            'Material_type' => $this->input->post('material_type'),
+            'Uom' => $this->input->post('uom'),
+            'Qty' => floatval($this->input->post('qty')),
+            'Crtdt' => date('Y-d-m H:i'),
+            'Crtby' => $this->input->post('user'),
+            'Upddt' => date('Y-d-m H:i'),
+            'Updby' => $this->input->post('user')
+        );
+
+        $this->MModel->insertData('bom', $Data);
+        $this->session->set_flashdata('SUCCESS',
+        '
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
+                <i class="bi bi-check-circle me-1"></i> New Material\'s BOM successfully added
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        ');
+        redirect('master/bom');
+    }
 
 
     // READ BOM
@@ -165,4 +209,6 @@ class Master extends CI_Controller {
     }
 
     // DELETE Material BOM
+
+
 }

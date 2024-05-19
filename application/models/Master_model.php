@@ -3,12 +3,22 @@ defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Master_model extends CI_Model {
     public function getListMaterial(){
+        $this->db->where('is_active', 1); 
         return $this->db->get('material_list')->result_array();
     }
 
     public function getBom(){
-        return $this->db->get('bom')->result_array();
+        $this->db->where('is_active', 1); 
+        return $this->db->get('bom')->result_array(); 
     }
+
+    public function getBomDistinct() {
+        $this->db->distinct();
+        $this->db->select('Id_fg');
+        $this->db->where('is_active', 1); 
+        return $this->db->get('bom')->result_array(); 
+    }
+        
 
     public function insertData($table,$Data){
         return $this->db->insert($table,$Data);
