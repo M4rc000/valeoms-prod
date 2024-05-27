@@ -24,7 +24,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
 |
 */
 $config['base_url'] = 'http://localhost/2024/ValeoMS/';
-// $config['base_url'] = 'https://32d0-103-135-220-100.ngrok-free.app/2024/ValeoMS/';
+// $config['base_url'] = 'https://1352-180-252-127-41.ngrok-free.app/2024/ValeoMS/';
 
 /*
 |--------------------------------------------------------------------------

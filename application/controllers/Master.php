@@ -18,7 +18,7 @@ class Master extends CI_Controller {
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
         $data['title'] = 'Material List';
-        $data['material_list'] = $this->MModel->getListMaterial();
+        $data['material_list'] = $this->MModel->getMaterials();
         
         $this->load->view('templates/header', $data);
         $this->load->view('templates/navbar');   
@@ -167,13 +167,92 @@ class Master extends CI_Controller {
         redirect('master/bom');
     }
 
+    // ADD NEW BOM
+    function addNewBom(){
+        $materials = $this->input->post('materials');
+        $DataProduct = array(
+            'Id_fg' => $this->input->post('products_id'),
+            'Fg_desc' => $this->input->post('product_desc'),
+            'is_active' => 1,
+            // ADD HERE
+
+            'Crtdt' => date('Y-d-m H:i'),
+            'Crtby' => $this->input->post('user'),
+            'Upddt' => date('Y-d-m H:i'),
+            'Updby' => $this->input->post('user')
+        );
+
+        $insertData = array();
+        foreach ($materials as $material) {
+            $row = array_merge($DataProduct, array(
+                'Id_material' => $material['material_id'],
+                'Material_desc' => $material['material_desc'],
+                'Material_type' => $material['material_type'],
+                'Qty' => floatval($material['qty']),
+                'Uom' => $material['uom']
+            ));
+            $insertData[] = $row;
+            // echo '<br>';
+            // var_dump($row); // Output each row data
+            // echo '<br>';
+        }
+        // die(); 
+
+        $this->db->insert_batch('bom', $insertData);
+        $this->session->set_flashdata('SUCCESS',
+        '
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
+                <i class="bi bi-check-circle me-1"></i> New BOM successfully added
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        ');
+        redirect('master/bom');
+    }
+
     // READ BOM
     public function getBomList(){
         $Id_product = htmlspecialchars($this->input->post('Id_product'));
-        $result = $this->db->query("SELECT * FROM bom WHERE Id_fg = '$Id_product' AND is_active = 1")->result_array();
+        if($Id_product){
+            $result = $this->db->query("SELECT * FROM bom WHERE Id_fg = '$Id_product' AND is_active = 1")->result_array();
+        }
+        else{
+            $result = $this->db->query("SELECT * FROM bom WHERE is_active = 1")->result_array();
+        }
        
         echo json_encode($result);
     }    
+    
+    public function getAllBom(){
+        // Load the model
+        $this->load->model('Bom_model');
+
+        // Read DataTables parameters
+        $start = $this->input->post('start');
+        $length = $this->input->post('length');
+        $draw = $this->input->post('draw');
+        $search = $this->input->post('search')['value'];
+
+        // Fetch the data
+        $data = $this->Bom_model->getBomData($start, $length, $search);
+
+        // Total records, before filtering
+        $totalRecords = $this->Bom_model->getTotalRecords();
+
+        // Total records, after filtering
+        $totalFilteredRecords = $this->Bom_model->getTotalFilteredRecords($search);
+
+        // Prepare the response in DataTables format
+        $response = array(
+            "draw" => intval($draw),
+            "recordsTotal" => $totalRecords,
+            "recordsFiltered" => $totalFilteredRecords,
+            "data" => $data
+        );
+
+        // Send the response in JSON format
+        echo json_encode($response);
+    }
+ 
 
     // UPDATE Material BOM
     public function EditBomMaterial(){

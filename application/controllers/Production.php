@@ -79,13 +79,13 @@ class Production extends CI_Controller {
 
     // ADD KANBAN BOX
     function AddKanbanBox(){
-        $productID = $this->input->post('product_id');
-        $bomDesc = $this->PModel->getBomDesc($productID);
+        $materialID = $this->input->post('material_id');
+        $materialDesc = $this->PModel->getMaterialDesc($materialID);
 
         $Data = array(
-            'Id_product' => $productID,
-            'Product_desc' => $bomDesc[0]['Fg_desc'],
-            'Product_qty' => $this->input->post('qty'),
+            'Id_material' => $materialID,
+            'Material_desc' => $materialDesc[0]['Material_desc'],
+            'Material_qty' => $this->input->post('qty'),
             'Product_plan' => $this->input->post('production_planning'),
             'crtdt' => date('Y-d-m H:i'),
             'crtby' => $this->input->post('user'),

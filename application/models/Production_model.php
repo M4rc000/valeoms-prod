@@ -2,12 +2,12 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Production_model extends CI_Model {
-    public function getBomDesc($productID) {
-        $this->db->select('Fg_desc');
-        $this->db->where('Id_fg', $productID);
+    public function getMaterialDesc($materialID) {
+        $this->db->select('Material_desc');
+        $this->db->where('Id_material', $materialID);
         $this->db->where('is_active', 1);
         $this->db->limit(1);
-        $query = $this->db->get('bom');
+        $query = $this->db->get('material_list');
         return $query->result_array();
     }
 

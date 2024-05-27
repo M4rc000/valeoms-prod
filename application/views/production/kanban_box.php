@@ -80,8 +80,8 @@
 										<!-- GET USER -->
 										<input type="text" class="form-control" id="user" name="user"
 											value="<?=$name['username'];?>" hidden>
-										<label for="product_id" class="form-label"><b>Product ID</b></label>
-										<input type="text" class="form-control" id="product_id" name="product_id"
+										<label for="material_id" class="form-label"><b>Material Part No</b></label>
+										<input type="text" class="form-control" id="material_id" name="material_id"
 											required>
 									</div>
 									<div class="col-4">
@@ -124,9 +124,9 @@
 											<?php $number = 0; foreach($kanbanlist as $kl): $number++ ?>
 											<tr>
 												<td><?=$number;?></td>
-												<td><?=$kl['Id_product'];?></td>
-												<td><?=$kl['Product_desc'];?></td>
-												<td><?=$kl['Product_qty'];?></td>
+												<td><?=$kl['Id_material'];?></td>
+												<td><?=$kl['Material_desc'];?></td>
+												<td><?=$kl['Material_qty'];?></td>
 												<td><?=$kl['Product_plan'];?></td>
 												<td>
 													<a href="#" data-bs-toggle="modal" data-bs-target="#editModal`+ MaterialID +`">
@@ -135,7 +135,7 @@
 													<a href="#" data-bs-toggle="modal" data-bs-target="#deleteModal`+ MaterialID +`">
 														<span class="badge bg-danger"><i class="bi bi-trash"></i></span>
 													</a>
-													<a href="#">
+													<a href="#" class="print-button" data-id="<?=$kl['Id_material'];?>" data-description="<?=$kl['Material_desc'];?>" data-qty="<?=$kl['Material_qty'];?>" data-plan="<?=$kl['Product_plan'];?>">
 														<span class="badge bg-success"><i class="bi bi-printer"></i></span>
 													</a>
 												</td>
@@ -157,11 +157,12 @@
 <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
 <script>
 	function generateBarcode() {
-		var productId = "<?= isset($this->session->flashdata('kanban_data')['Id_product']) ? $this->session->flashdata('kanban_data')['Id_product'] : '' ?>";
-        var qty = "<?= isset($this->session->flashdata('kanban_data')['Product_qty']) ? $this->session->flashdata('kanban_data')['Product_qty'] : '' ?>";
+		var materialId = "<?= isset($this->session->flashdata('kanban_data')['Id_material']) ? $this->session->flashdata('kanban_data')['Id_material'] : '' ?>";
+		var materialDesc = "<?= isset($this->session->flashdata('kanban_data')['Material_desc']) ? $this->session->flashdata('kanban_data')['Material_desc'] : '' ?>";
+        var qty = "<?= isset($this->session->flashdata('kanban_data')['Material_qty']) ? $this->session->flashdata('kanban_data')['Material_qty'] : '' ?>";
         var production_planning = "<?= isset($this->session->flashdata('kanban_data')['Product_plan']) ? $this->session->flashdata('kanban_data')['Product_plan'] : '' ?>";
 
-		if (productId.length == 0 || qty.length == 0 || production_planning.length == 0) {
+		if (materialId.length == 0 || qty.length == 0 || production_planning.length == 0) {
 			return false;
 		} else {
 			var htmlContent = 
@@ -173,13 +174,19 @@
 			            <div class="col-md-8" style="font-size: 14px">
 			                <ul>
 			                    <li>
-			                        <p><b>Product ID :</b> ${productId}</p>
+			                        <p><b>Material Part No :</b> ${materialId}</p>
 			                    </li>
 			                    <li>
-			                        <p><b>Product Qty :</b> ${qty}</p>
+			                        <p><b>Material Part Name :</b> ${materialDesc}</p>
 			                    </li>
 			                    <li>
-			                        <p><b>Product Plan :</b> ${production_planning}</p>
+			                        <p><b>Material Qty :</b> ${qty}</p>
+			                    </li>
+			                    <li>
+			                        <p><b>FG ID :</b> ${production_planning}</p>
+			                    </li>
+			                    <li>
+			                        <p><b>Production Plan :</b> ${production_planning}</p>
 			                    </li>
 			                </ul>
 			            </div>  
@@ -201,8 +208,17 @@
 			$('.preview').empty().append(htmlContent);
 
 			// Generate the QR code after the element is in the DOM
+			var dataBarcode = 
+			`
+				Material Part No : ${materialId}
+				Material Part Name : ${materialDesc}
+				Material Qty : ${qty}
+				FG ID : ${production_planning}
+				Production Plan : ${production_planning}
+			`;
+
 			var qrcode = new QRCode(document.getElementById("preview-barcode"), {
-			    text: "<?=base_url('warehouse/')?>",
+			    text: `${dataBarcode}`,
 			    width: 150,
 			    height: 150,
 			    correctLevel: QRCode.CorrectLevel.H
@@ -214,11 +230,37 @@
     window.onload = function() {
 		var checkNewData = "<?= $this->session->flashdata('kanban_data') ? count($kanbanData = $this->session->flashdata('kanban_data')) : '' ?>";
 
-		console.log(checkNewData.length);
-
 		if(checkNewData.length > 0){
 			generateBarcode();
-			console.log('Iyaa');
 		}
     }
+
+	$('.print-button').on('click', function(e) {
+		console.log('Testing');
+		e.preventDefault();
+
+		var materialId = $(this).data('id');
+		var description = $(this).data('description');
+		var qty = $(this).data('qty');
+		var plan = $(this).data('plan');
+
+		var printContent = `
+			<div>
+				<h3>Production Details</h3>
+				<p><strong>Production ID:</strong> ${materialId}</p>
+				<p><strong>Production Description:</strong> ${description}</p>
+				<p><strong>Qty:</strong> ${qty}</p>
+				<p><strong>Production Plan No:</strong> ${plan}</p>
+			</div>
+		`;
+
+		var printWindow = window.open('', '', 'height=600,width=800');
+		printWindow.document.write('<html><head><title>Print</title>');
+		printWindow.document.write('<style>body { font-family: Arial, sans-serif; }</style>');
+		printWindow.document.write('</head><body >');
+		printWindow.document.write(printContent);
+		printWindow.document.write('</body></html>');
+		printWindow.document.close();
+		printWindow.print();
+	});
 </script>

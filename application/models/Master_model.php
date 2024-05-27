@@ -7,6 +7,12 @@ class Master_model extends CI_Model {
         return $this->db->get('material_list')->result_array();
     }
 
+    public function getMaterials(){
+        $this->db->select('Id_material, Material_desc, Material_type, Uom, Family');
+        $this->db->where('is_active', 1); 
+        return $this->db->get('material_list')->result_array(); 
+    }
+
     public function getBom(){
         $this->db->where('is_active', 1); 
         return $this->db->get('bom')->result_array(); 
@@ -32,5 +38,14 @@ class Master_model extends CI_Model {
     public function deleteData($table, $id){
         $this->db->where('id',$id);
         $this->db->delete($table);
+    }
+
+    // READ DATA PRINT
+    public function material_list_print() {
+        $this->db->select('Id_material, Material_desc, Material_type, Uom, Family');
+        $this->db->from('material_list');
+        $this->db->where('is_active', 1);
+        $query = $this->db->get();
+        return $query->result();
     }
 }
