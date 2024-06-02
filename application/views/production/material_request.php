@@ -16,20 +16,58 @@
                 </div>
                 <div class="row mt-5 ms-4">
                     <div class="col-md">
-                        <div id="data">
-                        </div>
+                        <div id="data"></div>
                     </div>
                 </div>
-                <div class="row mt-5 ms-4">
+                <div class="row mt-5 ms-4" id="billofmaterial">
                     <div class="col-md">
-                        <div id="data-table">
-                        </div>
+                        <div id="data-table"></div>
                     </div>
                 </div>
 			</div>
 		</div>
 	</div>
 </section>
+
+<!-- ADD MODAL -->
+<div class="modal fade" id="addMaterialRequest" tabindex="-1">
+	<div class="modal-dialog modal-lg">
+		<div class="modal-content">
+			<?= form_open_multipart('production/AddMaterialRequest'); ?>
+			<div class="modal-header">
+				<h5 class="modal-title">Add Material Request</h5>
+				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+			</div>
+			<div class="modal-body">
+				<!-- GET USER -->
+				<input type="text" class="form-control" id="user" name="user" value="<?=$name['username'];?>" hidden>
+				<div class="row ps-2 mb-3">
+					<div class="col-md-3">
+						<label for="material_id" class="form-label">Material Part No</label>
+						<input type="text" class="form-control" id="material_id" name="material_id" readonly>
+					</div>
+					<div class="col-5">
+						<label for="material_desc" class="form-label">Material Part Name</label>
+						<input type="text" class="form-control" id="material_desc" name="material_desc" readonly required>
+					</div>
+                    <div class="col-2">
+                        <label for="qty" class="form-label">Qty</label>
+                        <input type="text" class="form-control" id="qty" name="qty" required>
+                    </div>
+                    <div class="col-2">
+                        <label for="uom" class="form-label">Uom</label>
+                        <input type="text" class="form-control" id="uom" name="uom">
+                    </div>
+				</div>
+			</div>
+			<div class="modal-footer">
+				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+				<button type="submit" class="btn btn-primary">Save changes</button>
+			</div>
+			</form>
+		</div>
+	</div>
+</div>
 
 
 <script>
@@ -69,8 +107,10 @@
 
     function calculateData(){
         var qty = $('#qty').val();
+        var productID = $('#product_id').val();
+
 		$.ajax({
-			url: '<?= base_url('production/getProduct'); ?>',
+			url: '<?= base_url('production/getProductData'); ?>',
 			type: 'post',
 			dataType: 'json',
 			data: {
@@ -79,15 +119,27 @@
 			success: function(res) {
 
                 // Construct HTML content to append
-                var htmlContent = '<p><b>Product ID:</b> ' + productId + '</p>';
-                htmlContent += 
+                var title = '';
+                title+=
+                `
+                <div class="col-md mb-2">
+                    <span>
+                        <b>
+                            BILL OF MATERIAL
+                        </b>
+                    </span>
+                </div>
+                <hr style="border: 1.5px solid black">
+                `;
+                var tableBom = '';
+                tableBom += 
                 `
                 <table class="table table-bordered">
-                    <thead>
+                    <thead style="font-size: 14px">
                         <tr>
                             <th scope="col" rowspan="2" class="text-center">#</th>
-                            <th scope="col" rowspan="2" class="text-center">Product ID</th>
-                            <th scope="col" rowspan="2" class="text-center">Material Description</th>
+                            <th scope="col" rowspan="2" class="text-center">Material Part No</th>
+                            <th scope="col" rowspan="2" class="text-center">Material Part Name</th>
                             <th scope="col" rowspan="2" class="text-center">Material Need</th>
                             <th scope="col" rowspan="2" class="text-center">Stock On Hand</th>
                             <th scope="col" colspan="3" class="text-center">Location 1</th>
@@ -97,16 +149,16 @@
                         <tr>
                             <th scope="col">SLoc</th>
                             <th scope="col">Qty</th>
-                            <th scope="col">UOM</th>
+                            <th scope="col" class="text-center">UOM</th>
                             <th scope="col">SLoc</th>
                             <th scope="col">Qty</th>
-                            <th scope="col">UOM</th>
+                            <th scope="col" class="text-center">UOM</th>
                             <th scope="col">SLoc</th>
                             <th scope="col">Qty</th>
-                            <th scope="col">UOM</th>
+                            <th scope="col" class="text-center">UOM</th>
                         </tr>
                     </thead>
-                    <tbody>
+                    <tbody style="font-size: 13.5px">
                         <tr>
                             <th scope="row">1</th>
                             <td>1001</td>
@@ -143,12 +195,27 @@
                 </table>
                 `;  
 
+                var buttonMaterial = '';
+                buttonMaterial+=
+                `
+                <div class="row">
+                    <div class="col-md text-end">
+                        <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addMaterialRequest">
+                            Material Request
+                        </button>
+                    </div>
+                </div>
+                `;
+
                 // Append the HTML content to the div with id "data"
-                $('#data').empty().append(htmlContent);
+                $('#billofmaterial').empty().append(title);
+                $('#billofmaterial').append(tableBom);
+                $('#billofmaterial').append(buttonMaterial);
+                
 			},
 			error: function(xhr, ajaxOptions, thrownError) {
 				alert(thrownError);
 			}
 		});
-    }
+    }   
 </script>

@@ -27,7 +27,7 @@
 					<?php if ($this->session->flashdata('ERROR') != '') { ?>
 						<?= $this->session->flashdata('ERROR'); ?>
 					<?php } ?>
-					<table class="table table-bordered" >
+					<table class="table table-bordered">
 						<thead>
 							<tr>
 								<th>ProductID</th>
