@@ -6,18 +6,23 @@
                 <div class="card-body table-responsive mt-2">
                     <?php if ($this->session->flashdata('SUCCESS') != '') { ?>
                     <?= $this->session->flashdata('SUCCESS'); ?>
+
                     <?php } ?>
                     <?php if ($this->session->flashdata('DUPLICATES') != '') { ?>
                     <?= $this->session->flashdata('DUPLICATES'); ?>
+
                     <?php } ?>
                     <?php if ($this->session->flashdata('DELETED') != '') { ?>
                     <?= $this->session->flashdata('DELETED'); ?>
+
                     <?php } ?>
                     <?php if ($this->session->flashdata('EDIT') != '') { ?>
                     <?= $this->session->flashdata('EDIT'); ?>
+
                     <?php } ?>
                     <?php if ($this->session->flashdata('ERROR') != '') { ?>
                     <?= $this->session->flashdata('ERROR'); ?>
+
                     <?php } ?>
                     <button type="button" class="btn btn-primary mb-2 mt-5" data-bs-toggle="modal"
                         data-bs-target="#addModal1" style="font-weight: bold;" id="addBtn">
@@ -42,7 +47,10 @@
 							foreach ($receiving_material as $material):
 								$number++ ?>
                             <tr>
-                                <td><?= $number; ?></td>
+
+                                <td>
+                                    <?= $number; ?>
+                                </td>
                                 <td><?php echo $material['reference_number']; ?></td>
                                 <td><?php echo $material['material_desc']; ?></td>
                                 <td><?php echo $material['qty']; ?></td>
@@ -58,27 +66,28 @@
                                     </button>
                                 </td>
                             </tr>
+
                             <?php endforeach; ?>
                         </tbody>
                     </table>
-                    <div class="row mb-5 mt-2" >
-                    <label class="col-sm-2 col-form-label">
-                        <b>Total weight (kg)</b>
-                    </label>
-                    <div class="col-sm-3">
-                        <input type="text" class="form-control" id="total_weight" onblur="getSloc()">
-                    </div>
+                    <div class="row mb-5 mt-2">
+                        <label class="col-sm-2 col-form-label">
+                            <b>Total weight (kg)</b>
+                        </label>
+                        <div class="col-sm-3">
+                            <input type="text" class="form-control" id="total_weight" onblur="getSloc()">
+                        </div>
 
-                    <label class="col-sm-2 col-form-label">
-                        <b>Select SLoc</b>
-                    </label>
-                    <div class="col-sm-4">
-                        <select id="sloc_select" class="form-select" aria-label="Default select example">
-                            <option value="" disabled selected style="color: GREY;">Please select total weight first
-                            </option>
-                        </select>
+                        <label class="col-sm-2 col-form-label">
+                            <b>Select SLoc</b>
+                        </label>
+                        <div class="col-sm-4">
+                            <select id="sloc_select" class="form-select" aria-label="Default select example">
+                                <option value="" disabled selected style="color: GREY;">Please select total weight first
+                                </option>
+                            </select>
+                        </div>
                     </div>
-                </div>
                     <div class="row mt-2" style="text-align: right; margin-right: 5px;">
                         <div class="col-md-10"></div>
                         <div class="col-md">
@@ -249,7 +258,7 @@ function getBarcode() {
     if (slocSelect && total_weight) {
         Swal.fire({
             title: "Are you sure?",
-            text: "You want approve this box?",
+            text: "You want to approve this box?",
             icon: "warning",
             showCancelButton: true,
             confirmButtonColor: "#3085d6",
@@ -310,26 +319,27 @@ function getBarcode() {
 }
 
 function printBarcode(idBox) {
+    var logoUrl = '<?php echo base_url("assets/img/valeo.png"); ?>';
     var printWindow = window.open('', '', 'height=400,width=600');
     printWindow.document.write('<html><head><title>Print Barcode</title>');
     printWindow.document.write('<style>');
     printWindow.document.write('@page { size: 15cm 10cm; margin: 0; }');
     printWindow.document.write(
-        '.print-section { display: flex; flex-direction: column; width: 15cm; height: 10cm; border: 1px solid black; box-sizing: border-box; }'
+        '.print-section { display: flex; flex-direction: column; width: 15cm; height: 7cm; border: 1px solid black; box-sizing: border-box; }'
     );
     printWindow.document.write(
-        '.row { display: flex; flex: 1; align-items: center; justify-content: center; border-bottom: 1px solid black; }'
+        '.row { display: flex; flex: 1; align-items: center; justify-content: space-between; border-bottom: 1px solid black; }'
     );
-    printWindow.document.write('.row:first-child { height: 3cm; justify-content: space-between; padding: 0 7px; }');
+    printWindow.document.write('.row:first-child { height: 3.5cm; padding: 0 5px; }');
     printWindow.document.write(
-        '.row:last-child { height: 5cm; border: none; text-align: center; font-size: 1em; align-items: flex-start; padding-top: 0px; }'
-    );
-    printWindow.document.write('.barcode, .valeo-logo { display: inline-block;  text-align: center;}');
-    printWindow.document.write('.barcode { width: 2cm; height: 2cm; }');
+        '.row:last-child { height: 3cm; align-items: center; justify-content: center; text-align: center; }');
+    printWindow.document.write('.barcode, .valeo-logo { display: inline-block; text-align: center;}');
+    printWindow.document.write('.barcode { width: 2cm; height: 2cm; margin-left:2cm;}');
     printWindow.document.write(
-        '.valeo-logo { width: 7cm; height: 5cm; background-image: url(\'<?= base_url("assets/img/valeo.png") ?>\'); background-size: contain; background-repeat: no-repeat; background-position: center;  text-align: center;}'
+        `.valeo-logo { width: 3cm; height: 2cm;margin-right:1cm; background-image: url('${logoUrl}'); background-size: contain; background-repeat: no-repeat; background-position: center; }`
     );
-
+    printWindow.document.write(
+        '.barcode-info { font-size: 2em; margin-top: 10px; text-align: center; width: 100%; margin-left:15px; }');
     printWindow.document.write('#qrcode img { width: 100%; height: 100%; }');
     printWindow.document.write('</style>');
     printWindow.document.write('</head><body>');
@@ -337,18 +347,21 @@ function printBarcode(idBox) {
     printWindow.document.write('<div class="row">');
     printWindow.document.write('<div class="barcode" id="qrcode">' + document.getElementById('qrcode').innerHTML +
         '</div>');
-    printWindow.document.write('<div class="valeo-logo"></div>');
+    printWindow.document.write('<div class="valeo-logo"><img src="' + logoUrl +
+        '" alt="Valeo Logo" style="width: 100%; height: 100%;"></div>');
     printWindow.document.write('</div>');
     printWindow.document.write('<div class="row">');
-    printWindow.document.write('<div class="barcode-info">ID Box:<br><h1 style="font-size:6em; ;">' + idBox +
-        '</h1></div>');
-    printWindow.document.write('</div>');
-    printWindow.document.write('</div>');
     printWindow.document.write(
-        '</body></html>');
+        '<div class="barcode-info" style="margin-top:85px;"><span>ID Box:</span><h1 style="font-size:3em; margin-top:0;">' +
+        idBox + '</h1></div>');
+    printWindow.document.write('</div>');
+    printWindow.document.write('</div>');
+    printWindow.document.write('</body></html>');
     printWindow.document.close();
     printWindow.print();
 }
+
+
 
 function deleteItem(id) {
     Swal.fire({
@@ -482,7 +495,7 @@ function editBox(id_box, weight, sloc) {
 <!-- DELETE CONFIRM MODAL-->
 <?php foreach ($users as $usr): ?>
 <?= form_open_multipart('admin/deleteDataReceiving'); ?>
-<div class="modal fade" id="deleteModal<?= $usr['id']; ?>" tabindex="-1" aria-labelledby="exampleModalLabel"
+<div class="modal fade" id="deleteModal<?= $usr['id']; ?>" tabindex=" -1" aria-labelledby="exampleModalLabel"
     aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
@@ -514,6 +527,7 @@ function editBox(id_box, weight, sloc) {
 
 
 </div>
+
 </form>
 
 <?php endforeach; ?>

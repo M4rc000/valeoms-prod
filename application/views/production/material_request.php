@@ -114,11 +114,33 @@
 			type: 'post',
 			dataType: 'json',
 			data: {
-				qty
+				qty, productID
 			},
 			success: function(res) {
+                console.log(res);
+                var row = '';
+                for (let number = 0; number < res.length; number++) {
+                    row+=
+                    `
+                        <tr>
+                            <th scope="row">${number+1}</th>
+                            <td>${res[number].Id_material}</td>
+                            <td>${res[number].Material_desc}</td>
+                            <td>10</td>
+                            <td>20</td>
+                            <td>Loc1</td>
+                            <td>5</td>
+                            <td>pcs</td>
+                            <td>Loc2</td>
+                            <td>8</td>
+                            <td>pcs</td>
+                            <td>Loc3</td>
+                            <td>15</td>
+                            <td>pcs</td>
+                        </tr>
+                    `;
+                }
 
-                // Construct HTML content to append
                 var title = '';
                 title+=
                 `
@@ -134,7 +156,7 @@
                 var tableBom = '';
                 tableBom += 
                 `
-                <table class="table table-bordered">
+                <table class="table table-bordered" id="tbom">
                     <thead style="font-size: 14px">
                         <tr>
                             <th scope="col" rowspan="2" class="text-center">#</th>
@@ -159,41 +181,12 @@
                         </tr>
                     </thead>
                     <tbody style="font-size: 13.5px">
-                        <tr>
-                            <th scope="row">1</th>
-                            <td>1001</td>
-                            <td>Product A</td>
-                            <td>10</td>
-                            <td>20</td>
-                            <td>Loc1</td>
-                            <td>5</td>
-                            <td>pcs</td>
-                            <td>Loc2</td>
-                            <td>8</td>
-                            <td>pcs</td>
-                            <td>Loc3</td>
-                            <td>15</td>
-                            <td>pcs</td>
-                        </tr>
-                        <tr>
-                            <th scope="row">2</th>
-                            <td>1002</td>
-                            <td>Product B</td>
-                            <td>15</td>
-                            <td>25</td>
-                            <td>Loc1</td>
-                            <td>10</td>
-                            <td>pcs</td>
-                            <td>Loc2</td>
-                            <td>5</td>
-                            <td>pcs</td>
-                            <td>Loc3</td>
-                            <td>20</td>
-                            <td>pcs</td>
-                        </tr>
+                        ${row}
                     </tbody>
                 </table>
                 `;  
+
+                let tbom = new DataTable('#tbom');
 
                 var buttonMaterial = '';
                 buttonMaterial+=

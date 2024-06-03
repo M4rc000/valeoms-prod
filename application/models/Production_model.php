@@ -30,18 +30,48 @@ class Production_model extends CI_Model {
         if ($query->num_rows() > 0) {
             // Return the last ID
             $lastKanbanID = $query->row()->id_kanban_box;
-            $prefix = substr($lastKanbanID, 0, 2); // Assuming 'KB' is always the prefix
-            $numericPart = substr($lastKanbanID, 2);
-
+            $prefix = substr($lastKanbanID, 0, 3); // Assuming 'KBA' is always the prefix
+            $numericPart = substr($lastKanbanID, 3);
+        
             // Increment the numeric part
-            $incrementedNumericPart = str_pad((int)$numericPart + 1, strlen($numericPart), '0', STR_PAD_LEFT);
-
+            $incrementedNumericPart = (int)$numericPart + 1;
+        
+            // If the numeric part reaches 10000000, reset to 1 and increment the prefix
+            if ($incrementedNumericPart >= 10000000) {
+                $incrementedNumericPart = 1;
+                
+                // Increment the last character of the prefix
+                $lastChar = substr($prefix, -1);
+                $secondChar = substr($prefix, -2, 1);
+                $firstChar = substr($prefix, -3, 1);
+                
+                // Increment the last character, if it is 'Z', reset to 'A' and increment the second last character
+                if ($lastChar === 'Z') {
+                    $lastChar = 'A';
+                    $secondChar++;
+        
+                    // If the second character is 'Z', reset to 'A' and increment the first character
+                    if ($secondChar === 'Z' + 1) {
+                        $secondChar = 'A';
+                        $firstChar++;
+                    }
+                } else {
+                    $lastChar++;
+                }
+                
+                // Combine characters to form the new prefix
+                $prefix = $firstChar . $secondChar . $lastChar;
+            }
+        
+            // Format the incremented numeric part
+            $formattedNumericPart = str_pad($incrementedNumericPart, strlen($numericPart), '0', STR_PAD_LEFT);
+        
             // Return the next Kanban ID
-            return $prefix . $incrementedNumericPart;
+            return $prefix . $formattedNumericPart;
         } else {
             // Handle the case when the table is empty
-            return 'KB0001';
-        }
+            return 'KBA0000001';
+        }        
     }
 
     public function getMaterialList(){

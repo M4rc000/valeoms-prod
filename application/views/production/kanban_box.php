@@ -131,6 +131,7 @@
 										<thead>
 										<tr>
 											<th>#</th>
+											<th>Kanban Box No</th>
 											<th>Production ID</th>
 											<th>Material Part No</th>
 											<th>Material Part Name</th>
@@ -143,6 +144,7 @@
 											<?php $number = 0; foreach($kanbanlist as $kl): $number++ ?>
 											<tr>
 												<td><?=$number;?></td>
+												<td><?=$kl['id_kanban_box'];?></td>
 												<td><?=$kl['product_id'];?></td>
 												<td><?=$kl['Id_material'];?></td>
 												<td><?=$kl['Material_desc'];?></td>
@@ -297,9 +299,11 @@
 			var qty = "<?= isset($this->session->flashdata('kanban_data')['Material_qty']) ? $this->session->flashdata('kanban_data')['Material_qty'] : '' ?>";
 			var production_planning = "<?= isset($this->session->flashdata('kanban_data')['Product_plan']) ? $this->session->flashdata('kanban_data')['Product_plan'] : '' ?>";
 
+			
 			if (materialId.length == 0 || qty.length == 0 || production_planning.length == 0) {
 				return false;
 			} else {
+				console.log('Id Kanban Box : ' + id_kanban_box);
 				var htmlContent = 
 				`
 					<div class="kanban-card">
@@ -332,10 +336,11 @@
 					</div>
 				`;
 
-				htmlContent+=
-				`
+				htmlContent += `
 				<div class="offset-md-7 col-md-3 text-end">
-					<button class="btn btn-warning" style="width: 100px; color: white" onclick="printKanbanCard()"><i class="bx bxs-printer me-2"></i>Print</button>
+					<button class="btn btn-warning" style="width: 100px; color: white" onclick="printKanbanCard(this)" data-id="${materialId}" data-description="${materialDesc}" data-qty="${qty}" data-plan="${production_planning}" data-fg="${production_planning}" data-kanban="${id_kanban_box}">
+						<i class="bx bxs-printer me-2"></i>Print
+					</button>
 				</div>
 				`;
 
@@ -389,7 +394,6 @@
 			var materialQty = $(this).data('qty');
 			var proPlan = $(this).data('plan');
 			var id_kanban = $(this).data('kanban');
-			console.log(materialID);
 
 			$.ajax({
 				url: '<?= base_url('production/getKanbanImage'); ?>',
@@ -399,60 +403,64 @@
 					id_kanban 
 				},
 				success: function(res) {
-					console.log(res);
-					console.log('QR code saved successfully');
 					var image = res[0].image;
 
 					// Construct the correct image URL
 					var imageSrc = '<?= base_url('assets/img/kanban-barcode/'); ?>' + image;
 
-					// Open a new window with the data to print
-					var printWindow = window.open('', '', 'height=300,width=600');
+					var printWindow = window.open('', '', 'height=400,width=600');
 					printWindow.document.write(`
 						<link href="<?=base_url('assets');?>/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
 						<style>
-                            @media print {
-                                @page {
-                                    margin: 0;
-                                }
-                                body {
-                                    margin: 1.6cm;
-                                }
-                                header, footer {
-                                    display: none;
-                                }
-                            }
-                        </style>
-							<div class="kanban-card" style="border: 1px solid #B4B4B8; padding: 20px; width: 700px; margin: 20px auto; position: relative;">
-								<img src="<?=base_url('assets');?>/img/valeo-kanban-logo.png" alt="Logo" class="logo">
-								<h3 style="text-align: center; margin-bottom: 20px; text-decoration: underline;">KANBAN CARD</h3>
-								<div class="row mt-5 me-0">
-									<div class="col-md-8" style="font-size: 14px">
-										<ul style="list-style: none; padding: 0;">
-											<li style="display: flex; align-items: center; padding: 5px 0;">
-												<p style="margin: 0"><b>Material Part No :</b> ${materialID}</p>
-											</li>
-											<li style="display: flex; align-items: center; padding: 5px 0;">
-												<p style="margin: 0"><b>Material Part Name :</b> ${materialDesc}</p>
-											</li>
-											<li style="display: flex; align-items: center; padding: 5px 0;">
-												<p style="margin: 0"><b>Material Qty :</b> ${materialQty}</p>
-											</li>
-											<li style="display: flex; align-items: center; padding: 5px 0;">
-												<p style="margin: 0"><b>FG ID :</b> ${proPlan}</p>
-											</li>
-											<li style="display: flex; align-items: center; padding: 5px 0;">
-												<p style="margin: 0"><b>Production Plan :</b> ${proPlan}</p>
-											</li>
-										</ul>
-									</div>  
-									<div class="col-md-3 text-center">
-										<div id="preview-barcode">
-											<img src="${imageSrc}" alt="QR Code">
-										</div>
+							@media print {
+								@page { 
+									size: 15cm 10cm; 
+									margin: 0;
+								}
+								header, footer {
+									display: none;
+								}
+								.kanban-card {
+									border: 1px solid black;
+									padding: 20px;
+									width: 15cm;
+									height: 8.6cm;
+									margin: 0;
+									box-sizing: border-box;
+									page-break-inside: avoid;
+								}
+							}
+						</style>
+						<div class="kanban-card" style="border: 1px solid black; padding: 20px; width: 15cm; height: 8.6cm; margin: 15px auto; position: relative; box-sizing: border-box;">
+							<img src="<?=base_url('assets');?>/img/valeo-kanban-logo.png" alt="Logo" class="logo">
+							<h3 style="text-align: center; margin-top: -30px; margin-bottom: 5px; text-decoration: underline;">KANBAN CARD</h3>
+							<div class="row mt-5 me-0">
+								<div class="col-md-8" style="font-size: 16px; width: 55% !important;">
+									<ul style="list-style: none; padding: 0;">
+										<li style="display: flex; align-items: center; padding: 5px 0;">
+											<p style="margin: 0"><b>Material Part No :</b> ${materialID}</p>
+										</li>
+										<li style="display: flex; align-items: center; padding: 5px 0;">
+											<p style="margin: 0"><b>Material Part Name :</b> ${materialDesc}</p>
+										</li>
+										<li style="display: flex; align-items: center; padding: 5px 0;">
+											<p style="margin: 0"><b>Material Qty :</b> ${materialQty}</p>
+										</li>
+										<li style="display: flex; align-items: center; padding: 5px 0;">
+											<p style="margin: 0"><b>FG ID :</b> ${proPlan}</p>
+										</li>
+										<li style="display: flex; align-items: center; padding: 5px 0;">
+											<p style="margin: 0"><b>Production Plan :</b> ${proPlan}</p>
+										</li>
+									</ul>
+								</div>  
+								<div class="col-md-3 text-center" style="font-size: 14px; margin-left: 5rem; width: 8% !important;">
+									<div id="preview-barcode">
+										<img src="${imageSrc}" alt="QR Code">
 									</div>
 								</div>
 							</div>
+						</div>
 					`);
 					printWindow.document.close();
 					printWindow.print();
@@ -463,9 +471,11 @@
 			});
 		});
 
+		
+		
 		$('#material_id').on('change', function () {
 			var materialID = $(this).val();
-
+			
 			$.ajax({
 				url: '<?= base_url('production/getMaterialList'); ?>',
 				type: 'post',
@@ -483,4 +493,92 @@
 			});
 		});
 	})
+
+	function printKanbanCard(button){
+		var materialID = $(button).data('id');
+		var materialDesc = $(button).data('description');
+		var materialQty = $(button).data('qty');
+		var proPlan = $(button).data('plan');
+		var id_fg = $(button).data('fg');
+		var id_kanban = $(button).data('kanban');
+		console.log(id_kanban);
+
+		$.ajax({
+			url: '<?= base_url('production/getKanbanImage'); ?>',
+			type: 'POST',
+			dataType: 'json',
+			data: { 
+				id_kanban
+			},
+			success: function(res) {
+				// console.log('QR code saved successfully');
+				var image = res[0].image;
+
+				// Construct the correct image URL
+				var imageSrc = '<?= base_url('assets/img/kanban-barcode/'); ?>' + image;
+
+				// Open a new window with the data to print
+				// var printWindow = window.open('', '', 'height=300,width=600');
+				var printWindow = window.open('', '', 'height=400,width=600');
+				printWindow.document.write(`
+					<link href="<?=base_url('assets');?>/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
+					<style>
+						@media print {
+							@page { 
+								size: 15cm 10cm; 
+								margin: 0;
+							}
+							header, footer {
+								display: none;
+							}
+							.kanban-card {
+								border: 1px solid black;
+								padding: 20px;
+								width: 15cm;
+								height: 8.6cm;
+								margin: 0;
+								box-sizing: border-box;
+								page-break-inside: avoid;
+							}
+						}
+					</style>
+						<div class="kanban-card" style="border: 1px solid black; padding: 20px; width: 15cm; height: 8.6cm; margin: 15px auto; position: relative; box-sizing: border-box;">
+							<img src="<?=base_url('assets');?>/img/valeo-kanban-logo.png" alt="Logo" class="logo">
+							<h3 style="text-align: center; margin-top: -30px; margin-bottom: 5px; text-decoration: underline;">KANBAN CARD</h3>
+							<div class="row mt-5 me-0">
+								<div class="col-md-8" style="font-size: 16px; width: 55% !important;">
+									<ul style="list-style: none; padding: 0;">
+										<li style="display: flex; align-items: center; padding: 5px 0;">
+											<p style="margin: 0"><b>Material Part No :</b> ${materialID}</p>
+										</li>
+										<li style="display: flex; align-items: center; padding: 5px 0;">
+											<p style="margin: 0"><b>Material Part Name :</b> ${materialDesc}</p>
+										</li>
+										<li style="display: flex; align-items: center; padding: 5px 0;">
+											<p style="margin: 0"><b>Material Qty :</b> ${materialQty}</p>
+										</li>
+										<li style="display: flex; align-items: center; padding: 5px 0;">
+											<p style="margin: 0"><b>FG ID :</b> ${id_fg}</p>
+										</li>
+										<li style="display: flex; align-items: center; padding: 5px 0;">
+											<p style="margin: 0"><b>Production Plan :</b> ${proPlan}</p>
+										</li>
+									</ul>
+								</div>  
+								<div class="col-md-3 text-center" style="font-size: 14px; margin-left: 5rem; width: 8% !important;">
+									<div id="preview-barcode">
+										<img src="${imageSrc}" alt="QR Code">
+									</div>
+								</div>
+							</div>
+						</div>
+				`);
+				printWindow.document.close();
+				printWindow.print();
+			},
+			error: function(err) {
+				console.error('Error saving QR code:', err);
+			}
+		});
+	}
 </script>

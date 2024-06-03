@@ -251,6 +251,38 @@ class Warehouse extends CI_Controller
 		redirect('warehouse/list_box');
 	}
 
+	public function get_box(){
+		$id_box = $this->input->post('id_box');
+		$details = $this->Warehouse_model->getDetailBox($id_box);
+		$box = $this->db->query("SELECT a.*, s.Sloc, s.Id_storage as id_sloc from box  a LEFT JOIN storage s on s.Id_storage = a.sloc  where a.id_box = $id_box")->row();
+		$data = [
+			'box' => $box,
+			'detail' => $details,
+			'status' => true
+		];
+
+		echo json_encode($data);
+
+	}
+
+	public function add_new_box()
+	{
+		$total_weight = $this->input->post('total_weight');
+		$sloc = $this->input->post('sloc');
+		$details = $this->input->post('details');
+
+		// Assuming you have a model method to add a new box
+		$box_id = $this->Warehouse_model->addNewBox($total_weight, $sloc, $details);
+
+		if ($box_id) {
+			$this->session->set_flashdata('SUCCESS', 'Box added successfully!');
+		} else {
+			$this->session->set_flashdata('ERROR', 'Failed to add box!');
+		}
+
+		redirect('warehouse/list_box');
+	}
+
 
 	// Fungsi untuk mengambil data material berdasarkan reference number
 	public function getMaterialByReferenceNumber($reference_number)
@@ -314,6 +346,37 @@ class Warehouse extends CI_Controller
 		echo json_encode($data);
 
 	}
+
+	private function generateFormattedBoxNumber()
+	{
+		// Get the last box number from the database
+		$last_box = $this->db->order_by('id_box', 'DESC')->get('box')->row();
+
+		// If there is no previous box number, start with 'CKA0000001'
+		if (!$last_box) {
+			return 'CKA0000001';
+		}
+
+		// Extract the prefix and number parts from the last box number
+		$last_number = substr($last_box->no_box, 3); // Extracts the number part after 'CKA'
+		$last_prefix = substr($last_box->no_box, 0, 3); // Extracts the 'CKA' part
+
+		// Increment the number part
+		$new_number = (int) $last_number + 1;
+
+		// If the number part reaches 10000000, reset to 1 and handle prefix change if needed
+		if ($new_number >= 10000000) {
+			$new_number = 1;
+			// Handle incrementing the prefix if needed (though it would likely be a more complex rule)
+			// Assuming no prefix change required here for simplicity
+		}
+
+		// Format the new box number as 'CKA0000001'
+		$formatted_box_number = $last_prefix . str_pad($new_number, 7, '0', STR_PAD_LEFT);
+
+		return $formatted_box_number;
+
+	}
 	public function save_new_box()
 	{
 		$total_weight = $this->input->post('total_weight');
@@ -325,81 +388,95 @@ class Warehouse extends CI_Controller
 				'status' => false,
 				'msg' => 'Material is empty'
 			];
-
-			echo json_encode(($data));
-			die;
+			echo json_encode($data);
+			return;
 		}
 
-		//save header box
+		// Generate a formatted box number
+		try {
+			$formatted_box_number = $this->generateFormattedBoxNumber();
+		} catch (Exception $e) {
+			log_message('error', 'Error generating box number: ' . $e->getMessage());
+			echo json_encode(['status' => false, 'msg' => 'Error generating box number: ' . $e->getMessage()]);
+			return;
+		}
+
+		// Save the box header
 		$header = [
 			'weight' => $total_weight,
-			'no_box' => 'B/' . date('Y-m', time()) . '/' . '04',
+			'no_box' => $formatted_box_number,
 			'sloc' => $id_sloc,
 			'crtby' => $this->session->userdata('username'),
 			'crtdt' => date('Y-m-d H:i:s')
 		];
-		$this->Amodel->insertData('box', $header);
-		$id_box = $this->db->insert_id();
 
-		//save detail box
-		// Membuat array untuk menyimpan id_box_detail
-		$id_box_detail_array = array();
-
-		// Memasukkan id_box_detail ke dalam array
-		foreach ($material as $key => $v) {
-			$data = [
-				'id_box' => $id_box,
-				'id_material' => $v->reference_number,
-				'material_desc' => $v->material_desc,
-				'crtby' => $this->session->userdata('username'),
-				'crtdt' => date('Y-m-d H:i:s')
-			];
-			$this->Amodel->insertData('box_detail', $data);
-			$id_box_detail_array[] = $this->db->insert_id(); // Menambahkan id_box_detail ke dalam array
+		try {
+			$this->Amodel->insertData('box', $header);
+		} catch (Exception $e) {
+			log_message('error', 'Error inserting box header: ' . $e->getMessage());
+			echo json_encode(['status' => false, 'msg' => 'Error inserting box header: ' . $e->getMessage()]);
+			return;
 		}
 
-		// Memasukkan nilai id_box_detail dari array ke dalam tabel receiving_material
-		$material = $this->db->query("SELECT * FROM receiving_material_temp")->result();
-		foreach ($material as $key => $v) {
-			// Mengambil id_box_detail dari array secara berurutan
-			$id_box_detail = array_shift($id_box_detail_array);
+		$id_box = $this->db->insert_id();
+		$id_box_detail_array = array();
 
-			$data = [
-				'id_box' => $id_box,
-				'id_box_detail' => $id_box_detail,
-				'reference_number' => $v->reference_number,
-				'material' => $v->material_desc,
-				'qty' => $v->qty,
-				'uom' => $v->uom,
-				's_loc' => $id_sloc,
-				'barcode' => $header['no_box'],
-				'receiving_date' => $v->receiving_date,
-				'created_by' => $this->session->userdata('username'),
-				'created_at' => date('Y-m-d H:i:s')
-			];
-			$this->Amodel->insertData('receiving_material', $data);
+		try {
+			foreach ($material as $key => $v) {
+				$data = [
+					'id_box' => $id_box,
+					'id_material' => $v->reference_number,
+					'material_desc' => $v->material_desc,
+					'crtby' => $this->session->userdata('username'),
+					'crtdt' => date('Y-m-d H:i:s')
+				];
+				$this->Amodel->insertData('box_detail', $data);
+				$id_box_detail_array[] = $this->db->insert_id();
+			}
 
-			//save list storage
-			$list_storage = [
-				'id_box' => $id_box,
-				'product_id' => $v->reference_number,
-				'material_desc' => $v->material_desc,
-				'total_qty' => $v->qty,
-				'sloc' => $id_sloc,
-				'uom' => $v->uom,
-				'created_by' => $this->session->userdata('username'),
-				'created_at' => date('Y-m-d H:i:s')
-			];
-			$this->Amodel->insertData('list_storage', $list_storage);
+			foreach ($material as $key => $v) {
+				$id_box_detail = array_shift($id_box_detail_array);
+
+				$data = [
+					'id_box' => $id_box,
+					'id_box_detail' => $id_box_detail,
+					'reference_number' => $v->reference_number,
+					'material' => $v->material_desc,
+					'qty' => $v->qty,
+					'uom' => $v->uom,
+					's_loc' => $id_sloc,
+					'barcode' => $formatted_box_number,
+					'receiving_date' => $v->receiving_date,
+					'created_by' => $this->session->userdata('username'),
+					'created_at' => date('Y-m-d H:i:s')
+				];
+				$this->Amodel->insertData('receiving_material', $data);
+
+				// Save list storage
+				$list_storage = [
+					'id_box' => $id_box,
+					'product_id' => $v->reference_number,
+					'material_desc' => $v->material_desc,
+					'total_qty' => $v->qty,
+					'sloc' => $id_sloc,
+					'uom' => $v->uom,
+					'created_by' => $this->session->userdata('username'),
+					'created_at' => date('Y-m-d H:i:s')
+				];
+				$this->Amodel->insertData('list_storage', $list_storage);
+			}
+		} catch (Exception $e) {
+			log_message('error', 'Error inserting box details: ' . $e->getMessage());
+			echo json_encode(['status' => false, 'msg' => 'Error inserting box details: ' . $e->getMessage()]);
+			return;
 		}
 
 		$data = [
 			'status' => true,
-			'no_box' => $header['no_box'],
+			'no_box' => $formatted_box_number,
 		];
 
-		echo json_encode(($data));
-
+		echo json_encode($data);
 	}
 
 	public function detail_receiving($box_id)
@@ -522,21 +599,22 @@ class Warehouse extends CI_Controller
 		return $this->db->insert_id();
 	}
 
-	public function save_unpack(){
+	public function save_unpack()
+	{
 		$id_box_detail = $this->input->post('id_box_detail');
 		$id_box_destination = $this->input->post('id_box_destination');
 		$id_material = $this->input->post('id_material');
 		$id_receiving_material = $this->input->post('id_receiving_material');
 
 		$new_id_Sloc = $this->db->query("SELECT sloc from `box` where id_box = $id_box_destination")->row();
-		
+
 		//update box detail
 		$dtupdate = [
 			'id_box' => $id_box_destination,
 			'uptdt' => date('Y-m-d H:i:s'),
 			'uptby' => $this->session->userdata('username'),
 		];
-	
+
 		$this->db->where('id_box_detail', $id_box_detail);
 		$unpack = $this->db->update('box_detail', $dtupdate);
 
@@ -550,7 +628,7 @@ class Warehouse extends CI_Controller
 		$this->db->where('id_box_detail', $id_box_detail);
 		$unpack = $this->db->update('receiving_material', $dtupdate);
 
-		if($unpack){
+		if ($unpack) {
 			$data = [
 				'status' => true,
 			];
@@ -561,8 +639,9 @@ class Warehouse extends CI_Controller
 		}
 		echo json_encode($data);
 	}
-	
-	public function save_cycle_count(){
+
+	public function save_cycle_count()
+	{
 		$id_box_detail = $this->input->post('id_box_detail');
 		$qty = $this->input->post('qty');
 
@@ -575,7 +654,7 @@ class Warehouse extends CI_Controller
 		$this->db->where('id_box_detail', $id_box_detail);
 		$update = $this->db->update('receiving_material', $dtupdate);
 
-		if($update){
+		if ($update) {
 			$data = [
 				'status' => true,
 			];

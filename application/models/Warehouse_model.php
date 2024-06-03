@@ -66,19 +66,106 @@ class Warehouse_model extends CI_Model
 		return $this->db->query("SELECT a.*, b.qty, b.uom, s.Sloc, h.no_box, b.id as id_receiving_material from box_detail a left join receiving_material b on b.id_box_detail = a.id_box_Detail left join storage s on s.Id_storage = b.s_loc LEFT JOIN `box` h on h.id_box = a.id_box  where a.id_box = $id_box")->result_array();
 	}
 
+
+
 	public function getDetailStorage($id)
 	{
 		return $this->db->query("SELECT a.*, b.Sloc as sloc_name FROM list_storage a left join storage b on a.sloc = b.Id_storage where a.product_id = '$id'")->result_array();
 	}
 
+	public function addNewBox($weight, $sloc, $details)
+	{
+		// Generate a formatted box number
+		$formatted_box_number = $this->generateFormattedBoxNumber();
+
+		$data = [
+			'no_box' => $formatted_box_number, // Add the generated box number
+			'weight' => $weight,
+			'sloc' => $sloc,
+		];
+		$this->db->insert('box', $data);
+		$box_id = $this->db->insert_id();
+
+		foreach ($details as $detail) {
+			$detail['id_box'] = $box_id;
+			$this->db->insert('box_detail', $detail);
+		}
+		return $box_id;
+	}
+
+	private function generateFormattedBoxNumber()
+	{
+		// Get the last box number from the database
+		$last_box = $this->db->order_by('no_box', 'DESC')->get('box')->row();
+
+		// If there is no previous box number, start with 'CKA0000001'
+		if (!$last_box) {
+			return 'CKA0000001';
+		}
+
+		// Extract the number part from the last box number
+		$last_number = substr($last_box->no_box, 3);
+
+		// Increment the number part
+		$new_number = (int) $last_number + 1;
+
+		// Format the new box number as 'CKA0000001'
+		$formatted_box_number = 'CKA' . str_pad($new_number, 7, '0', STR_PAD_LEFT);
+
+		return $formatted_box_number;
+	}
+
+
+	public function updateBox($id_box, $weight, $sloc, $details)
+	{
+		$data = [
+			'weight' => $weight,
+			'sloc' => $sloc,
+		];
+		$this->db->where('id_box', $id_box);
+		$this->db->update('box', $data);
+
+		foreach ($details as $detail) {
+			$this->db->where('id_detail', $detail['id_detail']);
+			$this->db->update('box_detail', $detail);
+		}
+		return true;
+	}
+
+	public function getBoxDetails($id_box)
+	{
+		$this->db->select('*');
+		$this->db->from('box');
+		$this->db->join('box_detail', 'box.id_box = box_detail.id_box');
+		$this->db->where('box.id_box', $id_box);
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+
 	public function getMaterialReport($id)
 	{
-		return $this->db->query("SELECT * FROM receiving_material where reference_number = '$id' group by reference_number order by id desc")->row();
+		return $this->db->query("SELECT rm.*
+		FROM receiving_material rm
+		JOIN (
+			SELECT reference_number, MAX(id) as max_id
+			FROM receiving_material
+			WHERE reference_number = 'S0141206243'
+			GROUP BY reference_number
+		) as grouped_rm ON rm.id = grouped_rm.max_id
+		ORDER BY rm.id DESC;")->row();
 	}
 
 	public function qtyMaterial($id)
 	{
-		$result = $this->db->query("SELECT * FROM receiving_material WHERE reference_number = '$id' ORDER BY id DESC LIMIT 1 OFFSET 1");
+		$result = $this->db->query("SELECT rm.*
+		FROM receiving_material rm
+		JOIN (
+			SELECT reference_number, MAX(id) as max_id
+			FROM receiving_material
+			WHERE reference_number = 'S0141206243'
+			GROUP BY reference_number
+		) as grouped_rm ON rm.id = grouped_rm.max_id
+		ORDER BY rm.id DESC;");
 
 		if ($result->row()) {
 			return $result->row()->qty;
@@ -87,11 +174,20 @@ class Warehouse_model extends CI_Model
 		}
 	}
 
+
+
 	public function deleteMaterialTemp($id)
 	{
 		$this->db->where('id', $id);
 		$delete = $this->db->delete('receiving_material_temp');
 		return $delete;
+	}
+
+	public function deleteData($table, $where)
+	{
+		$this->db->where($where);
+		$this->db->delete($table);
+		return ($this->db->affected_rows() > 0) ? true : false;
 	}
 }
 ?>

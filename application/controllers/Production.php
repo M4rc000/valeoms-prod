@@ -35,7 +35,7 @@ class Production extends CI_Controller {
 
     function getProductData(){
         $productID = $this->input->post('productID');
-        $result = $this->db->query("SELECT Id_fg, Fg_desc FROM bom WHERE Id_fg = '$productID'")->result_array();
+        $result = $this->db->query("SELECT * FROM bom WHERE Id_fg = '$productID'")->result_array();
        
         echo json_encode($result);
     }
@@ -56,7 +56,18 @@ class Production extends CI_Controller {
     function getBox()
     {
         $boxID = $this->input->post('boxID');
-        $result = $this->db->query("SELECT * FROM box WHERE Id_box = '$boxID'")->result_array();
+        $result = $this->db->query("SELECT 
+                b.no_box, 
+                b.weight, 
+                b.sloc, 
+                bd.product_id, 
+                bd.material_desc, 
+                bd.total_qty, 
+                bd.uom
+            FROM box b
+            LEFT JOIN list_storage bd ON b.id_box = bd.id_box
+            WHERE b.no_box = '$boxID'
+        ")->result_array();
        
         echo json_encode($result);
     }
@@ -64,11 +75,56 @@ class Production extends CI_Controller {
     function getReqNo()
     {
         $reqNo = $this->input->post('reqNo');
-        $result = $this->db->query("SELECT * FROM production_request WHERE production_request_no = '$reqNo'")->result_array();
-       
+        $boxID = $this->input->post('boxID');
+
+        $resultBox = $this->db->query("SELECT 
+                b.no_box, 
+                b.weight, 
+                b.sloc, 
+                bd.product_id, 
+                bd.material_desc, 
+                bd.total_qty, 
+                bd.uom
+            FROM box b
+            LEFT JOIN list_storage bd ON b.id_box = bd.id_box
+            WHERE b.no_box = '$boxID'")->result_array();
+        $resultReq = $this->db->query("SELECT * FROM production_request WHERE production_request_no = '$reqNo'")->result_array();
+
+        $result = [
+            'boxID_result' => $resultBox,
+            'reqNo_result' => $resultReq
+        ];
+
         echo json_encode($result);
     }
 
+    function getBom()
+    {
+        $product_id = $this->input->post('production_id');
+        $boxID = $this->input->post('boxID');
+        
+        $resultBox = $this->db->query("SELECT 
+        b.no_box, 
+                b.weight, 
+                b.sloc, 
+                bd.product_id, 
+                bd.material_desc, 
+                bd.total_qty, 
+                bd.uom
+            FROM box b
+            LEFT JOIN list_storage bd ON b.id_box = bd.id_box
+            WHERE b.no_box = '$boxID'")->result_array();
+
+        $resultProduct = $this->db->query("SELECT * FROM bom WHERE Id_fg ='$product_id'")->result_array();
+
+        $result = [
+            'boxID_result' => $resultBox,
+            'product_result' => $resultProduct
+        ];
+        echo json_encode($result);
+    }
+
+    
     public function kanban_box(){
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
@@ -202,5 +258,17 @@ class Production extends CI_Controller {
         }
     }
     
-    
+    public function material_return()
+	{
+        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+        
+        $data['title'] = 'Material Return';
+
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/navbar', $data);   
+        $this->load->view('templates/sidebar', $data);   
+        $this->load->view('production/material_return', $data);
+        $this->load->view('templates/footer');
+	}
 }
