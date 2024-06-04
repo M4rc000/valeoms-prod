@@ -92,25 +92,32 @@ class Warehouse_model extends CI_Model
 		}
 		return $box_id;
 	}
-
 	private function generateFormattedBoxNumber()
 	{
 		// Get the last box number from the database
-		$last_box = $this->db->order_by('no_box', 'DESC')->get('box')->row();
+		$last_box = $this->db->order_by('id_box', 'DESC')->get('box')->row();
 
-		// If there is no previous box number, start with 'CKA0000001'
+		// If there is no previous box number, start with 'CKA000001'
 		if (!$last_box) {
-			return 'CKA0000001';
+			return 'CKA000001';
 		}
 
-		// Extract the number part from the last box number
-		$last_number = substr($last_box->no_box, 3);
+		// Extract the letter and number parts from the last box number
+		$prefix = substr($last_box->no_box, 0, 2); // 'CK'
+		$last_char = substr($last_box->no_box, 2, 1); // 'A'
+		$last_number = substr($last_box->no_box, 3); // '000001'
 
 		// Increment the number part
 		$new_number = (int) $last_number + 1;
 
-		// Format the new box number as 'CKA0000001'
-		$formatted_box_number = 'CKA' . str_pad($new_number, 7, '0', STR_PAD_LEFT);
+		// If the number part reaches 1000000, reset to 1 and increment the letter part
+		if ($new_number > 999999) {
+			$new_number = 1;
+			$last_char++;
+		}
+
+		// Format the new box number as 'CKA000001'
+		$formatted_box_number = $prefix . $last_char . str_pad($new_number, 6, '0', STR_PAD_LEFT);
 
 		return $formatted_box_number;
 	}
@@ -132,15 +139,7 @@ class Warehouse_model extends CI_Model
 		return true;
 	}
 
-	public function getBoxDetails($id_box)
-	{
-		$this->db->select('*');
-		$this->db->from('box');
-		$this->db->join('box_detail', 'box.id_box = box_detail.id_box');
-		$this->db->where('box.id_box', $id_box);
-		$query = $this->db->get();
-		return $query->result_array();
-	}
+
 
 	public function getMaterialReport($id)
 	{
@@ -189,5 +188,16 @@ class Warehouse_model extends CI_Model
 		$this->db->delete($table);
 		return ($this->db->affected_rows() > 0) ? true : false;
 	}
+
+	public function getBoxById($id_box)
+	{
+		return $this->db->get_where('box', ['id_box' => $id_box])->row_array();
+	}
+
+	public function getBoxDetails($id_box)
+	{
+		return $this->db->get_where('box_detail', ['id_box' => $id_box])->result_array();
+	}
+
 }
 ?>

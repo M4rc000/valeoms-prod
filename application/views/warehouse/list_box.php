@@ -73,7 +73,8 @@
                             <label class="col-form-label">
                                 <b>Total weight (kg)</b>
                             </label>
-                            <input type="text" class="form-control" id="weight-add" name="weight-add" onblur="getSloc()" >
+                            <input type="text" class="form-control" id="weight-add" name="weight-add"
+                                onblur="getSloc()">
                         </div>
                         <div class="col-sm-6 mt-3">
                             <b>Sloc</b>
@@ -129,7 +130,8 @@
                             <label class="col-form-label">
                                 <b>Total weight (kg)</b>
                             </label>
-                            <input type="text" class="form-control" id="weight-edit" name="weight-edit" required onblur="getSlocEdit()">
+                            <input type="text" class="form-control" id="weight-edit" name="weight-edit" required
+                                onblur="getSlocEdit()">
                         </div>
                         <div class="col-sm-6 mt-3">
                             <b>Sloc</b>
@@ -174,12 +176,95 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
 function closeModal() {
-    $('#reference_number').val("");
-    $('#material').val("");
-    $('#qty').val("");
-    $('#material_edit').val('');
-    $('#uom_edit').val('');
-    $('#uom').val("");
+    $('#id_box').val("");
+    $('#weight').val("");
+    $('#sloc').val("");
+    $('#detailsBody').empty();
+}
+
+function editBox(id_box) {
+    $.ajax({
+        url: '<?php echo base_url('warehouse/get_box'); ?>',
+        type: 'POST',
+        data: {
+            id_box: id_box
+        },
+        success: function(res) {
+            var data = JSON.parse(res);
+            if (data.status) {
+                $('#id_box').val(id_box);
+                $('#weight-edit').val(data.box.weight);
+                $('#sloc_select_edit').empty().append($('<option>', {
+                    value: data.box.id_sloc,
+                    text: data.box.sloc
+                }));
+                $('#detailsBody').empty();
+                $.each(data.details, function(index, detail) {
+                    $('#detailsBody').append('<tr>' +
+                        '<td><input type="text" class="form-control" name="details[' + index +
+                        '][id_material]" value="' + detail.id_material + '" required></td>' +
+                        '<td><input type="text" class="form-control" name="details[' + index +
+                        '][material_desc]" value="' + detail.material_desc +
+                        '" required></td>' +
+                        '<td><input type="number" class="form-control" name="details[' + index +
+                        '][qty]" value="' + detail.qty + '" required></td>' +
+                        '<td><input type="text" class="form-control" name="details[' + index +
+                        '][uom]" value="' + detail.uom + '" required></td>' +
+                        '</tr>');
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.msg
+                });
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while processing your request.'
+            });
+        }
+    });
+}
+
+function getDetailBox(id_box, no_box) {
+    $.ajax({
+        url: '<?php echo base_url('warehouse/get_box_details'); ?>',
+        type: 'POST',
+        data: {
+            id_box: id_box
+        },
+        success: function(res) {
+            var data = JSON.parse(res);
+            if (data.status) {
+                $('#detailModal1' + no_box).find('.modal-body').empty();
+                $.each(data.details, function(index, detail) {
+                    $('#detailModal1' + no_box).find('.modal-body').append('<p>' +
+                        '<b>Part Number:</b> ' + detail.id_material + '<br>' +
+                        '<b>Part Name:</b> ' + detail.material_desc + '<br>' +
+                        '<b>QTY:</b> ' + detail.qty + '<br>' +
+                        '<b>UOM:</b> ' + detail.uom + '<br>' +
+                        '</p><hr>');
+                });
+            } else {
+                Swal.fire({
+                    icon: 'error',
+                    title: 'Error',
+                    text: data.msg
+                });
+            }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while processing your request.'
+            });
+        }
+    });
 }
 
 function refreshAll() {
@@ -303,7 +388,7 @@ function getSloc() {
 }
 
 function getBarcode(no_box) {
-  
+
     var qrcode = new QRCode(document.getElementById("qrcode"), {
         text: no_box,
         width: 150,
@@ -371,7 +456,7 @@ function getSlocEdit() {
 }
 
 function getBarcode(no_box) {
-  
+
     var qrcode = new QRCode(document.getElementById("qrcode"), {
         text: no_box,
         width: 150,
@@ -465,7 +550,8 @@ function deleteItem(id) {
         }
     });
 }
- function editBox(id_box){
+
+function editBox(id_box) {
     $.ajax({
         url: '<?php echo base_url('warehouse/get_box'); ?>',
         type: 'POST',

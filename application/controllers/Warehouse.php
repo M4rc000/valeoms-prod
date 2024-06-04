@@ -1,9 +1,9 @@
 <?php
 defined('BASEPATH') or exit('No direct script access allowed');
 date_default_timezone_set('Asia/Jakarta');
+
 class Warehouse extends CI_Controller
 {
-
 	public function __construct()
 	{
 		parent::__construct();
@@ -11,8 +11,6 @@ class Warehouse extends CI_Controller
 		$this->load->library('form_validation');
 		$this->load->model('Warehouse_model');
 		$this->load->model('Admin_model', 'Amodel');
-
-		// require_once(APPPATH . 'vendor/phpqrcode/qrlib.php');
 	}
 
 	public function AddReceivingMaterial()
@@ -30,19 +28,15 @@ class Warehouse extends CI_Controller
 			'created_at' => date('Y-m-d H:i:s')
 		);
 
-		// Masukkan data ke dalam tabel receiving_material
 		$this->Amodel->insertData('receiving_material_temp', $data);
 
-		// Set flash data untuk menampilkan pesan sukses
 		$this->session->set_flashdata('SUCCESS', '<div class="alert alert-success alert-dismissible fade show mb-2" id="dismiss" role="alert" style="width: 40%">
 			<i class="bi bi-check-circle me-1"></i> New receiving material successfully added
 			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
 			</div>');
 
-		// Redirect ke halaman yang sesuai
 		redirect('Warehouse/');
 	}
-
 
 	public function editReceivingMaterialTemp()
 	{
@@ -69,60 +63,32 @@ class Warehouse extends CI_Controller
 		redirect('Warehouse/');
 	}
 
-
-
 	public function index()
 	{
-		// Fetch user data
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
 		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
-		// Fetch receiving materials from the model
 		$this->load->model('Warehouse_model');
 		$data['receiving_material'] = $this->Warehouse_model->getReceivingMaterials();
-
-		// Fetch all users
 		$data['users'] = $this->Warehouse_model->getAllUsers();
 
-		// // Load views
-		// $data['title'] = 'Receiving Material';
-		// $this->load->view('templates/header', $data);
-		// $this->load->view('templates/navbar', $data);
-		// $this->load->view('templates/sidebar', $data);
-		// $this->load->view('warehouse/receiving_material', $data);
-		// $this->load->view('templates/footer');
-		// Fetch receiving materials from the model
-		$this->load->model('Warehouse_model');
-		$data['list_storage'] = $this->Warehouse_model->getReceivingMaterials();
-
-		// Fetch all users
-		$data['users'] = $this->Warehouse_model->getAllUsers();
-
-		// Load views
 		$data['title'] = 'Receiving Material';
 		$this->load->view('templates/header', $data);
 		$this->load->view('templates/navbar', $data);
 		$this->load->view('templates/sidebar', $data);
 		$this->load->view('warehouse/detail_receiving', $data);
-		// $this->load->view('warehouse/receiving_material', $data);
 		$this->load->view('templates/footer');
 	}
 
-
 	public function list_storage()
 	{
-		// Fetch user data
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
 		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
-		// Fetch receiving materials from the model
 		$this->load->model('Warehouse_model');
 		$data['list_storage'] = $this->Warehouse_model->getListStorage();
-
-		// Fetch all users
 		$data['users'] = $this->Warehouse_model->getAllUsers();
 
-		// Load views
 		$data['title'] = 'List Storage';
 		$this->load->view('templates/header', $data);
 		$this->load->view('templates/navbar', $data);
@@ -133,18 +99,13 @@ class Warehouse extends CI_Controller
 
 	public function list_material_report()
 	{
-		// Fetch user data
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
 		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
-		// Fetch receiving materials from the model
 		$this->load->model('Warehouse_model');
 		$data['list_storage'] = $this->Warehouse_model->getListStorage();
-
-		// Fetch all users
 		$data['users'] = $this->Warehouse_model->getAllUsers();
 
-		// Load views
 		$data['title'] = 'List Material Report';
 		$this->load->view('templates/header', $data);
 		$this->load->view('templates/navbar', $data);
@@ -158,15 +119,11 @@ class Warehouse extends CI_Controller
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
 		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
-		// Fetch receiving materials from the model
 		$this->load->model('Warehouse_model');
 		$data['list_box'] = $this->Warehouse_model->getListBox();
 		$data['users'] = $this->Warehouse_model->getAllUsers();
 
-		// Define the title variable
 		$data['title'] = 'List Box';
-
-		// Load views
 		$this->load->view('templates/header', $data);
 		$this->load->view('templates/navbar', $data);
 		$this->load->view('templates/sidebar', $data);
@@ -176,18 +133,13 @@ class Warehouse extends CI_Controller
 
 	public function regrouping()
 	{
-		// Fetch user data
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
 		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
-		// Fetch receiving materials from the model
 		$this->load->model('Warehouse_model');
 		$data['list_box'] = $this->Warehouse_model->getListBox();
-
-		// Fetch all users
 		$data['users'] = $this->Warehouse_model->getAllUsers();
 
-		// Load views
 		$data['title'] = 'Re-Grouping';
 		$this->load->view('templates/header', $data);
 		$this->load->view('templates/navbar', $data);
@@ -198,18 +150,13 @@ class Warehouse extends CI_Controller
 
 	public function cycle_count()
 	{
-		// Fetch user data
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
 		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
-		// Fetch receiving materials from the model
 		$this->load->model('Warehouse_model');
 		$data['list_box'] = $this->Warehouse_model->getListBox();
-
-		// Fetch all users
 		$data['users'] = $this->Warehouse_model->getAllUsers();
 
-		// Load views
 		$data['title'] = 'Cycle Count';
 		$this->load->view('templates/header', $data);
 		$this->load->view('templates/navbar', $data);
@@ -218,14 +165,12 @@ class Warehouse extends CI_Controller
 		$this->load->view('templates/footer');
 	}
 
-
 	public function get_box_details()
 	{
 		$id_box = $this->input->post('id_box');
 		$details = $this->Warehouse_model->getDetailBox($id_box);
 		echo json_encode($details);
 	}
-
 
 	public function edit_box()
 	{
@@ -251,18 +196,19 @@ class Warehouse extends CI_Controller
 		redirect('warehouse/list_box');
 	}
 
-	public function get_box(){
+	public function get_box()
+	{
 		$id_box = $this->input->post('id_box');
-		$details = $this->Warehouse_model->getDetailBox($id_box);
-		$box = $this->db->query("SELECT a.*, s.Sloc, s.Id_storage as id_sloc from box  a LEFT JOIN storage s on s.Id_storage = a.sloc  where a.id_box = $id_box")->row();
+		$box = $this->Warehouse_model->getBoxById($id_box);
+		$details = $this->Warehouse_model->getBoxDetails($id_box);
+
 		$data = [
+			'status' => true,
 			'box' => $box,
-			'detail' => $details,
-			'status' => true
+			'details' => $details,
 		];
 
 		echo json_encode($data);
-
 	}
 
 	public function add_new_box()
@@ -271,7 +217,6 @@ class Warehouse extends CI_Controller
 		$sloc = $this->input->post('sloc');
 		$details = $this->input->post('details');
 
-		// Assuming you have a model method to add a new box
 		$box_id = $this->Warehouse_model->addNewBox($total_weight, $sloc, $details);
 
 		if ($box_id) {
@@ -283,12 +228,8 @@ class Warehouse extends CI_Controller
 		redirect('warehouse/list_box');
 	}
 
-
-	// Fungsi untuk mengambil data material berdasarkan reference number
 	public function getMaterialByReferenceNumber($reference_number)
 	{
-		// Query ke database untuk mengambil data material dari material_list berdasarkan reference number
-		// Gantilah bagian ini sesuai dengan struktur tabel dan logika pengambilan data di backend Anda
 		$query = $this->Warehouse_model->getReceivingMaterials("SELECT * FROM material_list WHERE reference_number = '$reference_number'");
 		$material_data = $query->row_array();
 		return $material_data;
@@ -299,8 +240,7 @@ class Warehouse extends CI_Controller
 		$refnumber = $this->input->post('refnumber');
 		$refnumber2 = $this->input->post('refnumber2');
 
-		$row = $this->db->query("SELECT Material_desc, Uom FROM material_list WHERE Id_material = '$refnumber' or Id_material = '$refnumber2'");
-		// print_r($row);die;
+		$row = $this->db->query("SELECT Material_desc, Uom FROM material_list WHERE Id_material = '$refnumber' OR Id_material = '$refnumber2'");
 		if ($row->row() !== null) {
 			$dt = $row->row();
 			$data = [
@@ -344,39 +284,32 @@ class Warehouse extends CI_Controller
 			];
 		}
 		echo json_encode($data);
-
 	}
 
 	private function generateFormattedBoxNumber()
 	{
-		// Get the last box number from the database
 		$last_box = $this->db->order_by('id_box', 'DESC')->get('box')->row();
 
-		// If there is no previous box number, start with 'CKA0000001'
 		if (!$last_box) {
-			return 'CKA0000001';
+			return 'CKA000001';
 		}
 
-		// Extract the prefix and number parts from the last box number
-		$last_number = substr($last_box->no_box, 3); // Extracts the number part after 'CKA'
-		$last_prefix = substr($last_box->no_box, 0, 3); // Extracts the 'CKA' part
+		$prefix = substr($last_box->no_box, 0, 2);
+		$last_char = substr($last_box->no_box, 2, 1);
+		$last_number = substr($last_box->no_box, 3);
 
-		// Increment the number part
 		$new_number = (int) $last_number + 1;
 
-		// If the number part reaches 10000000, reset to 1 and handle prefix change if needed
-		if ($new_number >= 10000000) {
+		if ($new_number > 999999) {
 			$new_number = 1;
-			// Handle incrementing the prefix if needed (though it would likely be a more complex rule)
-			// Assuming no prefix change required here for simplicity
+			$last_char++;
 		}
 
-		// Format the new box number as 'CKA0000001'
-		$formatted_box_number = $last_prefix . str_pad($new_number, 7, '0', STR_PAD_LEFT);
+		$formatted_box_number = $prefix . $last_char . str_pad($new_number, 6, '0', STR_PAD_LEFT);
 
 		return $formatted_box_number;
-
 	}
+
 	public function save_new_box()
 	{
 		$total_weight = $this->input->post('total_weight');
@@ -392,7 +325,6 @@ class Warehouse extends CI_Controller
 			return;
 		}
 
-		// Generate a formatted box number
 		try {
 			$formatted_box_number = $this->generateFormattedBoxNumber();
 		} catch (Exception $e) {
@@ -401,7 +333,6 @@ class Warehouse extends CI_Controller
 			return;
 		}
 
-		// Save the box header
 		$header = [
 			'weight' => $total_weight,
 			'no_box' => $formatted_box_number,
@@ -452,7 +383,6 @@ class Warehouse extends CI_Controller
 				];
 				$this->Amodel->insertData('receiving_material', $data);
 
-				// Save list storage
 				$list_storage = [
 					'id_box' => $id_box,
 					'product_id' => $v->reference_number,
@@ -481,13 +411,8 @@ class Warehouse extends CI_Controller
 
 	public function detail_receiving($box_id)
 	{
-		// Load model
 		$this->load->model('Warehouse_model');
-
-		// Panggil fungsi dari model untuk mengambil data
 		$data['receiving_material'] = $this->Warehouse_model->get_receiving_by_box_id($box_id);
-
-		// Load view untuk halaman detail
 		$this->load->view('pages/detail_receiving', $data);
 	}
 
@@ -498,7 +423,7 @@ class Warehouse extends CI_Controller
 			'status' => true,
 		];
 
-		echo json_encode(($data));
+		echo json_encode($data);
 	}
 
 	public function get_detail_box()
@@ -511,7 +436,7 @@ class Warehouse extends CI_Controller
 			'dt' => $detail_box,
 		];
 
-		echo json_encode(($data));
+		echo json_encode($data);
 	}
 
 	public function get_detail_storage()
@@ -524,7 +449,7 @@ class Warehouse extends CI_Controller
 			'dt' => $detail_storage,
 		];
 
-		echo json_encode(($data));
+		echo json_encode($data);
 	}
 
 	public function get_material_report()
@@ -539,10 +464,7 @@ class Warehouse extends CI_Controller
 			'early_qty' => $qtyEarly
 		];
 
-
-		echo json_encode(($data));
-
-
+		echo json_encode($data);
 	}
 
 	public function delete_material_temp()
@@ -551,64 +473,18 @@ class Warehouse extends CI_Controller
 		$this->Warehouse_model->deleteMaterialTemp($id);
 		$data = [
 			'status' => true,
-
 		];
 
-		echo json_encode(($data));
-	}
-
-	// Controller function to handle edit submission
-	public function editReceivingMaterial()
-	{
-		$id_box = $this->input->post('id_box');
-		$weight = $this->input->post('weight');
-		$sloc = $this->input->post('sloc');
-
-		$data = array(
-			'weight' => $weight,
-			'sloc' => $sloc
-		);
-
-		$this->db->where('id_box', $id_box);
-		$this->db->update('receiving_material', $data);
-
-		$this->session->set_flashdata('SUCCESS', 'Data updated successfully!');
-		redirect('warehouse/receiving_material');
-	}
-
-	// Fungsi untuk menghasilkan ID Box baru
-	public function generateBoxID()
-	{
-		$this->db->select('no_box');
-		$this->db->order_by('no_box', 'DESC');
-		$this->db->limit(1);
-		$query = $this->db->get('box');
-
-		if ($query->num_rows() > 0) {
-			$last_id = $query->row()->id_box;
-			$next_id = ++$last_id;  // Auto increment
-		} else {
-			$next_id = 'A0000000001';
-		}
-		return $next_id;
-	}
-
-	public function insertData($table, $data)
-	{
-		$this->db->insert($table, $data);
-		return $this->db->insert_id();
+		echo json_encode($data);
 	}
 
 	public function save_unpack()
 	{
 		$id_box_detail = $this->input->post('id_box_detail');
 		$id_box_destination = $this->input->post('id_box_destination');
-		$id_material = $this->input->post('id_material');
-		$id_receiving_material = $this->input->post('id_receiving_material');
 
 		$new_id_Sloc = $this->db->query("SELECT sloc from `box` where id_box = $id_box_destination")->row();
 
-		//update box detail
 		$dtupdate = [
 			'id_box' => $id_box_destination,
 			'uptdt' => date('Y-m-d H:i:s'),
@@ -618,7 +494,6 @@ class Warehouse extends CI_Controller
 		$this->db->where('id_box_detail', $id_box_detail);
 		$unpack = $this->db->update('box_detail', $dtupdate);
 
-		//update receiving material
 		$dtupdate = [
 			'id_box' => $id_box_destination,
 			's_loc' => $new_id_Sloc->sloc,
@@ -645,7 +520,6 @@ class Warehouse extends CI_Controller
 		$id_box_detail = $this->input->post('id_box_detail');
 		$qty = $this->input->post('qty');
 
-		//update qty in receiving material
 		$dtupdate = [
 			'qty' => $qty,
 			'updated_at' => date('Y-m-d H:i:s'),
@@ -665,5 +539,4 @@ class Warehouse extends CI_Controller
 		}
 		echo json_encode($data);
 	}
-
 }
