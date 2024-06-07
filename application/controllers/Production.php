@@ -39,6 +39,14 @@ class Production extends CI_Controller {
        
         echo json_encode($result);
     }
+    
+    function getSlocStorage(){
+        $materialId = $this->input->post('materialId');
+        $result = $this->db->query("SELECT b.no_box, b.weight, b.sloc, bd.product_id, bd.material_desc, bd.total_qty, bd.uom FROM box b LEFT JOIN list_storage bd ON b.id_box = bd.id_box WHERE bd.product_id = '$materialId'
+        ")->result_array();
+       
+        echo json_encode($result);
+    }
 
     public function kitting(){
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
@@ -124,7 +132,6 @@ class Production extends CI_Controller {
         echo json_encode($result);
     }
 
-    
     public function kanban_box(){
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();

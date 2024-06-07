@@ -38,7 +38,7 @@
             },
             success: function(res) {
                 if (res.length > 0) {
-                    // console.log(res);
+                    console.log(res);
                     var boxID = res[0].no_box;
                     var sloc = res[0].sloc;
                     var weight = res[0].weight;
