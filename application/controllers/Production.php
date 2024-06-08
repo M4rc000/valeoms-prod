@@ -18,6 +18,8 @@ class Production extends CI_Controller {
         
         $data['title'] = 'Material Requests';
 
+        $data['boms'] = $this->PModel->getAllBoms();
+
         $this->load->view('templates/header', $data);
         $this->load->view('templates/navbar', $data);   
         $this->load->view('templates/sidebar', $data);   
@@ -35,6 +37,22 @@ class Production extends CI_Controller {
 
     function getProductData(){
         $productID = $this->input->post('productID');
+        $productDesc = $this->input->post('productDesc');
+        $product_plan_qty = $this->input->post('qty');
+        $production_plan = $this->PModel->getLastProductionPlan();
+
+        $Data = [
+            'Production_plan' => $production_plan,
+            'Id_fg' => $productID,
+            'Fg_desc' => $productDesc,
+            'Production_plan_qty' => $product_plan_qty,
+            'Crtdt' => date('Y-d-m H:i'),
+            'Crtby' => $this->input->post('user'),
+            'Upddt' => date('Y-d-m H:i'),
+            'Updby' => $this->input->post('user')
+        ];
+
+        $this->PModel->insertData('production_plan', $Data);
         $result = $this->db->query("SELECT * FROM bom WHERE Id_fg = '$productID'")->result_array();
        
         echo json_encode($result);

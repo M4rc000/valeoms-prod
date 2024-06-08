@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 07, 2024 at 04:29 AM
+-- Generation Time: Jun 08, 2024 at 10:07 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.1
 
@@ -6452,7 +6452,8 @@ CREATE TABLE `box` (
 
 INSERT INTO `box` (`id_box`, `no_box`, `weight`, `sloc`, `crtby`, `crtdt`) VALUES
 (167, 'CKA000001', NULL, NULL, '', '0000-00-00 00:00:00'),
-(168, 'CKA000002', 200, '58', 'Prime', '2024-06-04 10:03:28');
+(168, 'CKA000002', 200, '58', 'Prime', '2024-06-04 10:03:28'),
+(169, 'CKA000003', 200, '58', 'Prime', '2024-06-08 14:29:04');
 
 -- --------------------------------------------------------
 
@@ -6479,7 +6480,13 @@ INSERT INTO `box_detail` (`id_box_detail`, `id_box`, `id_material`, `material_de
 (369, 168, 'S0641221871', 'DRIVE SHAFT MC.TSL14', '2024-06-04 10:03:28', 'Prime', '', ''),
 (370, 168, 'TM350C01201', 'THRUST SPLINE M/C.FPR-3', '2024-06-04 10:03:28', 'Prime', '', ''),
 (371, 168, 'S0151215894', 'INTERNAL GEAR ASSY. TSL12', '2024-06-04 10:03:28', 'Prime', '', ''),
-(372, 168, 'M302C0031', 'PINION ASS\'Y.?? 22HP', '2024-06-04 10:03:28', 'Prime', '', '');
+(372, 168, 'M302C0031', 'PINION ASS\'Y.?? 22HP', '2024-06-04 10:03:28', 'Prime', '', ''),
+(373, 169, 'TM303C01103', 'S/ROLLER ASS\'Y.MELROE', '2024-06-08 14:29:04', 'Prime', '', ''),
+(374, 169, 'M302C0031', 'PINION ASS\'Y.?? 22HP', '2024-06-08 14:29:04', 'Prime', '', ''),
+(375, 169, 'E000V601100', 'STATOR VARNISHING.TG11', '2024-06-08 14:29:04', 'Prime', '', ''),
+(376, 169, 'S0041221794', 'LEVER. TSL14', '2024-06-08 14:29:04', 'Prime', '', ''),
+(377, 169, 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', '2024-06-08 14:29:04', 'Prime', '', ''),
+(378, 169, 'S9101217395', 'SCREW M/SWITCH. RSML14', '2024-06-08 14:29:04', 'Prime', '', '');
 
 -- --------------------------------------------------------
 
@@ -6508,7 +6515,8 @@ CREATE TABLE `kanban_box` (
 INSERT INTO `kanban_box` (`id_kanban_box`, `Id_material`, `Material_desc`, `Material_qty`, `Product_plan`, `product_id`, `image`, `Crtdt`, `Crtby`, `Upddt`, `Updby`) VALUES
 ('KBA0000001', 'S0641221871', 'DRIVE SHAFT MC.TSL14', 10, 'PP20240601', '', '665df7a277db7.png', '2024-04-06 00:04', 'Prime', '2024-04-06 00:04', 'Prime'),
 ('KBA0000002', 'S0641221871', 'DRIVE SHAFT MC.TSL14', 10, 'PP20240601', '', '665df8bdad61f.png', '2024-04-06 00:09', 'Prime', '2024-04-06 00:09', 'Prime'),
-('KBA0000003', 'G4022627569', 'F/BKT M/C TF110 TRACTOR,ANODIZING', 10, 'PP20240601', '', '665e019e29672.png', '2024-04-06 00:47', 'Prime', '2024-04-06 00:47', 'Prime');
+('KBA0000003', 'G4022627569', 'F/BKT M/C TF110 TRACTOR,ANODIZING', 10, 'PP20240601', '', '665e019e29672.png', '2024-04-06 00:47', 'Prime', '2024-04-06 00:47', 'Prime'),
+('KBA0000004', 'S0141206243', 'SATELLITE GEAR. TSL12', 10, 'PP202406', '', '6663eec210767.png', '2024-08-06 12:40', 'Prime', '2024-08-06 12:40', 'Prime');
 
 -- --------------------------------------------------------
 
@@ -6921,7 +6929,13 @@ INSERT INTO `list_storage` (`id`, `product_id`, `material_desc`, `sloc`, `uom`, 
 (386, 'S0641221871', 'DRIVE SHAFT MC.TSL14', '58', 'PC', 10, 168, 0, '2024-06-04 03:03:28'),
 (387, 'TM350C01201', 'THRUST SPLINE M/C.FPR-3', '58', 'PC', 10, 168, 0, '2024-06-04 03:03:28'),
 (388, 'S0151215894', 'INTERNAL GEAR ASSY. TSL12', '58', 'PC', 20, 168, 0, '2024-06-04 03:03:28'),
-(389, 'M302C0031', 'PINION ASS\'Y.?? 22HP', '58', 'PC', 10, 168, 0, '2024-06-04 03:03:28');
+(389, 'M302C0031', 'PINION ASS\'Y.?? 22HP', '58', 'PC', 10, 168, 0, '2024-06-04 03:03:28'),
+(390, 'TM303C01103', 'S/ROLLER ASS\'Y.MELROE', '50', 'PC', 10, 169, 0, '2024-06-08 07:29:04'),
+(391, 'M302C0031', 'PINION ASS\'Y.?? 22HP', '50', 'PC', 20, 169, 0, '2024-06-08 07:29:04'),
+(392, 'E000V601100', 'STATOR VARNISHING.TG11', '50', 'PC', 30, 169, 0, '2024-06-08 07:29:04'),
+(393, 'S0041221794', 'LEVER. TSL14', '50', 'PC', 20, 169, 0, '2024-06-08 07:29:04'),
+(394, 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', '50', 'PC', 20, 169, 0, '2024-06-08 07:29:04'),
+(395, 'S9101217395', 'SCREW M/SWITCH. RSML14', '50', 'PC', 20, 169, 0, '2024-06-08 07:29:04');
 
 -- --------------------------------------------------------
 
@@ -9096,24 +9110,64 @@ INSERT INTO `material_list` (`Id`, `Id_material`, `Material_desc`, `Material_typ
 --
 
 CREATE TABLE `material_request` (
-  `Id` int(11) NOT NULL,
-  `Req_no` varchar(128) NOT NULL,
+  `id` int(11) NOT NULL,
   `Id_material` varchar(30) NOT NULL,
   `Material_desc` varchar(128) NOT NULL,
-  `Material_need` int(11) NOT NULL,
+  `Qty` float NOT NULL,
+  `Uom` varchar(5) NOT NULL,
+  `Sloc` varchar(50) NOT NULL,
+  `Box_No` varchar(128) NOT NULL,
+  `production_plan` varchar(50) NOT NULL,
   `Crtdt` varchar(128) NOT NULL,
   `Crtby` varchar(128) NOT NULL,
   `Upddt` varchar(128) NOT NULL,
   `Updby` varchar(128) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
+-- --------------------------------------------------------
+
 --
--- Dumping data for table `material_request`
+-- Table structure for table `production_plan`
 --
 
-INSERT INTO `material_request` (`Id`, `Req_no`, `Id_material`, `Material_desc`, `Material_need`, `Crtdt`, `Crtby`, `Upddt`, `Updby`) VALUES
-(1, 'RQ18052024', 'S0641221871', 'DRIVE SHAFT MC.TSL14', 100, '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System'),
-(2, 'RQ18052024', 'TM350C01201', 'THRUST SPLINE M/C.FPR-3', 0, '2024-05-10 10:00', 'System', '2024-05-10 10:00', 'System');
+CREATE TABLE `production_plan` (
+  `id` int(11) NOT NULL,
+  `Production_plan` varchar(30) NOT NULL,
+  `Id_fg` varchar(30) NOT NULL,
+  `Fg_desc` varchar(128) NOT NULL,
+  `Production_plan_qty` int(11) NOT NULL,
+  `Crtdt` varchar(128) DEFAULT NULL,
+  `Crtby` varchar(128) DEFAULT NULL,
+  `Upddt` varchar(128) DEFAULT NULL,
+  `Updby` varchar(128) DEFAULT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `production_plan`
+--
+
+INSERT INTO `production_plan` (`id`, `Production_plan`, `Id_fg`, `Fg_desc`, `Production_plan_qty`, `Crtdt`, `Crtby`, `Upddt`, `Updby`) VALUES
+(2, 'PPA0000001', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', 100, '2024-09-06 03:04', 'Prime', '2024-09-06 03:04', 'Prime');
+
+-- --------------------------------------------------------
+
+--
+-- Table structure for table `production_plan_detail`
+--
+
+CREATE TABLE `production_plan_detail` (
+  `id` int(11) NOT NULL,
+  `Production_plan` varchar(30) NOT NULL,
+  `Id_material` varchar(30) NOT NULL,
+  `Material_desc` varchar(128) NOT NULL,
+  `Material_need` int(11) NOT NULL,
+  `Uom` varchar(5) NOT NULL,
+  `status` int(11) NOT NULL,
+  `Crtdt` varchar(128) NOT NULL,
+  `Crtby` varchar(128) NOT NULL,
+  `Upddt` varchar(128) NOT NULL,
+  `Updby` varchar(128) NOT NULL
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
 
 -- --------------------------------------------------------
 
@@ -9535,7 +9589,13 @@ INSERT INTO `receiving_material` (`id`, `id_box`, `reference_number`, `material`
 (369, 168, 'S0641221871', 'DRIVE SHAFT MC.TSL14', 10, 'PC', NULL, '58', 'CKA000002', 0, '2024-06-04 03:03:28', NULL, NULL, 369),
 (370, 168, 'TM350C01201', 'THRUST SPLINE M/C.FPR-3', 10, 'PC', NULL, '58', 'CKA000002', 0, '2024-06-04 03:03:28', NULL, NULL, 370),
 (371, 168, 'S0151215894', 'INTERNAL GEAR ASSY. TSL12', 20, 'PC', NULL, '58', 'CKA000002', 0, '2024-06-04 03:03:28', NULL, NULL, 371),
-(372, 168, 'M302C0031', 'PINION ASS\'Y.?? 22HP', 10, 'PC', NULL, '58', 'CKA000002', 0, '2024-06-04 03:03:28', NULL, NULL, 372);
+(372, 168, 'M302C0031', 'PINION ASS\'Y.?? 22HP', 10, 'PC', NULL, '58', 'CKA000002', 0, '2024-06-04 03:03:28', NULL, NULL, 372),
+(373, 169, 'TM303C01103', 'S/ROLLER ASS\'Y.MELROE', 10, 'PC', NULL, '58', 'CKA000003', 0, '2024-06-08 07:29:04', NULL, NULL, 373),
+(374, 169, 'M302C0031', 'PINION ASS\'Y.?? 22HP', 20, 'PC', NULL, '58', 'CKA000003', 0, '2024-06-08 07:29:04', NULL, NULL, 374),
+(375, 169, 'E000V601100', 'STATOR VARNISHING.TG11', 30, 'PC', NULL, '58', 'CKA000003', 0, '2024-06-08 07:29:04', NULL, NULL, 375),
+(376, 169, 'S0041221794', 'LEVER. TSL14', 20, 'PC', NULL, '58', 'CKA000003', 0, '2024-06-08 07:29:04', NULL, NULL, 376),
+(377, 169, 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', 20, 'PC', NULL, '58', 'CKA000003', 0, '2024-06-08 07:29:04', NULL, NULL, 377),
+(378, 169, 'S9101217395', 'SCREW M/SWITCH. RSML14', 20, 'PC', NULL, '58', 'CKA000003', 0, '2024-06-08 07:29:04', NULL, NULL, 378);
 
 -- --------------------------------------------------------
 
@@ -10241,7 +10301,13 @@ ALTER TABLE `material_list`
 -- Indexes for table `material_request`
 --
 ALTER TABLE `material_request`
-  ADD PRIMARY KEY (`Id`);
+  ADD PRIMARY KEY (`id`);
+
+--
+-- Indexes for table `production_plan`
+--
+ALTER TABLE `production_plan`
+  ADD PRIMARY KEY (`id`);
 
 --
 -- Indexes for table `production_request`
@@ -10305,19 +10371,19 @@ ALTER TABLE `bom`
 -- AUTO_INCREMENT for table `box`
 --
 ALTER TABLE `box`
-  MODIFY `id_box` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=169;
+  MODIFY `id_box` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=170;
 
 --
 -- AUTO_INCREMENT for table `box_detail`
 --
 ALTER TABLE `box_detail`
-  MODIFY `id_box_detail` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=373;
+  MODIFY `id_box_detail` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=379;
 
 --
 -- AUTO_INCREMENT for table `list_storage`
 --
 ALTER TABLE `list_storage`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=390;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=396;
 
 --
 -- AUTO_INCREMENT for table `material_list`
@@ -10329,7 +10395,13 @@ ALTER TABLE `material_list`
 -- AUTO_INCREMENT for table `material_request`
 --
 ALTER TABLE `material_request`
-  MODIFY `Id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT;
+
+--
+-- AUTO_INCREMENT for table `production_plan`
+--
+ALTER TABLE `production_plan`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
 
 --
 -- AUTO_INCREMENT for table `production_request`
@@ -10341,13 +10413,13 @@ ALTER TABLE `production_request`
 -- AUTO_INCREMENT for table `receiving_material`
 --
 ALTER TABLE `receiving_material`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=373;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=379;
 
 --
 -- AUTO_INCREMENT for table `receiving_material_temp`
 --
 ALTER TABLE `receiving_material_temp`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=74;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=80;
 
 --
 -- AUTO_INCREMENT for table `user`

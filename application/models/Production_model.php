@@ -77,4 +77,67 @@ class Production_model extends CI_Model {
     public function getMaterialList(){
         return $this->db->get('material_list')->result_array();
     }
+
+    public function getAllBoms(){
+        $this->db->distinct();
+        $this->db->select('Id_fg');
+        $this->db->where('is_active', 1); 
+        return $this->db->get('bom')->result_array(); 
+    }
+
+    public function getLastProductionPlan() {
+        $this->db->select('production_plan');
+        $this->db->from('production_plan');
+        $this->db->order_by('production_plan', 'DESC');
+        $this->db->limit(1);
+        
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0) {
+            // Return the last Production Plan
+            $lastProductionPlan = $query->row()->Production_plan;
+            $prefix = substr($lastProductionPlan, 0, 3);
+            $numericPart = substr($lastProductionPlan, 3);
+        
+            // Increment the numeric part
+            $incrementedNumericPart = (int)$numericPart + 1;
+        
+            // If the numeric part reaches 10000000, reset to 1 and increment the prefix
+            if ($incrementedNumericPart >= 10000000) {
+                $incrementedNumericPart = 1;
+                
+                // Increment the last character of the prefix
+                $lastChar = substr($prefix, -1);
+                $secondChar = substr($prefix, -2, 1);
+                $firstChar = substr($prefix, -3, 1);
+                
+                // Increment the last character, if it is 'Z', reset to 'A' and increment the second last character
+                if ($lastChar === 'Z') {
+                    $lastChar = 'A';
+                    $secondChar++;
+        
+                    // If the second character is 'Z', reset to 'A' and increment the first character
+                    if ($secondChar === 'Z' + 1) {
+                        $secondChar = 'A';
+                        $firstChar++;
+                    }
+                } else {
+                    $lastChar++;
+                }
+                
+                // Combine characters to form the new prefix
+                $prefix = $firstChar . $secondChar . $lastChar;
+            }
+        
+            // Format the incremented numeric part
+            $formattedNumericPart = str_pad($incrementedNumericPart, strlen($numericPart), '0', STR_PAD_LEFT);
+        
+            // Return the next Production Plan ID
+            return $prefix . $formattedNumericPart;
+        } else {
+            // Handle the case when the table is empty
+            return 'PPA0000001';
+        }        
+    }
+    
 }
