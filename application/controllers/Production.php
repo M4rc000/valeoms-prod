@@ -39,24 +39,54 @@ class Production extends CI_Controller {
         $productID = $this->input->post('productID');
         $productDesc = $this->input->post('productDesc');
         $product_plan_qty = $this->input->post('qty');
+        $user = $this->input->post('user');
+    
+        // Get the last production plan
         $production_plan = $this->PModel->getLastProductionPlan();
-
+    
+        // Data for Table production_plan
         $Data = [
             'Production_plan' => $production_plan,
             'Id_fg' => $productID,
             'Fg_desc' => $productDesc,
             'Production_plan_qty' => $product_plan_qty,
-            'Crtdt' => date('Y-d-m H:i'),
-            'Crtby' => $this->input->post('user'),
-            'Upddt' => date('Y-d-m H:i'),
-            'Updby' => $this->input->post('user')
+            'Crtdt' => date('Y-m-d H:i'),
+            'Crtby' => $user,
+            'Upddt' => date('Y-m-d H:i'),
+            'Updby' => $user
         ];
-
+    
+        // Insert data into production_plan table
         $this->PModel->insertData('production_plan', $Data);
+    
+        // Retrieve BOM data
         $result = $this->db->query("SELECT * FROM bom WHERE Id_fg = '$productID'")->result_array();
-       
-        echo json_encode($result);
+    
+        // Prepare and insert data into production_plan_detail table
+        foreach ($result as $row) {
+            $detailData = [
+                'Production_plan' => $production_plan,
+                'Id_material' => $row['Id_material'],
+                'Material_desc' => $row['Material_desc'],
+                'Material_need' => intval($row['Qty']) * $product_plan_qty,  // Calculate total material needed based on plan qty
+                'Uom' => $row['Uom'],
+                'status' => 0, 
+                'Crtdt' => date('Y-m-d H:i'),
+                'Crtby' => $user,
+                'Upddt' => date('Y-m-d H:i'),
+                'Updby' => $user
+            ];
+    
+            // Insert into production_plan_detail table
+            $this->PModel->insertData('production_plan_detail', $detailData);
+        }
+    
+        $results = $this->db->query("SELECT * FROM production_plan_detail WHERE Production_plan = '$production_plan'")->result_array();
+
+        // Echo the result as JSON
+        echo json_encode($results);
     }
+    
     
     function getSlocStorage(){
         $materialId = $this->input->post('materialId');

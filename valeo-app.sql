@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Jun 08, 2024 at 10:07 PM
+-- Generation Time: Jun 11, 2024 at 08:30 PM
 -- Server version: 10.4.22-MariaDB
 -- PHP Version: 8.1.1
 
@@ -6453,7 +6453,8 @@ CREATE TABLE `box` (
 INSERT INTO `box` (`id_box`, `no_box`, `weight`, `sloc`, `crtby`, `crtdt`) VALUES
 (167, 'CKA000001', NULL, NULL, '', '0000-00-00 00:00:00'),
 (168, 'CKA000002', 200, '58', 'Prime', '2024-06-04 10:03:28'),
-(169, 'CKA000003', 200, '58', 'Prime', '2024-06-08 14:29:04');
+(169, 'CKA000003', 200, '58', 'Prime', '2024-06-08 14:29:04'),
+(170, 'CKA000004', NULL, NULL, '', '0000-00-00 00:00:00');
 
 -- --------------------------------------------------------
 
@@ -9147,7 +9148,8 @@ CREATE TABLE `production_plan` (
 --
 
 INSERT INTO `production_plan` (`id`, `Production_plan`, `Id_fg`, `Fg_desc`, `Production_plan_qty`, `Crtdt`, `Crtby`, `Upddt`, `Updby`) VALUES
-(2, 'PPA0000001', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', 100, '2024-09-06 03:04', 'Prime', '2024-09-06 03:04', 'Prime');
+(58, 'PPA0000001', 'S000A447588', 'S/T. GAMMA2 INA. 2M610.TSL12. 1.2Kw', 100, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(59, 'PPA0000002', 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', 10, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime');
 
 -- --------------------------------------------------------
 
@@ -9168,6 +9170,56 @@ CREATE TABLE `production_plan_detail` (
   `Upddt` varchar(128) NOT NULL,
   `Updby` varchar(128) NOT NULL
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+
+--
+-- Dumping data for table `production_plan_detail`
+--
+
+INSERT INTO `production_plan_detail` (`id`, `Production_plan`, `Id_material`, `Material_desc`, `Material_need`, `Uom`, `status`, `Crtdt`, `Crtby`, `Upddt`, `Updby`) VALUES
+(1272, 'PPA0000001', 'S0041221794', 'LEVER. TSL14', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1273, 'PPA0000001', 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', 200, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1274, 'PPA0000001', 'S0561217579', 'LEVER REST. TSL12', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1275, 'PPA0000001', 'S9101217395', 'SCREW M/SWITCH. RSML14', 200, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1276, 'PPA0000001', 'S9221217787', 'FLANGE NUT. RSML14', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1277, 'PPA0000001', 'S9311220298', 'ADJUST WASHER. TSL12', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1278, 'PPA0000001', 'S9991195350', 'GREASE.CM55', 200, 'G', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1279, 'PPA0000001', 'K306127', 'LIQUID GREASE.CM-55', 200, 'G', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1280, 'PPA0000001', 'S1001223013', 'INDUCTOR ASSY. GAMMA2 N/ISG', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1281, 'PPA0000001', 'S1081204174', 'MAGNET. TSL12', 400, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1282, 'PPA0000001', 'S1091206541', 'HOLDER. TSL12', 400, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1283, 'PPA0000001', 'S1011223014', 'YOKE MC. GAMMA2 N/ISG', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1284, 'PPA0000001', 'S2001215878', 'ARMARURE ASSY. TSL12', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1285, 'PPA0000001', 'S5001223287', 'C/REAR PART ASS\'Y.GAMMA2 N/ISG', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1286, 'PPA0000001', 'S0281216690', 'REDUCTION GEAR ASS\'Y.GAMMA2 N/ISG', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1287, 'PPA0000001', 'S0131221795', 'DRIVE SHAFT ASSY. TSL14', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1288, 'PPA0000001', 'S0151215894', 'INTERNAL GEAR ASSY. TSL12', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1289, 'PPA0000001', 'S0641221871', 'DRIVE SHAFT MC.TSL14', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1290, 'PPA0000001', 'K300821', 'STEEL BALL.Y-2 24L', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1291, 'PPA0000001', 'S9011198356', 'DRIVE SHAFT BUSH. RSML14', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1292, 'PPA0000001', 'S305190484', 'SATELLITE PIN. TSL', 300, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1293, 'PPA0000001', 'S0141206243', 'SATELLITE GEAR. TSL12', 300, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1294, 'PPA0000001', 'S0571205800', 'GASKET SHEET. TSL12', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1295, 'PPA0000001', 'K306127', 'LIQUID GREASE.CM-55', 0, 'G', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1296, 'PPA0000001', 'S3001216692', 'ORC ASS\'Y.GAMMA2 N/ISG', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1297, 'PPA0000001', 'S0261217546', 'STOPPER. TSL12', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1298, 'PPA0000001', '4EM1771', 'STOP RING.D-3', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1299, 'PPA0000001', 'K306127', 'LIQUID GREASE.CM-55', 100, 'G', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1300, 'PPA0000001', 'A466035', 'F/BRKT ASS\'Y. GAMMA2 INA.', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1301, 'PPA0000001', 'A466045', 'M/SWITCH ASS\'Y. GAMMA2 INA. 2M610', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1302, 'PPA0000001', 'A466099', 'N/PLATE. GAMMA2 INA. 2M610', 100, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1303, 'PPA0000002', 'S0131221795', 'DRIVE SHAFT ASSY. TSL14', 10, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1304, 'PPA0000002', 'S0151215894', 'INTERNAL GEAR ASSY. TSL12', 10, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1305, 'PPA0000002', 'S0641221871', 'DRIVE SHAFT MC.TSL14', 10, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1306, 'PPA0000002', 'K300821', 'STEEL BALL.Y-2 24L', 10, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1307, 'PPA0000002', 'S9011198356', 'DRIVE SHAFT BUSH. RSML14', 10, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1308, 'PPA0000002', 'S305190484', 'SATELLITE PIN. TSL', 30, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1309, 'PPA0000002', 'S0141206243', 'SATELLITE GEAR. TSL12', 30, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1310, 'PPA0000002', 'S0571205800', 'GASKET SHEET. TSL12', 10, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1311, 'PPA0000002', 'K306127', 'LIQUID GREASE.CM-55', 0, 'G', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1312, 'PPA0000002', 'S3001216692', 'ORC ASS\'Y.GAMMA2 N/ISG', 10, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1313, 'PPA0000002', 'S0261217546', 'STOPPER. TSL12', 10, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1314, 'PPA0000002', '4EM1771', 'STOP RING.D-3', 10, 'PC', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime'),
+(1315, 'PPA0000002', 'K306127', 'LIQUID GREASE.CM-55', 10, 'G', 0, '2024-06-12 01:28', 'Prime', '2024-06-12 01:28', 'Prime');
 
 -- --------------------------------------------------------
 
@@ -10310,6 +10362,12 @@ ALTER TABLE `production_plan`
   ADD PRIMARY KEY (`id`);
 
 --
+-- Indexes for table `production_plan_detail`
+--
+ALTER TABLE `production_plan_detail`
+  ADD PRIMARY KEY (`id`);
+
+--
 -- Indexes for table `production_request`
 --
 ALTER TABLE `production_request`
@@ -10371,7 +10429,7 @@ ALTER TABLE `bom`
 -- AUTO_INCREMENT for table `box`
 --
 ALTER TABLE `box`
-  MODIFY `id_box` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=170;
+  MODIFY `id_box` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=171;
 
 --
 -- AUTO_INCREMENT for table `box_detail`
@@ -10401,7 +10459,13 @@ ALTER TABLE `material_request`
 -- AUTO_INCREMENT for table `production_plan`
 --
 ALTER TABLE `production_plan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=60;
+
+--
+-- AUTO_INCREMENT for table `production_plan_detail`
+--
+ALTER TABLE `production_plan_detail`
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1316;
 
 --
 -- AUTO_INCREMENT for table `production_request`

@@ -9,7 +9,7 @@
 	}
 </style>
 <section>
-    // GET USER
+    <!-- GET USER -->
     <input type="text" id="user" name="user" value="<?=$name['username'];?>" hidden>
 	<div class="row">
 		<div class="card info-card" style="height: 2500px;">
@@ -84,41 +84,19 @@
                     <hr class="mb-3">
                     <div class="row mt-2 ps-2 px-2">
                         <div class="col-md">
-                            <button class="btn btn-success">
+                            <button type="button" class="btn btn-success" id="plus-row">
                                 <i class="bi bi-plus-circle"></i>
                             </button>
                         </div>
                     </div>
-                    <div class="row mt-2 ps-2 px-2">
-                        <div class="col-md-2">
-                            <label for="sloc" class="form-label"><b>SLoc</b></label>
-                            <select id="sloc" class="form-select">
-                                <option selected>Choose SLoc</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
-                            <label for="box_no" class="form-label"><b>Box</b></label>
-                            <select id="box_no" class="form-select">
-                                <option selected>Choose Box</option>
-                            </select>
-                        </div>
-                        <div class="col-md-2">
+                    <div class="row mt-4">
+                        <div class="col-md-10" id="dynamic-rows-container">
+                             <!-- Dynamic rows will be appended here -->
+                         </div>
+                         <div class="col-md-2">
                             <label for="total_qty" class="form-label"><b>Qty on hand</b></label>
                             <input type="text" class="form-control" id="total_qty" name="total_qty" readonly>
-                        </div>
-                        <div class="col-md-2">
-                            <label for="qty_unpack" class="form-label"><b>Unpack</b></label>
-                            <input type="number" min="1" class="form-control" id="qty_unpack" name="qty_unpack">
-                        </div>
-                        <div class="col-md-2">
-                            <Button class="btn btn-primary" style="margin-top: 2rem;">
-                                <i class="bx bx-check-circle"></i>
-                            </Button>
-                        </div>
-                        <div class="col-md-2">
-                            <label for="qty_request" class="form-label"><b>Qty request</b></label>
-                            <input type="number" min="1" class="form-control" id="qty_request" name="qty_request">
-                        </div>
+                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
@@ -129,6 +107,7 @@
         </div>
     </div>
 </div>
+
 
 <script src="<?=base_url('assets/');?>vendor/datatables/datatables.js"></script>
 <script>
@@ -195,6 +174,11 @@
         var qty = $('#qty').val();
         var user = $('#user').val();
 
+        if(qty == 0 || qty == ''){
+            $('#data').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 40%"><i class="bi bi-x-circle me-1"></i> Qty can\'t empty<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+            return false;
+        }
+
 		$.ajax({
 			url: '<?= base_url('production/getProductData'); ?>',
 			type: 'post',
@@ -203,16 +187,15 @@
 				productID, productDesc, qty, user
 			},
 			success: function(res) {
-                console.log(res);
                 var row = '';
                 for (let number = 0; number < res.length; number++) {
                     row +=
                     `
-                        <tr data-id="${res[number].Id_material}" data-desc="${res[number].Material_desc}" data-qty="${res[number].Qty * qty}" data-uom="${res[number].Uom}">
+                        <tr data-id="${res[number].Id_material}" data-desc="${res[number].Material_desc}" data-qty="${res[number].Material_need}" data-uom="${res[number].Uom}">
                             <th scope="row">${number + 1}</th>
                             <td>${res[number].Id_material}</td>
                             <td>${res[number].Material_desc}</td>
-                            <td class="text-center">${res[number].Qty * qty}</td>
+                            <td class="text-center">${res[number].Material_need}</td>
                             <td class="text-center">${res[number].Uom}</td>
                             <td class="text-center">
                                 <a href="#" class="edit-material-request" data-bs-toggle="modal" data-bs-target="#addMaterialRequest">
@@ -220,7 +203,7 @@
                                 </a>
                             </td>
                             <td class="text-center">
-                                <input type="checkbox" name="" id="">
+                                <input type="checkbox" name="" id="" ${res[number].status == 1 ? 'checked' : ''}>
                             </td>
                         </tr>
                     `;
@@ -302,33 +285,37 @@
     //         },
     //         success: function(res) {
     //             if (res && res.length > 0) {
-    //                 console.log(res);
 
     //                 // ADD INPUT STOCK ON HAND
+    //                 var stock_on_hand = 0;
     //                 for (var i = 0; i < res.length; i++) {
-    //                     var stock_on_hand = 0;
-    //                     stock_on_hand+= parseInt(res[i].total_qty);
+    //                     stock_on_hand += parseInt(res[i].total_qty);
     //                 }
     //                 $('#stock_on_hand').val(stock_on_hand);
                     
     //                 // ADD OPTION SLOC
     //                 $('#sloc').empty().append('<option selected>Choose SLoc</option>');
-
-    //                 // LOOPING SLOC
     //                 for (var i = 0; i < res.length; i++) {
     //                     var sloc = res[i].sloc;
-    //                     $('#sloc').append('<option value="' + sloc + '" data-total_qty="' + res[i].total_qty + '">' + sloc + '</option>');
+    //                     $('#sloc').append('<option value="' + sloc + '">' + sloc + '</option>');
     //                 }
 
-    //                 // LOOPING BOX NO
+    //                 // ADD OPTION BOX NO
+    //                 $('#box_no').empty().append('<option selected>Choose Box No</option>');
     //                 for (var i = 0; i < res.length; i++) {
     //                     var box = res[i].no_box;
     //                     $('#box_no').append('<option value="' + box + '" data-total_qty="' + res[i].total_qty + '">' + box + '</option>');
     //                 }
 
-
-    //                 // Add change event listener to update total_qty based on selected SLoc
+    //                 // Update total_qty based on selected SLoc
     //                 $('#sloc').on('change', function () {
+    //                     var selectedOption = $(this).find('option:selected');
+    //                     var selectedTotalQty = selectedOption.data('total_qty');
+    //                     $('#total_qty').val(selectedTotalQty);
+    //                 });
+
+    //                 // Update total_qty based on selected Box No
+    //                 $('#box_no').on('change', function () {
     //                     var selectedOption = $(this).find('option:selected');
     //                     var selectedTotalQty = selectedOption.data('total_qty');
     //                     $('#total_qty').val(selectedTotalQty);
@@ -337,10 +324,8 @@
     //                 // Set initial total_qty based on the first SLoc in the list if needed
     //                 var initialTotalQty = $('#sloc').find('option:selected').data('total_qty');
     //                 $('#total_qty').val(initialTotalQty);
-    //             }
-    //             else{
-    //                 var stock_on_hand = 0;
-    //                 $('#stock_on_hand').val(stock_on_hand);
+    //             } else {
+    //                 $('#stock_on_hand').val(0);
     //             }
     //         },
     //         error: function(xhr, ajaxOptions, thrownError) {
@@ -349,6 +334,8 @@
     //     });
     // });
     $(document).on('click', '.edit-material-request', function () {
+        var rowIndex = 0; // Declare and reset rowIndex inside the click event
+
         var $row = $(this).closest('tr');
         var materialId = $row.data('id');
         var materialDesc = $row.data('desc');
@@ -360,15 +347,6 @@
         $('#material_need').val(materialNeed);
         $('#uom').val(uom);
 
-        $('#addMaterialRequest').on('shown.bs.modal', function () {
-            $('#sloc').select2({
-                dropdownParent: $('#addMaterialRequest')
-            });
-            $('#box_no').select2({
-                dropdownParent: $('#addMaterialRequest')
-            });
-        });
-
         $.ajax({
             url: '<?= base_url('production/getSlocStorage'); ?>',
             type: 'post',
@@ -377,47 +355,94 @@
                 materialId: materialId
             },
             success: function(res) {
-                if (res && res.length > 0) {
-                    console.log(res);
-
+                if (res) {
                     // ADD INPUT STOCK ON HAND
                     var stock_on_hand = 0;
                     for (var i = 0; i < res.length; i++) {
                         stock_on_hand += parseInt(res[i].total_qty);
                     }
                     $('#stock_on_hand').val(stock_on_hand);
-                    
-                    // ADD OPTION SLOC
-                    $('#sloc').empty().append('<option selected>Choose SLoc</option>');
-                    for (var i = 0; i < res.length; i++) {
-                        var sloc = res[i].sloc;
-                        $('#sloc').append('<option value="' + sloc + '">' + sloc + '</option>');
-                    }
 
-                    // ADD OPTION BOX NO
-                    $('#box_no').empty().append('<option selected>Choose Box No</option>');
-                    for (var i = 0; i < res.length; i++) {
-                        var box = res[i].no_box;
-                        $('#box_no').append('<option value="' + box + '" data-total_qty="' + res[i].total_qty + '">' + box + '</option>');
-                    }
+                    // Ensure event handler for adding new rows is only added once
+                    $('#plus-row').off('click').on('click', function() {
+                        rowIndex++;
+                        const rowHtml = `
+                            <div class="row" id="row-${rowIndex}">
+                                <div class="col-md-3">
+                                    <label for="sloc-${rowIndex}" class="form-label"><b>SLoc</b></label>
+                                    <select id="sloc-${rowIndex}" name="sloc[${rowIndex}]" class="form-select">
+                                        <option selected>Choose SLoc</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-3">
+                                    <label for="box_no-${rowIndex}" class="form-label"><b>Box</b></label>
+                                    <select id="box_no-${rowIndex}" name="box_no[${rowIndex}]" class="form-select">
+                                        <option selected>Choose Box</option>
+                                    </select>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="total_qty-${rowIndex}" class="form-label"><b>Qty on hand</b></label>
+                                    <input type="text" class="form-control" id="total_qty-${rowIndex}" name="total_qty[${rowIndex}]" readonly>
+                                </div>
+                                <div class="col-md-2">
+                                    <label for="qty_unpack-${rowIndex}" class="form-label"><b>Unpack</b></label>
+                                    <input type="number" min="1" class="form-control" id="qty_unpack-${rowIndex}" name="qty_unpack[${rowIndex}]">
+                                </div>
+                                <div class="col-md-2">
+                                    <button class="btn btn-primary" style="margin-top: 2rem;">
+                                        <i class="bx bx-check-circle"></i>
+                                    </button>
+                                </div>
+                            </div>
+                        `;
+                        
+                        $('#dynamic-rows-container').append(rowHtml);
 
-                    // Update total_qty based on selected SLoc
-                    $('#sloc').on('change', function () {
-                        var selectedOption = $(this).find('option:selected');
-                        var selectedTotalQty = selectedOption.data('total_qty');
-                        $('#total_qty').val(selectedTotalQty);
+                        // Initialize select2 for the newly added select elements
+                        $(`#sloc-${rowIndex}`).select2({
+                            dropdownParent: $('#addMaterialRequest')
+                        });
+                        $(`#box_no-${rowIndex}`).select2({
+                            dropdownParent: $('#addMaterialRequest')
+                        });
+
+                        // ADD OPTION SLOC
+                        $(`#sloc-${rowIndex}`).empty().append('<option selected>Choose SLoc</option>');
+                        for (var i = 0; i < res.length; i++) {
+                            var sloc = res[i].sloc;
+                            $(`#sloc-${rowIndex}`).append('<option value="' + sloc + '">' + sloc + '</option>');
+                        }
+
+                        // ADD OPTION BOX NO
+                        $(`#box_no-${rowIndex}`).empty().append('<option selected>Choose Box No</option>');
+                        for (var i = 0; i < res.length; i++) {
+                            var box = res[i].no_box;
+                            $(`#box_no-${rowIndex}`).append('<option value="' + box + '" data-total_qty="' + res[i].total_qty + '">' + box + '</option>');
+                        }
+
+                        // Update total_qty based on selected SLoc
+                        $(`#sloc-${rowIndex}`).on('change', function () {
+                            var selectedOption = $(this).find('option:selected');
+                            var selectedTotalQty = selectedOption.data('total_qty');
+                            $(`#total_qty-${rowIndex}`).val(selectedTotalQty);
+                        });
+
+                        // Update total_qty based on selected Box No
+                        $(`#box_no-${rowIndex}`).on('change', function () {
+                            var selectedOption = $(this).find('option:selected');
+                            var selectedTotalQty = selectedOption.data('total_qty');
+                            $(`#total_qty-${rowIndex}`).val(selectedTotalQty);
+                        });
+
+                        // Set initial total_qty based on the first SLoc in the list if needed
+                        var initialTotalQty = $(`#sloc-${rowIndex}`).find('option:selected').data('total_qty');
+                        $(`#total_qty-${rowIndex}`).val(initialTotalQty);
                     });
 
-                    // Update total_qty based on selected Box No
-                    $('#box_no').on('change', function () {
-                        var selectedOption = $(this).find('option:selected');
-                        var selectedTotalQty = selectedOption.data('total_qty');
-                        $('#total_qty').val(selectedTotalQty);
+                    // Ensure modal hidden event is handled properly
+                    $('#addMaterialRequest').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+                        $('#dynamic-rows-container').empty(); // Clear all dynamic rows when the modal is hidden
                     });
-
-                    // Set initial total_qty based on the first SLoc in the list if needed
-                    var initialTotalQty = $('#sloc').find('option:selected').data('total_qty');
-                    $('#total_qty').val(initialTotalQty);
                 } else {
                     $('#stock_on_hand').val(0);
                 }
@@ -427,7 +452,7 @@
             }
         });
     });
-
+    
     $(document).ready(function (){
         $('#product_id').select2();
     });

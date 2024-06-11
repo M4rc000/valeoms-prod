@@ -94,8 +94,8 @@ class Production_model extends CI_Model {
         $query = $this->db->get();
         
         if ($query->num_rows() > 0) {
-            // Return the last Production Plan
-            $lastProductionPlan = $query->row()->Production_plan;
+            // Get the last Production Plan
+            $lastProductionPlan = $query->row()->production_plan; // Adjusted to match the case of the column
             $prefix = substr($lastProductionPlan, 0, 3);
             $numericPart = substr($lastProductionPlan, 3);
         
@@ -114,12 +114,15 @@ class Production_model extends CI_Model {
                 // Increment the last character, if it is 'Z', reset to 'A' and increment the second last character
                 if ($lastChar === 'Z') {
                     $lastChar = 'A';
-                    $secondChar++;
-        
-                    // If the second character is 'Z', reset to 'A' and increment the first character
-                    if ($secondChar === 'Z' + 1) {
+                    if ($secondChar === 'Z') {
                         $secondChar = 'A';
-                        $firstChar++;
+                        if ($firstChar === 'Z') {
+                            $firstChar = 'A';
+                        } else {
+                            $firstChar++;
+                        }
+                    } else {
+                        $secondChar++;
                     }
                 } else {
                     $lastChar++;
@@ -138,6 +141,5 @@ class Production_model extends CI_Model {
             // Handle the case when the table is empty
             return 'PPA0000001';
         }        
-    }
-    
+    }     
 }
