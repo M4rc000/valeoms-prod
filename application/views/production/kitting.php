@@ -1,3 +1,13 @@
+<style>
+    .select2-container {
+		z-index: 99;
+	}
+
+	.select2-selection {
+		padding-top: 4px !important;
+		height: 38px !important;
+	}
+</style>
 <section>
     <div class="row">
         <div class="card">
@@ -8,7 +18,12 @@
                 <div class="row justify-content-center mt-3 gap-1">
                     <label for="box_id" class="col-sm-3 col-form-label text-end"><b>Box ID</b></label>
                     <div class="col-sm-5">
-                        <input type="text" class="form-control" id="box_id">
+                        <select id="box_id" class="form-select">
+                            <option selected>Choose Product FG</option>
+                            <?php foreach($boxs as $box): ?>
+                                <option value="<?=$box['no_box'];?>"><?=$box['no_box'];?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="col-sm-3">
                         <button type="submit" class="btn btn-success" onclick="getBox()">Search</button>
@@ -68,7 +83,7 @@
                         <div class="row mt-2 mb-5">
                             <label for="inputText" class="col-sm-2 col-form-label">Weight</label>
                             <div class="col-sm-3">
-                                <input type="text" class="form-control" value="${parseInt(weight)}" readonly disabled>
+                                <input type="text" class="form-control" value="${weight !== null ? parseInt(weight) : '0'}" readonly disabled>
                             </div>
                         </div>
                     `;
@@ -233,6 +248,7 @@
     //         }
     //     });
     // }
+
     function getReqNo() {
         var boxID = $('#box_id').val();
         var reqNo = $('#reqNo').val();
@@ -346,4 +362,7 @@
         });
     }
 
+    $(document).ready(function (){
+        $('#box_id').select2();
+    });
 </script>

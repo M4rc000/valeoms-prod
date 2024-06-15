@@ -48,10 +48,14 @@
 </section>
 
 <!-- MATERIAL REQUEST MODAL -->
-<div class="modal fade" id="addMaterialRequest" tabindex="-1">
+<div class="modal fade" id="addMaterialRequest" tabindex="-1" data-bs-backdrop="false">
     <div class="modal-dialog modal-xl">
         <div class="modal-content">
-            <form action="production/AddMaterialRequest" method="post">
+            <div class="row justify-content-center" style="z-index: 999">
+                <div class="col-md-12 text-center" id="datas-modals">
+                </div>
+            </div>
+            <form>
                 <div class="modal-header">
                     <h5 class="modal-title">Add Material Request</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
@@ -59,6 +63,8 @@
                 <div class="modal-body">
                     <!-- GET USER -->
                     <input type="text" class="form-control" id="user" name="user" value="<?=$name['username'];?>" hidden>
+                    <!-- GET PRODUC PLAN ID -->
+                    <input type="text" class="form-control" id="prod_plan_id" name="prod_plan_id" value="" hidden>
                     <div class="row ps-2 mb-3 px-2">
                         <div class="col-md-2">
                             <label for="material_id" class="form-label"><b>Material Part No</b></label>
@@ -73,7 +79,7 @@
                             <input type="text" class="form-control" id="material_need" name="material_need" readonly>
                         </div>
                         <div class="col-2">
-                            <label for="stock_on_hand" class="form-label"><b>Stock on hand</b></label>
+                            <label for="stock_on_hand" class="form-label"><b class="px-2">Stock on hand</b> <i class="bi bi-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="Accumulation Quantity on storage"></i></label>
                             <input type="text" class="form-control" id="stock_on_hand" name="stock_on_hand" readonly>
                         </div>
                         <div class="col-2">
@@ -94,8 +100,8 @@
                              <!-- Dynamic rows will be appended here -->
                          </div>
                          <div class="col-md-2">
-                            <label for="total_qty" class="form-label"><b>Qty on hand</b></label>
-                            <input type="text" class="form-control" id="total_qty" name="total_qty" readonly>
+                            <label for="total_qty_get" class="form-label"><b class="px-2">Qty Request</b> <i class="bi bi-info-circle" data-bs-toggle="tooltip" data-bs-placement="top" title="Accumulation Quantity unpack"></i></label>
+                            <input type="text" class="form-control" id="total_qty_get" name="total_qty_get" readonly>
                          </div>
                     </div>
                 </div>
@@ -157,11 +163,10 @@
                     $('#data').empty().append(htmlContent);
                 } else {
                     // Handle case when product is not found
-                    $('#data').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 40%"><i class="bi bi-x-circle me-1"></i> Product ID not found<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+                    $('#data-modal').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 40%"><i class="bi bi-x-circle me-1"></i> Product ID not found<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
                 }
             },
             error: function(xhr, ajaxOptions, thrownError) {
-                // Handle AJAX error
                 console.error(xhr.statusText);
             }
         });
@@ -187,6 +192,7 @@
 				productID, productDesc, qty, user
 			},
 			success: function(res) {
+                console.log(res);
                 var row = '';
                 for (let number = 0; number < res.length; number++) {
                     row +=
@@ -243,14 +249,17 @@
                     </table>
                 `;  
 
-                new DataTable('#tbl-bom');
                 $('#billofmaterial').empty().append(title);
                 $('#billofmaterial').append(tableBom);
+                // new DataTable('#tbl-bom');
+
+                // ADDING DATA PROD PLAN
+                $('#prod_plan_id').val(res[0].Production_plan);
+
 			},
 			error: function(xhr, ajaxOptions, thrownError) {
 				console.log(thrownError);
 			}
-            
 		});
     }
     
@@ -333,127 +342,1615 @@
     //         }
     //     });
     // });
-    $(document).on('click', '.edit-material-request', function () {
-        var rowIndex = 0; // Declare and reset rowIndex inside the click event
+    // $(document).on('click', '.edit-material-request', function () {
+    //     var rowIndex = 0; // Declare and reset rowIndex inside the click event
 
-        var $row = $(this).closest('tr');
-        var materialId = $row.data('id');
-        var materialDesc = $row.data('desc');
-        var materialNeed = $row.data('qty');
-        var uom = $row.data('uom');
+    //     var $row = $(this).closest('tr');
+    //     var materialId = $row.data('id');
+    //     var materialDesc = $row.data('desc');
+    //     var materialNeed = $row.data('qty');
+    //     var uom = $row.data('uom');
 
-        $('#material_id').val(materialId);
-        $('#material_desc').val(materialDesc);
-        $('#material_need').val(materialNeed);
-        $('#uom').val(uom);
+    //     $('#material_id').val(materialId);
+    //     $('#material_desc').val(materialDesc);
+    //     $('#material_need').val(materialNeed);
+    //     $('#uom').val(uom);
 
-        $.ajax({
-            url: '<?= base_url('production/getSlocStorage'); ?>',
-            type: 'post',
-            dataType: 'json',
-            data: {
-                materialId: materialId
-            },
-            success: function(res) {
-                if (res) {
-                    // ADD INPUT STOCK ON HAND
-                    var stock_on_hand = 0;
-                    for (var i = 0; i < res.length; i++) {
-                        stock_on_hand += parseInt(res[i].total_qty);
-                    }
-                    $('#stock_on_hand').val(stock_on_hand);
+    //     $.ajax({
+    //         url: '<?= base_url('production/getSlocStorage'); ?>',
+    //         type: 'post',
+    //         dataType: 'json',
+    //         data: {
+    //             materialId: materialId
+    //         },
+    //         success: function(res) {
+    //             if (res) {
+    //                 console.log(res);
+    //                 // ADD INPUT STOCK ON HAND
+    //                 var stock_on_hand = 0;
+    //                 for (var i = 0; i < res.length; i++) {
+    //                     stock_on_hand += parseInt(res[i].total_qty);
+    //                 }
+    //                 $('#stock_on_hand').val(stock_on_hand);
 
-                    // Ensure event handler for adding new rows is only added once
-                    $('#plus-row').off('click').on('click', function() {
-                        rowIndex++;
-                        const rowHtml = `
-                            <div class="row" id="row-${rowIndex}">
-                                <div class="col-md-3">
-                                    <label for="sloc-${rowIndex}" class="form-label"><b>SLoc</b></label>
-                                    <select id="sloc-${rowIndex}" name="sloc[${rowIndex}]" class="form-select">
-                                        <option selected>Choose SLoc</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-3">
-                                    <label for="box_no-${rowIndex}" class="form-label"><b>Box</b></label>
-                                    <select id="box_no-${rowIndex}" name="box_no[${rowIndex}]" class="form-select">
-                                        <option selected>Choose Box</option>
-                                    </select>
-                                </div>
-                                <div class="col-md-2">
-                                    <label for="total_qty-${rowIndex}" class="form-label"><b>Qty on hand</b></label>
-                                    <input type="text" class="form-control" id="total_qty-${rowIndex}" name="total_qty[${rowIndex}]" readonly>
-                                </div>
-                                <div class="col-md-2">
-                                    <label for="qty_unpack-${rowIndex}" class="form-label"><b>Unpack</b></label>
-                                    <input type="number" min="1" class="form-control" id="qty_unpack-${rowIndex}" name="qty_unpack[${rowIndex}]">
-                                </div>
-                                <div class="col-md-2">
-                                    <button class="btn btn-primary" style="margin-top: 2rem;">
-                                        <i class="bx bx-check-circle"></i>
-                                    </button>
-                                </div>
-                            </div>
-                        `;
+    //                 // Ensure event handler for adding new rows is only added once
+    //                 $('#plus-row').off('click').on('click', function() {
+    //                     rowIndex++;
+    //                     const rowHtml = `
+    //                         <div class="row" id="row-${rowIndex}">
+    //                             <div class="col-md-3">
+    //                                 <label for="sloc-${rowIndex}" class="form-label"><b>SLoc</b></label>
+    //                                 <select id="sloc-${rowIndex}" name="sloc[${rowIndex}]" class="form-select">
+    //                                     <option selected>Choose SLoc</option>
+    //                                 </select>
+    //                             </div>
+    //                             <div class="col-md-3">
+    //                                 <label for="box_no-${rowIndex}" class="form-label"><b>Box</b></label>
+    //                                 <select id="box_no-${rowIndex}" name="box_no[${rowIndex}]" class="form-select">
+    //                                     <option selected>Choose Box</option>
+    //                                 </select>
+    //                             </div>
+    //                             <div class="col-md-2">
+    //                                 <label for="total_qty-${rowIndex}" class="form-label"><b>Qty on hand</b></label>
+    //                                 <input type="text" class="form-control" id="total_qty-${rowIndex}" name="total_qty[${rowIndex}]" readonly>
+    //                             </div>
+    //                             <div class="col-md-2">
+    //                                 <label for="qty_unpack-${rowIndex}" class="form-label"><b>Unpack</b></label>
+    //                                 <input type="number" min="1" class="form-control" id="qty_unpack-${rowIndex}" name="qty_unpack[${rowIndex}]">
+    //                             </div>
+    //                             <div class="col-md-2">
+    //                                 <button class="btn btn-primary" type="submit" onclick="SubmitMaterialReq()" style="margin-top: 2rem;">
+    //                                     <i class="bx bx-check-circle"></i>
+    //                                 </button>
+    //                             </div>
+    //                         </div>
+    //                     `;
                         
-                        $('#dynamic-rows-container').append(rowHtml);
+    //                     $('#dynamic-rows-container').append(rowHtml);
 
-                        // Initialize select2 for the newly added select elements
-                        $(`#sloc-${rowIndex}`).select2({
-                            dropdownParent: $('#addMaterialRequest')
-                        });
-                        $(`#box_no-${rowIndex}`).select2({
-                            dropdownParent: $('#addMaterialRequest')
-                        });
+    //                     // Initialize select2 for the newly added select elements
+    //                     $(`#sloc-${rowIndex}`).select2({
+    //                         dropdownParent: $('#addMaterialRequest')
+    //                     });
+    //                     $(`#box_no-${rowIndex}`).select2({
+    //                         dropdownParent: $('#addMaterialRequest')
+    //                     });
 
-                        // ADD OPTION SLOC
-                        $(`#sloc-${rowIndex}`).empty().append('<option selected>Choose SLoc</option>');
-                        for (var i = 0; i < res.length; i++) {
-                            var sloc = res[i].sloc;
-                            $(`#sloc-${rowIndex}`).append('<option value="' + sloc + '">' + sloc + '</option>');
-                        }
+    //                     // ADD OPTION SLOC
+    //                     $(`#sloc-${rowIndex}`).empty().append('<option selected>Choose SLoc</option>');
+    //                     for (var i = 0; i < res.length; i++) {
+    //                         var sloc = res[i].sloc;
+    //                         $(`#sloc-${rowIndex}`).append('<option value="' + sloc + '">' + sloc + '</option>');
+    //                     }
 
-                        // ADD OPTION BOX NO
-                        $(`#box_no-${rowIndex}`).empty().append('<option selected>Choose Box No</option>');
-                        for (var i = 0; i < res.length; i++) {
-                            var box = res[i].no_box;
-                            $(`#box_no-${rowIndex}`).append('<option value="' + box + '" data-total_qty="' + res[i].total_qty + '">' + box + '</option>');
-                        }
+    //                     // ADD OPTION BOX NO
+    //                     $(`#box_no-${rowIndex}`).empty().append('<option selected>Choose Box No</option>');
+    //                     for (var i = 0; i < res.length; i++) {
+    //                         var box = res[i].no_box;
+    //                         $(`#box_no-${rowIndex}`).append('<option value="' + box + '" data-total_qty="' + res[i].total_qty + '">' + box + '</option>');
+    //                     }
 
-                        // Update total_qty based on selected SLoc
-                        $(`#sloc-${rowIndex}`).on('change', function () {
-                            var selectedOption = $(this).find('option:selected');
-                            var selectedTotalQty = selectedOption.data('total_qty');
-                            $(`#total_qty-${rowIndex}`).val(selectedTotalQty);
-                        });
+    //                     // Update total_qty based on selected SLoc
+    //                     $(`#sloc-${rowIndex}`).on('change', function () {
+    //                         var selectedOption = $(this).find('option:selected');
+    //                         var selectedTotalQty = selectedOption.data('total_qty');
+    //                         $(`#total_qty-${rowIndex}`).val(selectedTotalQty);
+    //                     });
 
-                        // Update total_qty based on selected Box No
-                        $(`#box_no-${rowIndex}`).on('change', function () {
-                            var selectedOption = $(this).find('option:selected');
-                            var selectedTotalQty = selectedOption.data('total_qty');
-                            $(`#total_qty-${rowIndex}`).val(selectedTotalQty);
-                        });
+    //                     // Update total_qty based on selected Box No
+    //                     $(`#box_no-${rowIndex}`).on('change', function () {
+    //                         var selectedOption = $(this).find('option:selected');
+    //                         var selectedTotalQty = selectedOption.data('total_qty');
+    //                         $(`#total_qty-${rowIndex}`).val(selectedTotalQty);
+    //                     });
 
-                        // Set initial total_qty based on the first SLoc in the list if needed
-                        var initialTotalQty = $(`#sloc-${rowIndex}`).find('option:selected').data('total_qty');
-                        $(`#total_qty-${rowIndex}`).val(initialTotalQty);
-                    });
+    //                     // Set initial total_qty based on the first SLoc in the list if needed
+    //                     var initialTotalQty = $(`#sloc-${rowIndex}`).find('option:selected').data('total_qty');
+    //                     $(`#total_qty-${rowIndex}`).val(initialTotalQty);
+    //                 });
 
-                    // Ensure modal hidden event is handled properly
-                    $('#addMaterialRequest').off('hidden.bs.modal').on('hidden.bs.modal', function () {
-                        $('#dynamic-rows-container').empty(); // Clear all dynamic rows when the modal is hidden
-                    });
-                } else {
-                    $('#stock_on_hand').val(0);
-                }
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                console.error('AJAX Error:', thrownError); // Log any errors
-            }
-        });
-    });
+    //                 // Ensure modal hidden event is handled properly
+    //                 $('#addMaterialRequest').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+    //                     $('#dynamic-rows-container').empty(); // Clear all dynamic rows when the modal is hidden
+    //                 });
+    //             } else {
+    //                 $('#stock_on_hand').val(0);
+    //             }
+    //         },
+    //         error: function(xhr, ajaxOptions, thrownError) {
+    //             console.error('AJAX Error:', thrownError); // Log any errors
+    //         }
+    //     });
+    // });
     
-    $(document).ready(function (){
+    // $(document).ready(function (){
+    //     $('#product_id').select2();
+    // });
+
+    // SUBMIT DATA MATERIAL REQUEST
+    // function SubmitMaterialReq() {
+    //     $("form").on("submit", function (event) {
+    //         event.preventDefault();
+            
+    //         // Initialize an empty array to store the data for each row
+    //         let materialData = [];
+            
+    //         // Iterate over each row
+    //         $(".row").each(function() {
+    //             // Get the row index
+    //             let rowIndex = $(this).attr('id').split('-')[1];
+                
+    //             // Collect the data from the current row
+    //             let sloc = $(`#sloc-${rowIndex}`).val();
+    //             let box_no = $(`#box_no-${rowIndex}`).val();
+    //             let qty_unpack = $(`#qty_unpack-${rowIndex}`).val();
+                
+    //             // Push the collected data into the array
+    //             materialData.push({
+    //                 sloc: sloc,
+    //                 box_no: box_no,
+    //                 qty_unpack: qty_unpack
+    //             });
+    //         });
+
+    //         // Send the collected data via AJAX
+    //         $.ajax({
+    //             url: '<?=base_url('production/AddMaterialRequest');?>',
+    //             type: 'POST',
+    //             data: {
+    //                 materialData: materialData
+    //             },
+    //             success: function (result) {
+    //                 console.log(result);
+    //             },
+    //             error: function(xhr, ajaxOptions, thrownError) {
+    //                 console.log(thrownError);
+    //             }
+    //         });
+    //     });
+    // }
+
+    
+    // $(document).ready(function () {
+    //     $('#product_id').select2();
+    //     let rowIndex = 0;
+    //     let quantitiesTracker = {};
+
+    //     // Function to handle form submission
+    //     function SubmitMaterialReq() {
+    //         $("form").on("submit", function (event) {
+    //             event.preventDefault();
+
+    //             // Initialize an empty array to store the data for each row
+    //             let materialData = [];
+    //             let totalQty = 0; // Variable to accumulate qty_unpack values
+
+    //             // Iterate over each row
+    //             $(".row").each(function () {
+    //                 // Get the row index
+    //                 let id = $(this).attr('id');
+    //                 if (id) {
+    //                     let rowIndex = id.split('-')[1];
+
+    //                     // Collect the data from the current row
+    //                     let sloc = $(`#sloc-${rowIndex}`).val();
+    //                     let box_no = $(`#box_no-${rowIndex}`).val();
+    //                     let qty_unpack = parseFloat($(`#qty_unpack-${rowIndex}`).val());
+
+    //                     // Push the collected data into the array
+    //                     materialData.push({
+    //                         sloc: sloc,
+    //                         box_no: box_no,
+    //                         // qty_unpack: qty_unpack
+    //                     });
+
+    //                     // Accumulate qty_unpack, ensuring it's a valid number
+    //                     if (!isNaN(qty_unpack)) {
+    //                         totalQty += qty_unpack;
+
+    //                         // Update the quantities tracker
+    //                         let key = `${sloc}-${box_no}`;
+    //                         if (quantitiesTracker[key]) {
+    //                             quantitiesTracker[key] -= qty_unpack;
+    //                         } else {
+    //                             quantitiesTracker[key] = parseFloat($(`#total_qty-${rowIndex}`).val()) - qty_unpack;
+    //                         }
+    //                     }
+    //                 }
+    //             });
+
+    //             // Send the collected data via AJAX
+    //             $.ajax({
+    //                 url: '<?=base_url('production/AddMaterialRequest');?>',
+    //                 type: 'POST',
+    //                 data: {
+    //                     materialData: materialData
+    //                 },
+    //                 success: function (result) {
+    //                     // Update total_qty_get with accumulated qty_unpack
+    //                     $('#total_qty_get').val(totalQty.toFixed(2));
+
+    //                     // Make inputs and buttons readonly and disabled
+    //                     $(".row").each(function () {
+    //                         let id = $(this).attr('id');
+    //                         if (id) {
+    //                             let rowIndex = id.split('-')[1];
+    //                             $(`#sloc-${rowIndex}`).prop('disabled', true);
+    //                             $(`#box_no-${rowIndex}`).prop('disabled', true);
+    //                             $(`#qty_unpack-${rowIndex}`).prop('readonly', true);
+    //                             $(`#submit-btn-${rowIndex}`).prop('disabled', true);
+    //                         }
+    //                     });
+
+    //                     // Decrease the stock_on_hand based on the total unpacked quantity
+    //                     let currentStock = parseFloat($('#stock_on_hand').val());
+    //                     if (!isNaN(currentStock)) {
+    //                         let newStock = currentStock - totalQty;
+    //                         $('#stock_on_hand').val(newStock.toFixed(2));
+    //                     }
+
+    //                     console.log(result);
+    //                 },
+    //                 error: function (xhr, ajaxOptions, thrownError) {
+    //                     console.log(thrownError);
+    //                 }
+    //             });
+    //         });
+    //     }
+
+    //     // Function to add a new row
+    //     function addNewRow(res) {
+    //         rowIndex++;
+    //         const rowHtml = `
+    //             <div class="row" id="row-${rowIndex}">
+    //                 <div class="col-md-3">
+    //                     <label for="sloc-${rowIndex}" class="form-label"><b>SLoc</b></label>
+    //                     <select id="sloc-${rowIndex}" name="sloc[${rowIndex}]" class="form-select">
+    //                         <option value="" selected>Choose SLoc</option>
+    //                     </select>
+    //                 </div>
+    //                 <div class="col-md-3">
+    //                     <label for="box_no-${rowIndex}" class="form-label"><b>Box</b></label>
+    //                     <select id="box_no-${rowIndex}" name="box_no[${rowIndex}]" class="form-select">
+    //                         <option value="" selected>Choose Box</option>
+    //                     </select>
+    //                 </div>
+    //                 <div class="col-md-2">
+    //                     <label for="total_qty-${rowIndex}" class="form-label"><b>Qty on hand</b></label>
+    //                     <input type="text" class="form-control" id="total_qty-${rowIndex}" name="total_qty[${rowIndex}]" readonly>
+    //                 </div>
+    //                 <div class="col-md-2">
+    //                     <label for="qty_unpack-${rowIndex}" class="form-label"><b>Unpack</b></label>
+    //                     <input type="number" min="0.1" step="0.1" class="form-control" id="qty_unpack-${rowIndex}" name="qty_unpack[${rowIndex}]">
+    //                 </div>
+    //                 <div class="col-md-2">
+    //                     <button class="btn btn-primary submit-row-btn" id="submit-btn-${rowIndex}" type="button" style="margin-top: 2rem;">
+    //                         <i class="bx bx-check-circle"></i>
+    //                     </button>
+    //                 </div>
+    //             </div>
+    //         `;
+
+    //         $('#dynamic-rows-container').append(rowHtml);
+
+    //         // Initialize select2 for the newly added select elements
+    //         $(`#sloc-${rowIndex}`).select2({
+    //             dropdownParent: $('#addMaterialRequest')
+    //         });
+    //         $(`#box_no-${rowIndex}`).select2({
+    //             dropdownParent: $('#addMaterialRequest')
+    //         });
+
+    //         // ADD OPTION SLOC
+    //         $(`#sloc-${rowIndex}`).empty().append('<option value="" selected>Choose SLoc</option>');
+    //         for (let i = 0; i < res.length; i++) {
+    //             let sloc = res[i].sloc;
+    //             $(`#sloc-${rowIndex}`).append('<option value="' + sloc + '">' + sloc + '</option>');
+    //         }
+
+    //         // ADD OPTION BOX NO
+    //         $(`#box_no-${rowIndex}`).empty().append('<option value="" selected>Choose Box No</option>');
+    //         for (let i = 0; i < res.length; i++) {
+    //             let box = res[i].no_box;
+    //             $(`#box_no-${rowIndex}`).append('<option value="' + box + '" data-total_qty="' + (res[i].total_qty_real !== "0" ? res[i].total_qty_real : res[i].total_qty) + '">' + box + '</option>');
+    //         }
+
+    //         // Update total_qty based on selected SLoc
+    //         $(`#sloc-${rowIndex}`).on('change', function () {
+    //             let selectedOption = $(this).find('option:selected');
+    //             let selectedTotalQty = selectedOption.data('total_qty');
+    //             let key = `${$(this).val()}-${$(`#box_no-${rowIndex}`).val()}`;
+    //             if (quantitiesTracker[key] !== undefined) {
+    //                 selectedTotalQty = quantitiesTracker[key];
+    //             }
+    //             $(`#total_qty-${rowIndex}`).val(selectedTotalQty.toFixed(2));
+    //         });
+
+    //         // Update total_qty based on selected Box No
+    //         $(`#box_no-${rowIndex}`).on('change', function () {
+    //             let selectedOption = $(this).find('option:selected');
+    //             let selectedTotalQty = selectedOption.data('total_qty');
+    //             let key = `${$(`#sloc-${rowIndex}`).val()}-${$(this).val()}`;
+    //             if (quantitiesTracker[key] !== undefined) {
+    //                 selectedTotalQty = quantitiesTracker[key];
+    //             }
+    //             $(`#total_qty-${rowIndex}`).val(selectedTotalQty.toFixed(2));
+    //         });
+
+    //         // Set initial total_qty based on the first SLoc in the list if needed
+    //         let initialTotalQty = $(`#sloc-${rowIndex}`).find('option:selected').data('total_qty');
+    //         let initialKey = `${$(`#sloc-${rowIndex}`).val()}-${$(`#box_no-${rowIndex}`).val()}`;
+    //         if (quantitiesTracker[initialKey] !== undefined) {
+    //             initialTotalQty = quantitiesTracker[initialKey];
+    //         }
+    //         $(`#total_qty-${rowIndex}`).val(initialTotalQty.toFixed(2));
+    //     }
+
+    //     // Handle click event for adding new rows
+    //     $(document).on('click', '.edit-material-request', function () {
+    //         var $row = $(this).closest('tr');
+    //         var materialId = $row.data('id');
+    //         var materialDesc = $row.data('desc');
+    //         var materialNeed = $row.data('qty');
+    //         var uom = $row.data('uom');
+
+    //         $('#material_id').val(materialId);
+    //         $('#material_desc').val(materialDesc);
+    //         $('#material_need').val(materialNeed);
+    //         $('#uom').val(uom);
+
+    //         $.ajax({
+    //             url: '<?= base_url('production/getSlocStorage'); ?>',
+    //             type: 'post',
+    //             dataType: 'json',
+    //             data: {
+    //                 materialId: materialId
+    //             },
+    //             success: function (res) {
+    //                 if (res) {
+    //                     console.log(res);
+    //                     // ADD INPUT STOCK ON HAND
+    //                     var stock_on_hand = 0;
+    //                     for (let i = 0; i < res.length; i++) {
+    //                         stock_on_hand += parseFloat(res[i].total_qty_real !== "0" ? res[i].total_qty_real : res[i].total_qty);
+    //                     }
+    //                     $('#stock_on_hand').val(stock_on_hand.toFixed(2));
+
+    //                     // Ensure event handler for adding new rows is only added once
+    //                     $('#plus-row').off('click').on('click', function () {
+    //                         addNewRow(res);
+    //                     });
+
+    //                     // Ensure modal hidden event is handled properly
+    //                     $('#addMaterialRequest').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+    //                         $('#dynamic-rows-container').empty(); // Clear all dynamic rows when the modal is hidden
+    //                         rowIndex = 0; // Reset rowIndex when the modal is hidden
+    //                     });
+    //                 } else {
+    //                     $('#stock_on_hand').val(0);
+    //                 }
+    //             },
+    //             error: function (xhr, ajaxOptions, thrownError) {
+    //                 console.error('AJAX Error:', thrownError); // Log any errors
+    //             }
+    //         });
+    //     });
+
+    //     // Handle click event for row submit buttons
+    //     $(document).on('click', '.submit-row-btn', function () {
+    //         let id = $(this).closest('.row').attr('id');
+    //         if (id) {
+    //             let rowIndex = id.split('-')[1];
+    //             let sloc = $(`#sloc-${rowIndex}`).val();
+    //             let box_no = $(`#box_no-${rowIndex}`).val();
+    //             let qty_unpack = parseFloat($(`#qty_unpack-${rowIndex}`).val());
+    //             let total_qty = parseFloat($(`#total_qty-${rowIndex}`).val());
+
+    //             // Validate that sloc and box_no are selected
+    //             if (!sloc || !box_no) {
+    //                 $('#datas-modals').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 100%"><i class="bi bi-x-circle me-1"></i>Select <strong>SLoc</strong> and <strong>Box</strong> before submitting<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+
+    //                 setTimeout(function() {
+    //                     $('#datas-modals .alert').alert('close');
+    //                 }, 3000);
+
+    //                 return;
+    //             }
+
+    //             // Validate that qty_unpack does not exceed total_qty
+    //             if (qty_unpack > total_qty) {
+    //                 $('#datas-modals').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 100%"><i class="bi bi-x-circle me-1"></i>Unpacked quantity cannot exceed quantity on hand<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+
+    //                 setTimeout(function() {
+    //                     $('#datas-modals .alert').alert('close');
+    //                 }, 3000);
+
+    //                 return;
+    //             }
+
+    //             // Trigger form submission
+    //             $("form").trigger('submit');
+    //         }
+    //     });
+
+    //     // Initialize form submission handler
+    //     SubmitMaterialReq();
+    // });
+
+    // $(document).ready(function () {
+    //     $('#product_id').select2();
+    //     let rowIndex = 0;
+    //     let quantitiesTracker = {};
+    //     let isFloatUom = false;
+
+    //     // Function to handle form submission
+    //     function SubmitMaterialReq() {
+    //         $("form").on("submit", function (event) {
+    //             event.preventDefault();
+
+    //             // Initialize an empty array to store the data for each row
+    //             let materialData = [];
+    //             let totalQty = 0; // Variable to accumulate qty_unpack values
+
+    //             // Iterate over each row
+    //             $(".row").each(function () {
+    //                 // Get the row index
+    //                 let id = $(this).attr('id');
+    //                 if (id) {
+    //                     let rowIndex = id.split('-')[1];
+
+    //                     // Collect the data from the current row
+    //                     let sloc = $(`#sloc-${rowIndex}`).val();
+    //                     let box_no = $(`#box_no-${rowIndex}`).val();
+    //                     let qty_unpack = isFloatUom ? parseFloat($(`#qty_unpack-${rowIndex}`).val()) : parseInt($(`#qty_unpack-${rowIndex}`).val(), 10);
+
+    //                     // Push the collected data into the array
+    //                     materialData.push({
+    //                         sloc: sloc,
+    //                         box_no: box_no,
+    //                         // qty_unpack: qty_unpack
+    //                     });
+
+    //                     // Accumulate qty_unpack, ensuring it's a valid number
+    //                     if (!isNaN(qty_unpack)) {
+    //                         totalQty += qty_unpack;
+
+    //                         // Update the quantities tracker
+    //                         let key = `${sloc}-${box_no}`;
+    //                         if (quantitiesTracker[key]) {
+    //                             quantitiesTracker[key] -= qty_unpack;
+    //                         } else {
+    //                             quantitiesTracker[key] = isFloatUom ? parseFloat($(`#total_qty-${rowIndex}`).val()) - qty_unpack : parseInt($(`#total_qty-${rowIndex}`).val(), 10) - qty_unpack;
+    //                         }
+    //                     }
+    //                 }
+    //             });
+
+    //             // Send the collected data via AJAX
+    //             $.ajax({
+    //                 url: '<?=base_url('production/AddMaterialRequest');?>',
+    //                 type: 'POST',
+    //                 data: {
+    //                     materialData: materialData
+    //                 },
+    //                 success: function (result) {
+    //                     // Update total_qty_get with accumulated qty_unpack
+    //                     $('#total_qty_get').val(totalQty.toFixed(isFloatUom ? 2 : 0));
+
+    //                     // Make inputs and buttons readonly and disabled
+    //                     $(".row").each(function () {
+    //                         let id = $(this).attr('id');
+    //                         if (id) {
+    //                             let rowIndex = id.split('-')[1];
+    //                             $(`#sloc-${rowIndex}`).prop('disabled', true);
+    //                             $(`#box_no-${rowIndex}`).prop('disabled', true);
+    //                             $(`#qty_unpack-${rowIndex}`).prop('readonly', true);
+    //                             $(`#submit-btn-${rowIndex}`).prop('disabled', true);
+    //                         }
+    //                     });
+
+    //                     // Decrease the stock_on_hand based on the total unpacked quantity
+    //                     let currentStock = parseFloat($('#stock_on_hand').val());
+    //                     if (!isNaN(currentStock)) {
+    //                         let newStock = currentStock - totalQty;
+    //                         $('#stock_on_hand').val(newStock.toFixed(isFloatUom ? 2 : 0));
+    //                     }
+
+    //                     console.log(result);
+    //                 },
+    //                 error: function (xhr, ajaxOptions, thrownError) {
+    //                     console.log(thrownError);
+    //                 }
+    //             });
+    //         });
+    //     }
+
+    //     // Function to add a new row
+    //     function addNewRow(res) {
+    //         rowIndex++;
+    //         const rowHtml = `
+    //             <div class="row" id="row-${rowIndex}">
+    //                 <div class="col-md-3">
+    //                     <label for="sloc-${rowIndex}" class="form-label"><b>SLoc</b></label>
+    //                     <select id="sloc-${rowIndex}" name="sloc[${rowIndex}]" class="form-select">
+    //                         <option value="" selected>Choose SLoc</option>
+    //                     </select>
+    //                 </div>
+    //                 <div class="col-md-3">
+    //                     <label for="box_no-${rowIndex}" class="form-label"><b>Box</b></label>
+    //                     <select id="box_no-${rowIndex}" name="box_no[${rowIndex}]" class="form-select">
+    //                         <option value="" selected>Choose Box</option>
+    //                     </select>
+    //                 </div>
+    //                 <div class="col-md-2">
+    //                     <label for="total_qty-${rowIndex}" class="form-label"><b>Qty on hand</b></label>
+    //                     <input type="text" class="form-control" id="total_qty-${rowIndex}" name="total_qty[${rowIndex}]" readonly>
+    //                 </div>
+    //                 <div class="col-md-2">
+    //                     <label for="qty_unpack-${rowIndex}" class="form-label"><b>Unpack</b></label>
+    //                     <input type="number" min="${isFloatUom ? '0.1' : '1'}" step="${isFloatUom ? '0.1' : '1'}" class="form-control" id="qty_unpack-${rowIndex}" name="qty_unpack[${rowIndex}]">
+    //                 </div>
+    //                 <div class="col-md-2">
+    //                     <button class="btn btn-primary submit-row-btn" id="submit-btn-${rowIndex}" type="button" style="margin-top: 2rem;">
+    //                         <i class="bx bx-check-circle"></i>
+    //                     </button>
+    //                 </div>
+    //             </div>
+    //         `;
+
+    //         $('#dynamic-rows-container').append(rowHtml);
+
+    //         // Initialize select2 for the newly added select elements
+    //         $(`#sloc-${rowIndex}`).select2({
+    //             dropdownParent: $('#addMaterialRequest')
+    //         });
+    //         $(`#box_no-${rowIndex}`).select2({
+    //             dropdownParent: $('#addMaterialRequest')
+    //         });
+
+    //         // ADD OPTION SLOC
+    //         $(`#sloc-${rowIndex}`).empty().append('<option value="" selected>Choose SLoc</option>');
+    //         for (let i = 0; i < res.length; i++) {
+    //             let sloc = res[i].sloc;
+    //             $(`#sloc-${rowIndex}`).append('<option value="' + sloc + '">' + sloc + '</option>');
+    //         }
+
+    //         // ADD OPTION BOX NO
+    //         $(`#box_no-${rowIndex}`).empty().append('<option value="" selected>Choose Box No</option>');
+    //         for (let i = 0; i < res.length; i++) {
+    //             let box = res[i].no_box;
+    //             $(`#box_no-${rowIndex}`).append('<option value="' + box + '" data-total_qty="' + (res[i].total_qty_real !== "0" ? res[i].total_qty_real : res[i].total_qty) + '">' + box + '</option>');
+    //         }
+
+    //         // Update total_qty based on selected SLoc
+    //         $(`#sloc-${rowIndex}`).on('change', function () {
+    //             let selectedOption = $(this).find('option:selected');
+    //             let selectedTotalQty = selectedOption.data('total_qty');
+    //             let key = `${$(this).val()}-${$(`#box_no-${rowIndex}`).val()}`;
+    //             if (quantitiesTracker[key] !== undefined) {
+    //                 selectedTotalQty = quantitiesTracker[key];
+    //             }
+    //             $(`#total_qty-${rowIndex}`).val(selectedTotalQty.toFixed(isFloatUom ? 2 : 0));
+    //         });
+
+    //         // Update total_qty based on selected Box No
+    //         $(`#box_no-${rowIndex}`).on('change', function () {
+    //             let selectedOption = $(this).find('option:selected');
+    //             let selectedTotalQty = selectedOption.data('total_qty');
+    //             let key = `${$(`#sloc-${rowIndex}`).val()}-${$(this).val()}`;
+    //             if (quantitiesTracker[key] !== undefined) {
+    //                 selectedTotalQty = quantitiesTracker[key];
+    //             }
+    //             $(`#total_qty-${rowIndex}`).val(selectedTotalQty.toFixed(isFloatUom ? 2 : 0));
+    //         });
+
+    //         // Set initial total_qty based on the first SLoc in the list if needed
+    //         let initialTotalQty = $(`#sloc-${rowIndex}`).find('option:selected').data('total_qty');
+    //         let initialKey = `${$(`#sloc-${rowIndex}`).val()}-${$(`#box_no-${rowIndex}`).val()}`;
+    //         if (quantitiesTracker[initialKey] !== undefined) {
+    //             initialTotalQty = quantitiesTracker[initialKey];
+    //         }
+    //         $(`#total_qty-${rowIndex}`).val(initialTotalQty.toFixed(isFloatUom ? 2 : 0));
+    //     }
+
+    //     // Handle click event for adding new rows
+    //     $(document).on('click', '.edit-material-request', function () {
+    //         var $row = $(this).closest('tr');
+    //         var materialId = $row.data('id');
+    //         var materialDesc = $row.data('desc');
+    //         var materialNeed = $row.data('qty');
+    //         var uom = $row.data('uom');
+
+    //         $('#material_id').val(materialId);
+    //         $('#material_desc').val(materialDesc);
+    //         $('#material_need').val(materialNeed);
+    //         $('#uom').val(uom);
+
+    //         // Check if Uom is not "PC"
+    //         isFloatUom = (uom !== "PC");
+
+    //         $.ajax({
+    //             url: '<?= base_url('production/getSlocStorage'); ?>',
+    //             type: 'post',
+    //             dataType: 'json',
+    //             data: {
+    //                 materialId: materialId
+    //             },
+    //             success: function (res) {
+    //                 if (res) {
+    //                     console.log(res);
+    //                     // ADD INPUT STOCK ON HAND
+    //                     var stock_on_hand = 0;
+    //                     for (let i = 0; i < res.length; i++) {
+    //                         stock_on_hand += parseFloat(res[i].total_qty_real !== "0" ? res[i].total_qty_real : res[i].total_qty);
+    //                     }
+    //                     $('#stock_on_hand').val(stock_on_hand.toFixed(isFloatUom ? 2 : 0));
+
+    //                     // Ensure event handler for adding new rows is only added once
+    //                     $('#plus-row').off('click').on('click', function () {
+    //                         addNewRow(res);
+    //                     });
+
+    //                     // Ensure modal hidden event is handled properly
+    //                     $('#addMaterialRequest').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+    //                         $('#dynamic-rows-container').empty(); // Clear all dynamic rows when the modal is hidden
+    //                         rowIndex = 0; // Reset rowIndex when the modal is hidden
+    //                     });
+    //                 } else {
+    //                     $('#stock_on_hand').val(0);
+    //                 }
+    //             },
+    //             error: function (xhr, ajaxOptions, thrownError) {
+    //                 console.error('AJAX Error:', thrownError); // Log any errors
+    //             }
+    //         });
+    //     });
+
+    //     // Handle click event for row submit buttons
+    //     $(document).on('click', '.submit-row-btn', function () {
+    //         let id = $(this).closest('.row').attr('id');
+    //         if (id) {
+    //             let rowIndex = id.split('-')[1];
+    //             let sloc = $(`#sloc-${rowIndex}`).val();
+    //             let box_no = $(`#box_no-${rowIndex}`).val();
+    //             let qty_unpack = isFloatUom ? parseFloat($(`#qty_unpack-${rowIndex}`).val()) : parseInt($(`#qty_unpack-${rowIndex}`).val(), 10);
+    //             let total_qty = isFloatUom ? parseFloat($(`#total_qty-${rowIndex}`).val()) : parseInt($(`#total_qty-${rowIndex}`).val(), 10);
+
+    //             // Validate that sloc and box_no are selected
+    //             if (!sloc || !box_no) {
+    //                 $('#datas-modals').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 100%"><i class="bi bi-x-circle me-1"></i>Select <strong>SLoc</strong> and <strong>Box</strong> before submitting<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+
+    //                 setTimeout(function() {
+    //                     $('#datas-modals .alert').alert('close');
+    //                 }, 3000);
+
+    //                 return;
+    //             }
+
+    //             // Validate that qty_unpack does not exceed total_qty
+    //             if (qty_unpack > total_qty) {
+    //                 $('#datas-modals').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 100%"><i class="bi bi-x-circle me-1"></i>Unpacked quantity cannot exceed quantity on hand<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+
+    //                 setTimeout(function() {
+    //                     $('#datas-modals .alert').alert('close');
+    //                 }, 3000);
+
+    //                 return;
+    //             }
+
+    //             // Trigger form submission
+    //             $("form").trigger('submit');
+    //         }
+    //     });
+
+    //     // Initialize form submission handler
+    //     SubmitMaterialReq();
+    // });
+
+    // $(document).ready(function () {
+    //     $('#product_id').select2();
+    //     let rowIndex = 0;
+    //     let quantitiesTracker = {};
+    //     let isFloatUom = false;
+
+    //     // Helper function to format numbers without trailing zeros
+    //     function formatNumber(num) {
+    //         return num % 1 === 0 ? num.toString() : num.toFixed(2).replace(/\.?0+$/, '');
+    //     }
+
+    //     // Function to handle form submission
+    //     function SubmitMaterialReq() {
+    //         $("form").on("submit", function (event) {
+    //             event.preventDefault();
+
+    //             // Initialize an empty array to store the data for each row
+    //             let materialData = [];
+    //             let totalQty = 0; // Variable to accumulate qty_unpack values
+
+    //             // Iterate over each row
+    //             $(".row").each(function () {
+    //                 // Get the row index
+    //                 let id = $(this).attr('id');
+    //                 if (id) {
+    //                     let rowIndex = id.split('-')[1];
+
+    //                     // Collect the data from the current row
+    //                     let sloc = $(`#sloc-${rowIndex}`).val();
+    //                     let box_no = $(`#box_no-${rowIndex}`).val();
+    //                     let qty_unpack = isFloatUom ? parseFloat($(`#qty_unpack-${rowIndex}`).val()) : parseInt($(`#qty_unpack-${rowIndex}`).val(), 10);
+
+    //                     // Push the collected data into the array
+    //                     materialData.push({
+    //                         sloc: sloc,
+    //                         box_no: box_no,
+    //                         // qty_unpack: qty_unpack
+    //                     });
+
+    //                     // Accumulate qty_unpack, ensuring it's a valid number
+    //                     if (!isNaN(qty_unpack)) {
+    //                         totalQty += qty_unpack;
+
+    //                         // Update the quantities tracker
+    //                         let key = `${sloc}-${box_no}`;
+    //                         if (quantitiesTracker[key]) {
+    //                             quantitiesTracker[key] -= qty_unpack;
+    //                         } else {
+    //                             quantitiesTracker[key] = isFloatUom ? parseFloat($(`#total_qty-${rowIndex}`).val()) - qty_unpack : parseInt($(`#total_qty-${rowIndex}`).val(), 10) - qty_unpack;
+    //                         }
+    //                     }
+    //                 }
+    //             });
+
+    //             // Send the collected data via AJAX
+    //             $.ajax({
+    //                 url: '<?=base_url('production/AddMaterialRequest');?>',
+    //                 type: 'POST',
+    //                 data: {
+    //                     materialData: materialData
+    //                 },
+    //                 success: function (result) {
+    //                     // Update total_qty_get with accumulated qty_unpack
+    //                     $('#total_qty_get').val(formatNumber(totalQty));
+
+    //                     // Make inputs and buttons readonly and disabled
+    //                     $(".row").each(function () {
+    //                         let id = $(this).attr('id');
+    //                         if (id) {
+    //                             let rowIndex = id.split('-')[1];
+    //                             $(`#sloc-${rowIndex}`).prop('disabled', true);
+    //                             $(`#box_no-${rowIndex}`).prop('disabled', true);
+    //                             $(`#qty_unpack-${rowIndex}`).prop('readonly', true);
+    //                             $(`#submit-btn-${rowIndex}`).prop('disabled', true);
+    //                         }
+    //                     });
+
+    //                     // Decrease the stock_on_hand based on the total unpacked quantity
+    //                     let currentStock = parseFloat($('#stock_on_hand').val());
+    //                     if (!isNaN(currentStock)) {
+    //                         let newStock = currentStock - totalQty;
+    //                         $('#stock_on_hand').val(formatNumber(newStock));
+    //                     }
+
+    //                     console.log(result);
+    //                 },
+    //                 error: function (xhr, ajaxOptions, thrownError) {
+    //                     console.log(thrownError);
+    //                 }
+    //             });
+    //         });
+    //     }
+
+    //     // Function to add a new row
+    //     function addNewRow(res) {
+    //         rowIndex++;
+    //         const rowHtml = `
+    //             <div class="row" id="row-${rowIndex}">
+    //                 <div class="col-md-3">
+    //                     <label for="sloc-${rowIndex}" class="form-label"><b>SLoc</b></label>
+    //                     <select id="sloc-${rowIndex}" name="sloc[${rowIndex}]" class="form-select">
+    //                         <option value="" selected>Choose SLoc</option>
+    //                     </select>
+    //                 </div>
+    //                 <div class="col-md-3">
+    //                     <label for="box_no-${rowIndex}" class="form-label"><b>Box</b></label>
+    //                     <select id="box_no-${rowIndex}" name="box_no[${rowIndex}]" class="form-select">
+    //                         <option value="" selected>Choose Box</option>
+    //                     </select>
+    //                 </div>
+    //                 <div class="col-md-2">
+    //                     <label for="total_qty-${rowIndex}" class="form-label"><b>Qty on hand</b></label>
+    //                     <input type="text" class="form-control" id="total_qty-${rowIndex}" name="total_qty[${rowIndex}]" readonly>
+    //                 </div>
+    //                 <div class="col-md-2">
+    //                     <label for="qty_unpack-${rowIndex}" class="form-label"><b>Unpack</b></label>
+    //                     <input type="number" min="${isFloatUom ? '0.1' : '1'}" step="${isFloatUom ? '0.1' : '1'}" class="form-control" id="qty_unpack-${rowIndex}" name="qty_unpack[${rowIndex}]">
+    //                 </div>
+    //                 <div class="col-md-2">
+    //                     <button class="btn btn-primary submit-row-btn" id="submit-btn-${rowIndex}" type="button" style="margin-top: 2rem;">
+    //                         <i class="bx bx-check-circle"></i>
+    //                     </button>
+    //                 </div>
+    //             </div>
+    //         `;
+
+    //         $('#dynamic-rows-container').append(rowHtml);
+
+    //         // Initialize select2 for the newly added select elements
+    //         $(`#sloc-${rowIndex}`).select2({
+    //             dropdownParent: $('#addMaterialRequest')
+    //         });
+    //         $(`#box_no-${rowIndex}`).select2({
+    //             dropdownParent: $('#addMaterialRequest')
+    //         });
+
+    //         // ADD OPTION SLOC
+    //         $(`#sloc-${rowIndex}`).empty().append('<option value="" selected>Choose SLoc</option>');
+    //         for (let i = 0; i < res.length; i++) {
+    //             let sloc = res[i].sloc;
+    //             $(`#sloc-${rowIndex}`).append('<option value="' + sloc + '">' + sloc + '</option>');
+    //         }
+
+    //         // ADD OPTION BOX NO
+    //         $(`#box_no-${rowIndex}`).empty().append('<option value="" selected>Choose Box No</option>');
+    //         for (let i = 0; i < res.length; i++) {
+    //             let box = res[i].no_box;
+    //             $(`#box_no-${rowIndex}`).append('<option value="' + box + '" data-total_qty="' + (res[i].total_qty_real !== "0" ? res[i].total_qty_real : res[i].total_qty) + '">' + box + '</option>');
+    //         }
+
+    //         // Update total_qty based on selected SLoc
+    //         $(`#sloc-${rowIndex}`).on('change', function () {
+    //             let selectedOption = $(this).find('option:selected');
+    //             let selectedTotalQty = selectedOption.data('total_qty');
+    //             let key = `${$(this).val()}-${$(`#box_no-${rowIndex}`).val()}`;
+    //             if (quantitiesTracker[key] !== undefined) {
+    //                 selectedTotalQty = quantitiesTracker[key];
+    //             }
+    //             $(`#total_qty-${rowIndex}`).val(formatNumber(selectedTotalQty));
+    //         });
+
+    //         // Update total_qty based on selected Box No
+    //         $(`#box_no-${rowIndex}`).on('change', function () {
+    //             let selectedOption = $(this).find('option:selected');
+    //             let selectedTotalQty = selectedOption.data('total_qty');
+    //             let key = `${$(`#sloc-${rowIndex}`).val()}-${$(this).val()}`;
+    //             if (quantitiesTracker[key] !== undefined) {
+    //                 selectedTotalQty = quantitiesTracker[key];
+    //             }
+    //             $(`#total_qty-${rowIndex}`).val(formatNumber(selectedTotalQty));
+    //         });
+
+    //         // Set initial total_qty based on the first SLoc in the list if needed
+    //         let initialTotalQty = $(`#sloc-${rowIndex}`).find('option:selected').data('total_qty');
+    //         let initialKey = `${$(`#sloc-${rowIndex}`).val()}-${$(`#box_no-${rowIndex}`).val()}`;
+    //         if (quantitiesTracker[initialKey] !== undefined) {
+    //             initialTotalQty = quantitiesTracker[initialKey];
+    //         }
+    //         $(`#total_qty-${rowIndex}`).val(formatNumber(initialTotalQty));
+    //     }
+
+    //     // Handle click event for adding new rows
+    //     $(document).on('click', '.edit-material-request', function () {
+    //         var $row = $(this).closest('tr');
+    //         var materialId = $row.data('id');
+    //         var materialDesc = $row.data('desc');
+    //         var materialNeed = $row.data('qty');
+    //         var uom = $row.data('uom');
+
+    //         $('#material_id').val(materialId);
+    //         $('#material_desc').val(materialDesc);
+    //         $('#material_need').val(materialNeed);
+    //         $('#uom').val(uom);
+
+    //         // Check if Uom is not "PC"
+    //         isFloatUom = (uom !== "PC");
+
+    //         $.ajax({
+    //             url: '<?= base_url('production/getSlocStorage'); ?>',
+    //             type: 'post',
+    //             dataType: 'json',
+    //             data: {
+    //                 materialId: materialId
+    //             },
+    //             success: function (res) {
+    //                 if (res) {
+    //                     console.log(res);
+    //                     // ADD INPUT STOCK ON HAND
+    //                     var stock_on_hand = 0;
+    //                     for (let i = 0; i < res.length; i++) {
+    //                         stock_on_hand += parseFloat(res[i].total_qty_real !== "0" ? res[i].total_qty_real : res[i].total_qty);
+    //                     }
+    //                     $('#stock_on_hand').val(formatNumber(stock_on_hand));
+
+    //                     // Ensure event handler for adding new rows is only added once
+    //                     $('#plus-row').off('click').on('click', function () {
+    //                         addNewRow(res);
+    //                     });
+
+    //                     // Ensure modal hidden event is handled properly
+    //                     $('#addMaterialRequest').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+    //                         $('#dynamic-rows-container').empty(); // Clear all dynamic rows when the modal is hidden
+    //                         rowIndex = 0; // Reset rowIndex when the modal is hidden
+    //                     });
+    //                 } else {
+    //                     $('#stock_on_hand').val(0);
+    //                 }
+    //             },
+    //             error: function (xhr, ajaxOptions, thrownError) {
+    //                 console.error('AJAX Error:', thrownError); // Log any errors
+    //             }
+    //         });
+    //     });
+
+    //     // Handle click event for row submit buttons
+    //     $(document).on('click', '.submit-row-btn', function () {
+    //         let id = $(this).closest('.row').attr('id');
+    //         if (id) {
+    //             let rowIndex = id.split('-')[1];
+    //             let sloc = $(`#sloc-${rowIndex}`).val();
+    //             let box_no = $(`#box_no-${rowIndex}`).val();
+    //             let qty_unpack = isFloatUom ? parseFloat($(`#qty_unpack-${rowIndex}`).val()) : parseInt($(`#qty_unpack-${rowIndex}`).val(), 10);
+    //             let total_qty = isFloatUom ? parseFloat($(`#total_qty-${rowIndex}`).val()) : parseInt($(`#total_qty-${rowIndex}`).val(), 10);
+
+    //             // Validate that sloc and box_no are selected
+    //             if (!sloc || !box_no) {
+    //                 $('#datas-modals').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 100%"><i class="bi bi-x-circle me-1"></i>Select <strong>SLoc</strong> and <strong>Box</strong> before submitting<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+
+    //                 setTimeout(function() {
+    //                     $('#datas-modals .alert').alert('close');
+    //                 }, 3000);
+
+    //                 return;
+    //             }
+
+    //             // Validate that qty_unpack does not exceed total_qty
+    //             if (qty_unpack > total_qty) {
+    //                 $('#datas-modals').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 100%"><i class="bi bi-x-circle me-1"></i>Unpacked quantity cannot exceed quantity on hand<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+
+    //                 setTimeout(function() {
+    //                     $('#datas-modals .alert').alert('close');
+    //                 }, 3000);
+
+    //                 return;
+    //             }
+
+    //             // Trigger form submission
+    //             $("form").trigger('submit');
+    //         }
+    //     });
+
+    //     // Initialize form submission handler
+    //     SubmitMaterialReq();
+    // });
+
+    $(document).ready(function () {
         $('#product_id').select2();
+        let rowIndex = 0;
+        let quantitiesTracker = {};
+        let isFloatUom = false;
+
+        // Helper function to format numbers without trailing zeros
+        function formatNumber(num) {
+            if (num === undefined || num === null || isNaN(num)) {
+                return 0;
+            }
+            return num % 1 === 0 ? num.toString() : num.toFixed(2).replace(/\.?0+$/, '');
+        }
+
+        // Function to handle form submission
+        function SubmitMaterialReq() {
+            $("form").on("submit", function (event) {
+                event.preventDefault();
+
+                // Initialize an empty array to store the data for each row
+                let materialData = [];
+                let totalQty = 0; // Variable to accumulate qty_unpack values
+
+                // Iterate over each row
+                $(".rows").each(function () {
+                    // Get the row index
+                    let id = $(this).attr('id');
+                    if (id) {
+                        let rowIndex = id.split('-')[1];
+                        console.log("RowIndex " + rowIndex);
+                        console.log("Id " + id);
+                        
+                        // Collect the data from the current row
+                        let sloc = $(`#sloc-${rowIndex}`).val();
+                        let box_no = $(`#box_no-${rowIndex}`).val();
+                        let qty_unpack = isFloatUom ? parseFloat($(`#qty_unpack-${rowIndex}`).val()) : parseInt($(`#qty_unpack-${rowIndex}`).val(), 10);
+
+                        // Push the collected data into the array
+                        materialData.push({
+                            sloc: sloc,
+                            box_no: box_no,
+                            // qty_unpack: qty_unpack
+                        });
+
+                        // Accumulate qty_unpack, ensuring it's a valid number
+                        if (!isNaN(qty_unpack)) {
+                            totalQty += qty_unpack;
+                            
+                            // Update the quantities tracker
+                            let key = `${sloc}-${box_no}`;
+                            if (quantitiesTracker[key]) {
+                                quantitiesTracker[key] -= qty_unpack;
+                            } else {
+                                quantitiesTracker[key] = isFloatUom ? parseFloat($(`#total_qty-${rowIndex}`).val()) - qty_unpack : parseInt($(`#total_qty-${rowIndex}`).val(), 10) - qty_unpack;
+                            }
+
+                            console.log("TQ " + totalQty);
+                            console.log("QU " + qty_unpack);
+                            let currentStock = parseFloat($('#stock_on_hand').val());
+                            if (!isNaN(currentStock)) {
+                                let newStock = currentStock - parseFloat(qty_unpack);
+                                console.log("parseFloat(qty_unpack)" + parseFloat(qty_unpack));
+                                console.log("Current stock" + currentStock);
+                                console.log("New stock" + newStock);
+                                console.log("Current Stock: " + currentStock + "-" +" Qty unpack: " + qty_unpack);
+                                $('#stock_on_hand').val(newStock);
+                            }
+                        }
+
+                        $('#total_qty_get').val(formatNumber(totalQty));
+
+                    }
+                });
+
+                // Send the collected data via AJAX
+                $.ajax({
+                    url: '<?=base_url('production/AddMaterialRequest');?>',
+                    type: 'POST',
+                    data: {
+                        materialData: materialData
+                    },
+                    success: function (result) {
+                        // Update total_qty_get with accumulated qty_unpack
+                        // $('#total_qty_get').val(formatNumber(totalQty));
+
+                        // Make inputs and buttons readonly and disabled
+                        $(".rows").each(function () {
+                            let id = $(this).attr('id');
+                            if (id) {
+                                let rowIndex = id.split('-')[1];
+                                $(`#sloc-${rowIndex}`).prop('disabled', true);
+                                $(`#box_no-${rowIndex}`).prop('disabled', true);
+                                $(`#qty_unpack-${rowIndex}`).prop('readonly', true);
+                                $(`#submit-btn-${rowIndex}`).prop('disabled', true);
+                            }
+                        });
+
+                        // Decrease the stock_on_hand based on the total unpacked quantity
+                        // let currentStock = parseFloat($('#stock_on_hand').val());
+                        // if (!isNaN(currentStock)) {
+                        //     let newStock = currentStock - totalQty;
+                        //     $('#stock_on_hand').val(formatNumber(newStock));
+                        // }
+
+                        console.log(materialData);
+                    },
+                    error: function (xhr, ajaxOptions, thrownError) {
+                        console.log(thrownError);
+                    }
+                });
+            });
+        }
+
+        // Function to add a new row
+        function addNewRow(res) {
+            rowIndex++;
+            const rowHtml = `
+                <div class="row rows" id="rows-${rowIndex}">
+                    <div class="col-md-3">
+                        <label for="sloc-${rowIndex}" class="form-label"><b>SLoc</b></label>
+                        <select id="sloc-${rowIndex}" name="sloc[${rowIndex}]" class="form-select">
+                        </select>
+                    </div>
+                    <div class="col-md-3">
+                        <label for="box_no-${rowIndex}" class="form-label"><b>Box</b></label>
+                        <select id="box_no-${rowIndex}" name="box_no[${rowIndex}]" class="form-select">
+                        </select>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="total_qty-${rowIndex}" class="form-label"><b>Qty on hand</b></label>
+                        <input type="text" class="form-control" id="total_qty-${rowIndex}" name="total_qty[${rowIndex}]" readonly>
+                    </div>
+                    <div class="col-md-2">
+                        <label for="qty_unpack-${rowIndex}" class="form-label"><b>Unpack</b></label>
+                        <input type="number" min="${isFloatUom ? '0.1' : '1'}" step="${isFloatUom ? '0.1' : '1'}" class="form-control" id="qty_unpack-${rowIndex}" name="qty_unpack[${rowIndex}]">
+                    </div>
+                    <div class="col-md-2">
+                        <button class="btn btn-primary submit-row-btn" id="submit-btn-${rowIndex}" type="button" style="margin-top: 2rem;">
+                            <i class="bx bx-check-circle"></i>
+                        </button>
+                    </div>
+                </div>
+            `;
+
+            $('#dynamic-rows-container').append(rowHtml);
+
+            // Initialize select2 for the newly added select elements
+            $(`#sloc-${rowIndex}`).select2({
+                dropdownParent: $('#addMaterialRequest')
+            });
+            $(`#box_no-${rowIndex}`).select2({
+                dropdownParent: $('#addMaterialRequest')
+            });
+
+            let slocBoxes = {};
+            for (let i = 0; i < res.length; i++) {
+                let sloc = res[i].sloc;
+                let box = res[i].no_box;
+                let totalQty = res[i].total_qty_real !== "0" ? res[i].total_qty_real : res[i].total_qty;
+
+                if (!slocBoxes[sloc]) {
+                    slocBoxes[sloc] = [];
+                }
+                slocBoxes[sloc].push({ box: box, totalQty: totalQty });
+            }
+
+            // Populate SLoc dropdown
+            $(`#sloc-${rowIndex}`).append('<option value="" selected>Choose SLoc</option>');
+            for (let sloc in slocBoxes) {
+                $(`#sloc-${rowIndex}`).append(`<option value="${sloc}">${sloc}</option>`);
+            }
+
+            // Update Box options based on selected SLoc
+            $(`#sloc-${rowIndex}`).on('change', function () {
+                let selectedSLoc = $(this).val();
+                $(`#box_no-${rowIndex}`).empty().append('<option value="" selected>Choose Box</option>');
+
+                if (slocBoxes[selectedSLoc]) {
+                    slocBoxes[selectedSLoc].forEach(item => {
+                        $(`#box_no-${rowIndex}`).append(`<option value="${item.box}" data-total_qty="${item.totalQty}">${item.box}</option>`);
+                    });
+                }
+
+                $(`#total_qty-${rowIndex}`).val(''); // Clear total_qty on SLoc change
+            });
+
+            // Update total_qty based on selected Box
+            $(`#box_no-${rowIndex}`).on('change', function () {
+                let selectedOption = $(this).find('option:selected');
+                let selectedTotalQty = parseFloat(selectedOption.data('total_qty'));
+
+                if (isNaN(selectedTotalQty)) {
+                    selectedTotalQty = 0;
+                }
+
+                let key = `${$(`#sloc-${rowIndex}`).val()}-${$(this).val()}`;
+                if (quantitiesTracker[key] !== undefined) {
+                    selectedTotalQty = quantitiesTracker[key];
+                }
+                $(`#total_qty-${rowIndex}`).val(formatNumber(selectedTotalQty));
+            });
+
+            // Initialize total_qty based on initial selection
+            let initialSLoc = $(`#sloc-${rowIndex}`).val();
+            if (initialSLoc && slocBoxes[initialSLoc]) {
+                let initialBox = $(`#box_no-${rowIndex}`).val();
+                let initialTotalQty = slocBoxes[initialSLoc].find(item => item.box === initialBox)?.totalQty || 0;
+                let initialKey = `${initialSLoc}-${initialBox}`;
+                if (quantitiesTracker[initialKey] !== undefined) {
+                    initialTotalQty = quantitiesTracker[initialKey];
+                }
+                $(`#total_qty-${rowIndex}`).val(formatNumber(initialTotalQty));
+            }
+        }
+
+        // Handle click event for adding new rows
+        $(document).on('click', '.edit-material-request', function () {
+            var $row = $(this).closest('tr');
+            var materialId = $row.data('id');
+            var materialDesc = $row.data('desc');
+            var materialNeed = $row.data('qty');
+            var uom = $row.data('uom');
+
+            $('#material_id').val(materialId);
+            $('#material_desc').val(materialDesc);
+            $('#material_need').val(materialNeed);
+            $('#uom').val(uom);
+
+            // Check if Uom is not "PC"
+            isFloatUom = (uom !== "PC");
+
+            $.ajax({
+                url: '<?= base_url('production/getSlocStorage'); ?>',
+                type: 'post',
+                dataType: 'json',
+                data: {
+                    materialId: materialId
+                },
+                success: function (res) {
+                    if (res) {
+                        console.log(res);
+                        // ADD INPUT STOCK ON HAND
+                        var stock_on_hand = 0;
+                        for (let i = 0; i < res.length; i++) {
+                            stock_on_hand += parseFloat(res[i].total_qty_real != res[i].total_qty ? res[i].total_qty_real : res[i].total_qty);
+                        }
+                        $('#stock_on_hand').val(formatNumber(stock_on_hand));
+
+                        // Ensure event handler for adding new rows is only added once
+                        $('#plus-row').off('click').on('click', function () {
+                            addNewRow(res);
+                        });
+
+                        // Ensure modal hidden event is handled properly
+                        $('#addMaterialRequest').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+                            $('#dynamic-rows-container').empty(); // Clear all dynamic rows when the modal is hidden
+                            rowIndex = 0; // Reset rowIndex when the modal is hidden
+                        });
+                    } else {
+                        $('#stock_on_hand').val(0);
+                    }
+                },
+                error: function (xhr, ajaxOptions, thrownError) {
+                    console.error('AJAX Error:', thrownError); // Log any errors
+                }
+            });
+        });
+
+        // Handle click event for row submit buttons
+        $(document).on('click', '.submit-row-btn', function () {
+            let id = $(this).closest('.rows').attr('id');
+            if (id) {
+                let rowIndex = id.split('-')[1];
+                let sloc = $(`#sloc-${rowIndex}`).val();
+                let box_no = $(`#box_no-${rowIndex}`).val();
+                let qty_unpack = isFloatUom ? parseFloat($(`#qty_unpack-${rowIndex}`).val()) : parseInt($(`#qty_unpack-${rowIndex}`).val(), 10);
+                let total_qty = isFloatUom ? parseFloat($(`#total_qty-${rowIndex}`).val()) : parseInt($(`#total_qty-${rowIndex}`).val(), 10);
+
+                // Validate that sloc and box_no are selected
+                if (!sloc || !box_no) {
+                    $('#datas-modals').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 100%"><i class="bi bi-x-circle me-1"></i>Select <strong>SLoc</strong> and <strong>Box</strong> before submitting<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+
+                    setTimeout(function() {
+                        $('#datas-modals .alert').alert('close');
+                    }, 3000);
+
+                    return;
+                }
+
+                // Validate that qty_unpack does not exceed total_qty
+                if (qty_unpack > total_qty) {
+                    $('#datas-modals').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 100%"><i class="bi bi-x-circle me-1"></i>Unpacked quantity cannot exceed quantity on hand<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+
+                    setTimeout(function() {
+                        $('#datas-modals .alert').alert('close');
+                    }, 3000);
+
+                    return;
+                }
+
+                // Trigger form submission
+                $("form").trigger('submit');
+                }
+        });
+                
+                // Initialize form submission handler
+        SubmitMaterialReq();
     });
+
+    // $(document).ready(function () {
+    //     $('#product_id').select2();
+    //     let rowIndex = 0;
+    //     let quantitiesTracker = {};
+    //     let isFloatUom = false;
+
+    //     // Helper function to format numbers without trailing zeros
+    //     function formatNumber(num) {
+    //         if (num === undefined || num === null || isNaN(num)) {
+    //             return 0;
+    //         }
+    //         return num % 1 === 0 ? num.toString() : num.toFixed(2).replace(/\.?0+$/, '');
+    //     }
+
+    //     // Function to handle form submission
+    //     function SubmitMaterialReq() {
+    //         $("form").on("submit", function (event) {
+    //             event.preventDefault();
+
+    //             // Initialize an empty array to store the data for each row
+    //             let materialData = [];
+    //             let totalQty = 0; // Variable to accumulate qty_unpack values
+
+    //             // Iterate over each row
+    //             $(".rows").each(function () {
+    //                 // Get the row index
+    //                 let id = $(this).attr('id');
+    //                 if (id) {
+    //                     let rowIndex = id.split('-')[1];
+    //                     console.log("RowIndex " + rowIndex);
+    //                     console.log("Id " + id);
+
+    //                     // Collect the data from the current row
+    //                     let sloc = $(`#sloc-${rowIndex}`).val();
+    //                     let box_no = $(`#box_no-${rowIndex}`).val();
+    //                     let qty_unpack = isFloatUom ? parseFloat($(`#qty_unpack-${rowIndex}`).val()) : parseInt($(`#qty_unpack-${rowIndex}`).val(), 10);
+
+    //                     // Push the collected data into the array
+    //                     materialData.push({
+    //                         sloc: sloc,
+    //                         box_no: box_no,
+    //                         // qty_unpack: qty_unpack
+    //                     });
+
+    //                     // Accumulate qty_unpack, ensuring it's a valid number
+    //                     if (!isNaN(qty_unpack)) {
+    //                         totalQty += qty_unpack;
+
+    //                         // Update the quantities tracker
+    //                         let key = `${sloc}-${box_no}`;
+    //                         if (quantitiesTracker[key]) {
+    //                             quantitiesTracker[key] -= qty_unpack;
+    //                         } else {
+    //                             quantitiesTracker[key] = isFloatUom ? parseFloat($(`#total_qty-${rowIndex}`).val()) - qty_unpack : parseInt($(`#total_qty-${rowIndex}`).val(), 10) - qty_unpack;
+    //                         }
+    //                     }
+    //                 }
+    //             });
+
+    //             // Decrease the stock_on_hand based on the total unpacked quantity
+    //             let currentStock = parseFloat($('#stock_on_hand').val());
+    //             if (!isNaN(currentStock)) {
+    //                 let newStock = currentStock - totalQty;
+    //                 $('#stock_on_hand').val(formatNumber(newStock));
+    //             }
+
+    //             // Send the collected data via AJAX
+    //             $.ajax({
+    //                 url: '<?= base_url('production/AddMaterialRequest'); ?>',
+    //                 type: 'POST',
+    //                 data: {
+    //                     materialData: materialData
+    //                 },
+    //                 success: function (result) {
+    //                     // Update total_qty_get with accumulated qty_unpack
+    //                     $('#total_qty_get').val(formatNumber(totalQty));
+
+    //                     // Make inputs and buttons readonly and disabled
+    //                     $(".rows").each(function () {
+    //                         let id = $(this).attr('id');
+    //                         if (id) {
+    //                             let rowIndex = id.split('-')[1];
+    //                             $(`#sloc-${rowIndex}`).prop('disabled', true);
+    //                             $(`#box_no-${rowIndex}`).prop('disabled', true);
+    //                             $(`#qty_unpack-${rowIndex}`).prop('readonly', true);
+    //                             $(`#submit-btn-${rowIndex}`).prop('disabled', true);
+    //                         }
+    //                     });
+
+    //                     console.log(materialData);
+    //                 },
+    //                 error: function (xhr, ajaxOptions, thrownError) {
+    //                     console.log(thrownError);
+    //                 }
+    //             });
+    //         });
+    //     }
+
+    //     // Function to add a new row
+    //     function addNewRow(res) {
+    //         rowIndex++;
+    //         const rowHtml = `
+    //             <div class="row rows" id="rows-${rowIndex}">
+    //                 <div class="col-md-3">
+    //                     <label for="sloc-${rowIndex}" class="form-label"><b>SLoc</b></label>
+    //                     <select id="sloc-${rowIndex}" name="sloc[${rowIndex}]" class="form-select">
+    //                     </select>
+    //                 </div>
+    //                 <div class="col-md-3">
+    //                     <label for="box_no-${rowIndex}" class="form-label"><b>Box</b></label>
+    //                     <select id="box_no-${rowIndex}" name="box_no[${rowIndex}]" class="form-select">
+    //                     </select>
+    //                 </div>
+    //                 <div class="col-md-2">
+    //                     <label for="total_qty-${rowIndex}" class="form-label"><b>Qty on hand</b></label>
+    //                     <input type="text" class="form-control" id="total_qty-${rowIndex}" name="total_qty[${rowIndex}]" readonly>
+    //                 </div>
+    //                 <div class="col-md-2">
+    //                     <label for="qty_unpack-${rowIndex}" class="form-label"><b>Unpack</b></label>
+    //                     <input type="number" min="${isFloatUom ? '0.1' : '1'}" step="${isFloatUom ? '0.1' : '1'}" class="form-control" id="qty_unpack-${rowIndex}" name="qty_unpack[${rowIndex}]">
+    //                 </div>
+    //                 <div class="col-md-2">
+    //                     <button class="btn btn-primary submit-row-btn" id="submit-btn-${rowIndex}" type="button" style="margin-top: 2rem;">
+    //                         <i class="bx bx-check-circle"></i>
+    //                     </button>
+    //                 </div>
+    //             </div>
+    //         `;
+
+    //         $('#dynamic-rows-container').append(rowHtml);
+
+    //         // Initialize select2 for the newly added select elements
+    //         $(`#sloc-${rowIndex}`).select2({
+    //             dropdownParent: $('#addMaterialRequest')
+    //         });
+    //         $(`#box_no-${rowIndex}`).select2({
+    //             dropdownParent: $('#addMaterialRequest')
+    //         });
+
+    //         let slocBoxes = {};
+    //         for (let i = 0; i < res.length; i++) {
+    //             let sloc = res[i].sloc;
+    //             let box = res[i].no_box;
+    //             let totalQty = res[i].total_qty_real !== "0" ? res[i].total_qty_real : res[i].total_qty;
+
+    //             if (!slocBoxes[sloc]) {
+    //                 slocBoxes[sloc] = [];
+    //             }
+    //             slocBoxes[sloc].push({ box: box, totalQty: totalQty });
+    //         }
+
+    //         // Populate SLoc dropdown
+    //         $(`#sloc-${rowIndex}`).append('<option value="" selected>Choose SLoc</option>');
+    //         for (let sloc in slocBoxes) {
+    //             $(`#sloc-${rowIndex}`).append(`<option value="${sloc}">${sloc}</option>`);
+    //         }
+
+    //         // Update Box options based on selected SLoc
+    //         $(`#sloc-${rowIndex}`).on('change', function () {
+    //             let selectedSLoc = $(this).val();
+    //             $(`#box_no-${rowIndex}`).empty().append('<option value="" selected>Choose Box</option>');
+
+    //             if (slocBoxes[selectedSLoc]) {
+    //                 slocBoxes[selectedSLoc].forEach(item => {
+    //                     $(`#box_no-${rowIndex}`).append(`<option value="${item.box}" data-total_qty="${item.totalQty}">${item.box}</option>`);
+    //                 });
+    //             }
+
+    //             $(`#total_qty-${rowIndex}`).val(''); // Clear total_qty on SLoc change
+    //         });
+
+    //         // Update total_qty based on selected Box
+    //         $(`#box_no-${rowIndex}`).on('change', function () {
+    //             let selectedOption = $(this).find('option:selected');
+    //             let selectedTotalQty = parseFloat(selectedOption.data('total_qty'));
+
+    //             if (isNaN(selectedTotalQty)) {
+    //                 selectedTotalQty = 0;
+    //             }
+
+    //             let key = `${$(`#sloc-${rowIndex}`).val()}-${$(this).val()}`;
+    //             if (quantitiesTracker[key] !== undefined) {
+    //                 selectedTotalQty = quantitiesTracker[key];
+    //             }
+    //             $(`#total_qty-${rowIndex}`).val(formatNumber(selectedTotalQty));
+    //         });
+
+    //         // Initialize total_qty based on initial selection
+    //         let initialSLoc = $(`#sloc-${rowIndex}`).val();
+    //         if (initialSLoc && slocBoxes[initialSLoc]) {
+    //             let initialBox = $(`#box_no-${rowIndex}`).val();
+    //             let initialTotalQty = slocBoxes[initialSLoc].find(item => item.box === initialBox)?.totalQty || 0;
+    //             let initialKey = `${initialSLoc}-${initialBox}`;
+    //             if (quantitiesTracker[initialKey] !== undefined) {
+    //                 initialTotalQty = quantitiesTracker[initialKey];
+    //             }
+    //             $(`#total_qty-${rowIndex}`).val(formatNumber(initialTotalQty));
+    //         }
+    //     }
+
+    //     // Handle click event for adding new rows
+    //     $(document).on('click', '.edit-material-request', function () {
+    //         var $row = $(this).closest('tr');
+    //         var materialId = $row.data('id');
+    //         var materialDesc = $row.data('desc');
+    //         var materialNeed = $row.data('qty');
+    //         var uom = $row.data('uom');
+
+    //         $('#material_id').val(materialId);
+    //         $('#material_desc').val(materialDesc);
+    //         $('#material_need').val(materialNeed);
+    //         $('#uom').val(uom);
+
+    //         // Check if Uom is not "PC"
+    //         isFloatUom = (uom !== "PC");
+
+    //         $.ajax({
+    //             url: '<?= base_url('production/getSlocStorage'); ?>',
+    //             type: 'post',
+    //             dataType: 'json',
+    //             data: {
+    //                 materialId: materialId
+    //             },
+    //             success: function (res) {
+    //                 if (res) {
+    //                     console.log(res);
+    //                     // ADD INPUT STOCK ON HAND
+    //                     var stock_on_hand = 0;
+    //                     for (let i = 0; i < res.length; i++) {
+    //                         stock_on_hand += parseFloat(res[i].total_qty_real != res[i].total_qty ? res[i].total_qty_real : res[i].total_qty);
+    //                     }
+    //                     $('#stock_on_hand').val(formatNumber(stock_on_hand));
+
+    //                     // Ensure event handler for adding new rows is only added once
+    //                     $('#plus-row').off('click').on('click', function () {
+    //                         addNewRow(res);
+    //                     });
+
+    //                     // Ensure modal hidden event is handled properly
+    //                     $('#addMaterialRequest').off('hidden.bs.modal').on('hidden.bs.modal', function () {
+    //                         $('#dynamic-rows-container').empty(); // Clear all dynamic rows when the modal is hidden
+    //                         rowIndex = 0; // Reset rowIndex when the modal is hidden
+    //                     });
+    //                 } else {
+    //                     $('#stock_on_hand').val(0);
+    //                 }
+    //             },
+    //             error: function (xhr, ajaxOptions, thrownError) {
+    //                 console.error('AJAX Error:', thrownError); // Log any errors
+    //             }
+    //         });
+    //     });
+
+    //     // Handle click event for row submit buttons
+    //     $(document).on('click', '.submit-row-btn', function () {
+    //         let id = $(this).closest('.rows').attr('id');
+    //         if (id) {
+    //             let rowIndex = id.split('-')[1];
+    //             let sloc = $(`#sloc-${rowIndex}`).val();
+    //             let box_no = $(`#box_no-${rowIndex}`).val();
+    //             let qty_unpack = isFloatUom ? parseFloat($(`#qty_unpack-${rowIndex}`).val()) : parseInt($(`#qty_unpack-${rowIndex}`).val(), 10);
+    //             let total_qty = isFloatUom ? parseFloat($(`#total_qty-${rowIndex}`).val()) : parseInt($(`#total_qty-${rowIndex}`).val(), 10);
+
+    //             // Validate that sloc and box_no are selected
+    //             if (!sloc || !box_no) {
+    //                 $('#datas-modals').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 100%"><i class="bi bi-x-circle me-1"></i>Select <strong>SLoc</strong> and <strong>Box</strong> before submitting<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+
+    //                 setTimeout(function() {
+    //                     $('#datas-modals .alert').alert('close');
+    //                 }, 3000);
+
+    //                 return;
+    //             }
+
+    //             // Validate that qty_unpack does not exceed total_qty
+    //             if (qty_unpack > total_qty) {
+    //                 $('#datas-modals').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 100%"><i class="bi bi-x-circle me-1"></i>Unpacked quantity cannot exceed quantity on hand<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+
+    //                 setTimeout(function() {
+    //                     $('#datas-modals .alert').alert('close');
+    //                 }, 3000);
+
+    //                 return;
+    //             }
+
+    //             // Update the display for quantity requested
+    //             $(`#qty_request-${rowIndex}`).text(qty_unpack);
+
+    //             // Enable the submit button for the current row
+    //             $(`#submit-btn-${rowIndex}`).prop('disabled', false);
+    //         }
+    //     });
+
+    //     // Initialize form submission handler
+    //     SubmitMaterialReq();
+    // });
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 </script>

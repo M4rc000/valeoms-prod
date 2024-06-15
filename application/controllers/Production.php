@@ -68,7 +68,7 @@ class Production extends CI_Controller {
                 'Production_plan' => $production_plan,
                 'Id_material' => $row['Id_material'],
                 'Material_desc' => $row['Material_desc'],
-                'Material_need' => intval($row['Qty']) * $product_plan_qty,  // Calculate total material needed based on plan qty
+                'Material_need' => $row['Qty'] * $product_plan_qty,
                 'Uom' => $row['Uom'],
                 'status' => 0, 
                 'Crtdt' => date('Y-m-d H:i'),
@@ -90,10 +90,48 @@ class Production extends CI_Controller {
     
     function getSlocStorage(){
         $materialId = $this->input->post('materialId');
-        $result = $this->db->query("SELECT b.no_box, b.weight, b.sloc, bd.product_id, bd.material_desc, bd.total_qty, bd.uom FROM box b LEFT JOIN list_storage bd ON b.id_box = bd.id_box WHERE bd.product_id = '$materialId'
+        $result = $this->db->query("SELECT b.no_box, b.weight, b.sloc, bd.product_id, bd.material_desc, bd.total_qty, bd.total_qty_real, bd.uom FROM box b LEFT JOIN list_storage bd ON b.id_box = bd.id_box WHERE bd.product_id = '$materialId'
         ")->result_array();
        
         echo json_encode($result);
+    }
+
+    function AddMaterialRequest(){
+        $user = $this->input->post('user');
+        $materialData = $this->input->post('materialData');
+        $Req_no = $this->PModel->getLastReqNo();
+        $Production_plan = $this->input->post('production_plan');
+        $Id_material = $this->input->post('Id_material');
+        $Material_desc = $this->input->post('Material_desc');
+        $result = 0;
+        die;
+
+        foreach ($materialData as $data) {
+            $Data = [
+                'Req_no' => $Req_no,
+                'Production_plan' => $Production_plan,
+                'Id_material' => $Id_material,
+                'Material_desc' => $Material_desc,
+                'Qty' => $data['qty'],
+                'sloc' => $data['sloc'],
+                'box_no' => $data['box_no'],
+                'crtdt' => date('Y-d-m H:i'),
+                'crtby' => $this->input->post('user'),
+                'upddt' => date('Y-d-m H:i'),
+                'updby' => $this->input->post('user')
+            ];
+
+            // Insert the data into the database
+            $this->PModel->insertData('production_request', $Data);
+            $result = 1;
+        }
+
+        
+    
+        $results = $this->db->query("SELECT * FROM production_plan_detail WHERE Production_plan = '$production_plan'")->result_array();
+
+        // Echo the result as JSON
+        echo json_encode($results);
     }
 
     public function kitting(){
@@ -101,6 +139,7 @@ class Production extends CI_Controller {
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
         
         $data['title'] = 'Kitting';
+        $data['boxs'] = $this->PModel->getAllBox();
 
         $this->load->view('templates/header', $data);
         $this->load->view('templates/navbar', $data);   
@@ -326,4 +365,11 @@ class Production extends CI_Controller {
         $this->load->view('production/material_return', $data);
         $this->load->view('templates/footer');
 	}
+
+    function getMaterialDesc(){
+        $materialID = htmlspecialchars($this->input->post('materialID'));
+        $result = $this->db->query("SELECT Material_desc, Material_type, Uom FROM material_list WHERE Id_material = '$materialID' AND is_active = 1")->result_array();
+    
+        echo json_encode($result);
+    }
 }

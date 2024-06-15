@@ -85,6 +85,12 @@ class Production_model extends CI_Model {
         return $this->db->get('bom')->result_array(); 
     }
 
+    public function getAllBox(){
+        $this->db->distinct();
+        $this->db->select('no_box');
+        return $this->db->get('box')->result_array(); 
+    }
+
     public function getLastProductionPlan() {
         $this->db->select('production_plan');
         $this->db->from('production_plan');
@@ -142,4 +148,67 @@ class Production_model extends CI_Model {
             return 'PPA0000001';
         }        
     }     
+
+    public function getLastReqNo() {
+        // Select the last request number from production_request table
+        $this->db->select('Req_no');
+        $this->db->from('production_request');
+        $this->db->order_by('Req_no', 'DESC');
+        $this->db->limit(1);
+        
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0) {
+            $lastReqNo = $query->row()->Req_no;
+
+            // Extract prefix and numeric part from the last request number
+            $prefix = substr($lastReqNo, 0, 3);
+            $numericPart = substr($lastReqNo, 3);
+
+            // Increment numeric part based on rules
+            $incrementedNumericPart = (int)$numericPart + 1;
+
+            // Determine the next prefix if numeric part exceeds 999999
+            if ($incrementedNumericPart > 999999) {
+                $prefix = $this->getNextPrefix($prefix);
+                $incrementedNumericPart = 1; // Reset numeric part
+            }
+
+            // Format numeric part to 6 digits
+            $formattedNumericPart = str_pad($incrementedNumericPart, 6, '0', STR_PAD_LEFT);
+
+            // Construct and return the next request number
+            return $prefix . $formattedNumericPart;
+        } else {
+            // Handle case when table is empty
+            return 'PRA000001'; // Default starting request number
+        }
+    }
+
+    private function getNextPrefix($currentPrefix) {
+        // Extract characters from the current prefix
+        $firstChar = $currentPrefix[0];
+        $secondChar = $currentPrefix[1];
+        $thirdChar = $currentPrefix[2];
+
+        // Increment the characters based on the rules A-Z
+        if ($thirdChar === 'Z') {
+            $thirdChar = 'A';
+            if ($secondChar === 'Z') {
+                $secondChar = 'A';
+                if ($firstChar === 'Z') {
+                    $firstChar = 'A';
+                } else {
+                    $firstChar++;
+                }
+            } else {
+                $secondChar++;
+            }
+        } else {
+            $thirdChar++;
+        }
+
+        // Return the next prefix
+        return $firstChar . $secondChar . $thirdChar;
+    }
 }
