@@ -14,7 +14,7 @@ class Production extends CI_Controller {
 	public function index()
 	{
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
-        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+        $data['name'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         
         $data['title'] = 'Material Requests';
 
@@ -27,8 +27,7 @@ class Production extends CI_Controller {
         $this->load->view('templates/footer');
 	}   
 
-    function getProduct()
-    {
+    function getProduct(){
         $productID = $this->input->post('productID');
         $result = $this->db->query("SELECT Id_fg, Fg_desc FROM bom WHERE Id_fg = '$productID'")->result_array();
        
@@ -125,28 +124,12 @@ class Production extends CI_Controller {
             $this->PModel->insertData('production_request', $Data);
             $result = 1;
         }
-
-        
     
         $results = $this->db->query("SELECT * FROM production_plan_detail WHERE Production_plan = '$production_plan'")->result_array();
 
-        // Echo the result as JSON
         echo json_encode($results);
     }
 
-    public function kitting(){
-        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
-        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
-        
-        $data['title'] = 'Kitting';
-        $data['boxs'] = $this->PModel->getAllBox();
-
-        $this->load->view('templates/header', $data);
-        $this->load->view('templates/navbar', $data);   
-        $this->load->view('templates/sidebar', $data);   
-        $this->load->view('production/kitting', $data);
-        $this->load->view('templates/footer');
-    }
 
     function getBox()
     {
@@ -167,57 +150,6 @@ class Production extends CI_Controller {
         echo json_encode($result);
     }
 
-    function getReqNo()
-    {
-        $reqNo = $this->input->post('reqNo');
-        $boxID = $this->input->post('boxID');
-
-        $resultBox = $this->db->query("SELECT 
-                b.no_box, 
-                b.weight, 
-                b.sloc, 
-                bd.product_id, 
-                bd.material_desc, 
-                bd.total_qty, 
-                bd.uom
-            FROM box b
-            LEFT JOIN list_storage bd ON b.id_box = bd.id_box
-            WHERE b.no_box = '$boxID'")->result_array();
-        $resultReq = $this->db->query("SELECT * FROM production_request WHERE production_request_no = '$reqNo'")->result_array();
-
-        $result = [
-            'boxID_result' => $resultBox,
-            'reqNo_result' => $resultReq
-        ];
-
-        echo json_encode($result);
-    }
-
-    function getBom()
-    {
-        $product_id = $this->input->post('production_id');
-        $boxID = $this->input->post('boxID');
-        
-        $resultBox = $this->db->query("SELECT 
-        b.no_box, 
-                b.weight, 
-                b.sloc, 
-                bd.product_id, 
-                bd.material_desc, 
-                bd.total_qty, 
-                bd.uom
-            FROM box b
-            LEFT JOIN list_storage bd ON b.id_box = bd.id_box
-            WHERE b.no_box = '$boxID'")->result_array();
-
-        $resultProduct = $this->db->query("SELECT * FROM bom WHERE Id_fg ='$product_id'")->result_array();
-
-        $result = [
-            'boxID_result' => $resultBox,
-            'product_result' => $resultProduct
-        ];
-        echo json_encode($result);
-    }
 
     public function kanban_box(){
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
@@ -366,10 +298,129 @@ class Production extends CI_Controller {
         $this->load->view('templates/footer');
 	}
 
+    function getslocbasedweight(){
+        $weight = $this->input->post('weight');
+        $result = $this->PModel->getsloc($weight);
+
+        echo json_encode($result);
+    }
+
     function getMaterialDesc(){
         $materialID = htmlspecialchars($this->input->post('materialID'));
         $result = $this->db->query("SELECT Material_desc, Material_type, Uom FROM material_list WHERE Id_material = '$materialID' AND is_active = 1")->result_array();
     
         echo json_encode($result);
+    }
+
+    function AddHighRack(){
+        $materialData = $this->input->post('materialData');
+        $no_box = $this->PModel->generateFormattedBoxNumber();
+    
+        $DataBox = [
+            'no_box' => $no_box,
+            'weight' => $this->input->post('weight'),
+            'sloc' => '',
+            'box_type' => 'HIGH',
+            'crtby' => $this->input->post('user'),
+            'crtdt' => date('Y-m-d H:i:s'), 
+        ];
+        $this->PModel->insertData('box', $DataBox);
+    
+        // Fetch the ID of the inserted box
+        $id_table_box = $this->db->query("SELECT * FROM `box` WHERE no_box ='$no_box'")->row_array(); 
+    
+        foreach($materialData as $md){
+            $DataBoxDetail = [
+                'id_box' => $id_table_box['id_box'],
+                'id_material' => $md['material_id'],
+                'material_desc' => $md['material_desc'],
+                'crtdt' => date('Y-m-d H:i:s'),
+                'crtby' => $this->input->post('user')
+            ];
+            $this->PModel->insertData('box_detail', $DataBoxDetail);
+        }
+    
+        foreach($materialData as $md){
+            $DataListStorage = [
+                'product_id' => $md['material_id'],
+                'material_desc' => $md['material_desc'],
+                'sloc' => '',
+                'uom' => $md['uom'],
+                'total_qty' => $md['qty'],
+                'total_qty_real' => $md['qty'],
+                'id_box' => $id_table_box['id_box'], 
+                'created_at' => date('Y-m-d H:i:s'), 
+                'created_by' => $this->input->post('user')
+            ];
+            $this->PModel->insertData('list_storage', $DataListStorage);
+        }
+    
+        $DataReturnWarehouse = [
+            'No_box' => $id_table_box['no_box'],
+            'status' => 1, // 1: PENDING, 0: APPROVED
+            'Crtdt' => date('Y-m-d H:i:s'),
+            'Crtby' => $this->input->post('user'),
+            'Upddt' => date('Y-m-d H:i:s'),
+            'Updby' => $this->input->post('user')
+        ];
+        $this->PModel->insertData('return_warehouse', $DataReturnWarehouse);
+    
+        echo json_encode(['no_box' => $id_table_box['no_box']]);
+    }
+    
+    function AddMediumRack(){
+        $materialData = $this->input->post('materialData');
+        $no_box = $this->PModel->generateFormattedBoxNumber();
+    
+        $DataBox = [
+            'no_box' => $no_box,
+            'weight' => $this->input->post('weight'),
+            'sloc' => '',
+            'box_type' => 'MEDIUM',
+            'crtby' => $this->input->post('user'),
+            'crtdt' => date('Y-m-d H:i:s'),
+        ];
+        $this->PModel->insertData('box', $DataBox);
+    
+        // Fetch the ID of the inserted box
+        $id_table_box = $this->db->query("SELECT * FROM `box` WHERE no_box ='$no_box'")->row_array(); 
+    
+        foreach($materialData as $md){
+            $DataBoxDetail = [
+                'id_box' => $id_table_box['id_box'],
+                'id_material' => $md['material_id'],
+                'material_desc' => $md['material_desc'],
+                'crtdt' => date('Y-m-d H:i:s'),
+                'crtby' => $this->input->post('user')
+            ];
+            $this->PModel->insertData('box_detail', $DataBoxDetail);
+        }
+    
+        foreach($materialData as $md){
+            $DataListStorage = [
+                'product_id' => $md['material_id'],
+                'material_desc' => $md['material_desc'],
+                'sloc' => '',
+                'uom' => $md['uom'],
+                'total_qty' => $md['qty'],
+                'total_qty_real' => $md['qty'],
+                'id_box' => $id_table_box['id_box'], 
+                'created_at' => date('Y-m-d H:i:s'), 
+                'created_by' => $this->input->post('user')
+            ];
+            $this->PModel->insertData('list_storage', $DataListStorage);
+        }
+    
+        $DataReturnWarehouse = [
+            'No_box' => $id_table_box['no_box'],
+            'status' => 1, // 1: PENDING, 0: APPROVED
+            'Crtdt' => date('Y-m-d H:i:s'), 
+            'Crtby' => $this->input->post('user'),
+            'Upddt' => date('Y-m-d H:i:s'), 
+            'Updby' => $this->input->post('user')
+        ];
+        $this->PModel->insertData('return_warehouse', $DataReturnWarehouse);
+    
+        echo json_encode(['no_box' => $id_table_box['no_box']]);
     }
 }

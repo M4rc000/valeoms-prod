@@ -10,7 +10,9 @@ class Warehouse extends CI_Controller
 		is_logged_in();
 		$this->load->library('form_validation');
 		$this->load->model('Warehouse_model');
+		$this->load->model('Warehouse_model', 'WModel');
 		$this->load->model('Admin_model', 'Amodel');
+		$this->load->model('Production_model', 'PModel');
 	}
 
 	public function AddReceivingMaterial()
@@ -192,15 +194,12 @@ class Warehouse extends CI_Controller
 		$this->load->view('print_barcode', $data);
 	}
 
-
 	public function getLastBoxId()
 	{
 		$this->load->model('Warehouse_model');
 		$lastBox = $this->Warehouse_model->getLastBox();
 		echo json_encode($lastBox);
 	}
-
-
 
 	public function delete_box()
 	{
@@ -213,7 +212,6 @@ class Warehouse extends CI_Controller
 			echo json_encode(['status' => false, 'msg' => 'Failed to delete the box.']);
 		}
 	}
-
 
 	public function get_box()
 	{
@@ -238,8 +236,6 @@ class Warehouse extends CI_Controller
 
 		echo json_encode($data);
 	}
-
-
 
 	public function add_new_box()
 	{
@@ -588,5 +584,112 @@ class Warehouse extends CI_Controller
 		}
 		echo json_encode($data);
 	}
+
+
+	public function kitting(){
+        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+        
+        $data['title'] = 'Kitting';
+        $data['boxs'] = $this->PModel->getAllBox();
+		$data['requestno'] = $this->WModel->getAllReqNo();
+
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/navbar', $data);   
+        $this->load->view('templates/sidebar', $data);   
+        $this->load->view('warehouse/kitting', $data);
+        $this->load->view('templates/footer');
+    }
+
+	function getReqNo()
+    {
+        $reqNo = $this->input->post('reqNo');
+        $boxID = $this->input->post('boxID');
+
+        $resultBox = $this->db->query("SELECT 
+                b.no_box, 
+                b.weight, 
+                b.sloc, 
+                bd.product_id, 
+                bd.material_desc, 
+                bd.total_qty, 
+                bd.uom
+            FROM box b
+            LEFT JOIN list_storage bd ON b.id_box = bd.id_box
+            WHERE b.no_box = '$boxID'")->result_array();
+        
+		$resultReq = $this->db->query("SELECT * FROM `material_request` WHERE Id_request = '$reqNo'")->result_array();
+
+		$productionPlan = $resultReq[0]['Production_plan'];
+    	$resultProdPlan = $this->db->query("SELECT
+				pp.Production_plan,
+				pp.Id_fg,
+				pp.Fg_desc,
+				pp.Production_plan_qty,
+				ppd.Id_material,
+				ppd.Material_desc,
+				ppd.Material_need,
+				ppd.Uom
+			FROM
+				production_plan pp
+			JOIN
+				production_plan_detail ppd ON pp.Production_plan = ppd.Production_plan
+			WHERE
+				ppd.status = 1
+				AND pp.Production_plan = '$productionPlan'")->result_array();
+
+        $result = [
+            'boxID_result' => $resultBox,
+            'reqNo_result' => $resultReq,
+			'ProdPlan_result' => $resultProdPlan
+        ];
+
+        echo json_encode($result);
+    }
+
+	function getBox()
+    {
+        $boxID = $this->input->post('boxID');
+        $result = $this->db->query("SELECT 
+                b.no_box, 
+                b.weight, 
+                b.sloc, 
+                bd.product_id, 
+                bd.material_desc, 
+                bd.total_qty, 
+                bd.uom
+            FROM box b
+            LEFT JOIN list_storage bd ON b.id_box = bd.id_box
+            WHERE b.no_box = '$boxID'
+        ")->result_array();
+       
+        echo json_encode($result);
+    }
+
+	function getBom()
+    {
+        $product_id = $this->input->post('production_id');
+        $boxID = $this->input->post('boxID');
+        
+        $resultBox = $this->db->query("SELECT 
+                b.no_box, 
+                b.weight, 
+                b.sloc, 
+                bd.product_id, 
+                bd.material_desc, 
+                bd.total_qty, 
+                bd.uom
+            FROM box b
+            LEFT JOIN list_storage bd ON b.id_box = bd.id_box
+            WHERE b.no_box = '$boxID'")->result_array();
+
+        $resultProduct = $this->db->query("SELECT * FROM bom WHERE Id_fg ='$product_id'")->result_array();
+
+        $result = [
+            'boxID_result' => $resultBox, // BOX DATA
+            'product_result' => $resultProduct // BOM
+        ];
+        echo json_encode($result);
+    }
 }
 ?>

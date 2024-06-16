@@ -177,7 +177,7 @@
             var rowIndexHG = $row.index();
 
             $.ajax({
-                url: '<?= base_url('production/getMaterialDesc'); ?>',
+                url: '<?= base_url('quality/getMaterialDesc'); ?>',
                 type: 'post',
                 dataType: 'json',
                 data: {
@@ -286,7 +286,7 @@
                 });
             }
             $.ajax({
-                url: '<?= base_url('production/AddHighRack'); ?>',
+                url: '<?= base_url('quality/AddHighRack'); ?>',
                 type: 'post',
                 dataType: 'json',
                 data: {
@@ -366,7 +366,7 @@
             var rowIndexMG = $row.index();
 
             $.ajax({
-                url: '<?= base_url('production/getMaterialDesc'); ?>',
+                url: '<?= base_url('quality/getMaterialDesc'); ?>',
                 type: 'post',
                 dataType: 'json',
                 data: {
@@ -475,7 +475,7 @@
                 });
             }
             $.ajax({
-                url: '<?= base_url('production/AddMediumRack'); ?>',
+                url: '<?= base_url('quality/AddMediumRack'); ?>',
                 type: 'post',
                 dataType: 'json',
                 data: {

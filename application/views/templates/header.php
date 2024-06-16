@@ -25,6 +25,8 @@
   <link href="<?=base_url('assets');?>/vendor/simple-datatables/style.css" rel="stylesheet">
   <link rel="stylesheet" href="<?=base_url('assets');?>/vendor/select2/select2.css">
   <link rel="stylesheet" href="<?=base_url('assets');?>/vendor/datatables/datatables.css">
+  <link rel="stylesheet" href="<?=base_url('assets');?>/vendor/sweet-alert/sweet-alert.css">
+
 
   <!-- Template Main CSS File -->
   <link href="<?=base_url('assets');?>/css/style.css" rel="stylesheet">

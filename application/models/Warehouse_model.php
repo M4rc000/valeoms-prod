@@ -226,5 +226,9 @@ class Warehouse_model extends CI_Model
 	{
 		return $this->db->get_where('box_detail', ['id_box' => $id_box])->result_array();
 	}
+
+	public function getAllReqNo(){
+		return $this->db->get('material_request')->result_array();
+	}
 }
 ?>

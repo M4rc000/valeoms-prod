@@ -725,8 +725,6 @@ function printBarcodeHigh(idBox) {
     printWindow.document.write('</body></html>');
     printWindow.document.close();
     printWindow.print();
-
-    // Increment the print count
 }
 
 
