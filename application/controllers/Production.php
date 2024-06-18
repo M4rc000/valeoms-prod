@@ -382,33 +382,34 @@ class Production extends CI_Controller {
         ];
         $this->PModel->insertData('box', $DataBox);
     
-        // Fetch the ID of the inserted box
         $id_table_box = $this->db->query("SELECT * FROM `box` WHERE no_box ='$no_box'")->row_array(); 
-    
-        foreach($materialData as $md){
-            $DataBoxDetail = [
-                'id_box' => $id_table_box['id_box'],
-                'id_material' => $md['material_id'],
-                'material_desc' => $md['material_desc'],
-                'crtdt' => date('Y-m-d H:i:s'),
-                'crtby' => $this->input->post('user')
-            ];
-            $this->PModel->insertData('box_detail', $DataBoxDetail);
-        }
-    
-        foreach($materialData as $md){
-            $DataListStorage = [
-                'product_id' => $md['material_id'],
-                'material_desc' => $md['material_desc'],
-                'sloc' => '',
-                'uom' => $md['uom'],
-                'total_qty' => $md['qty'],
-                'total_qty_real' => $md['qty'],
-                'id_box' => $id_table_box['id_box'], 
-                'created_at' => date('Y-m-d H:i:s'), 
-                'created_by' => $this->input->post('user')
-            ];
-            $this->PModel->insertData('list_storage', $DataListStorage);
+        
+        if($materialData){
+            foreach($materialData as $md){
+                $DataBoxDetail = [
+                    'id_box' => $id_table_box['id_box'],
+                    'id_material' => $md['material_id'],
+                    'material_desc' => $md['material_desc'],
+                    'crtdt' => date('Y-m-d H:i:s'),
+                    'crtby' => $this->input->post('user')
+                ];
+                $this->PModel->insertData('box_detail', $DataBoxDetail);
+            }
+        
+            foreach($materialData as $md){
+                $DataListStorage = [
+                    'product_id' => $md['material_id'],
+                    'material_desc' => $md['material_desc'],
+                    'sloc' => '',
+                    'uom' => $md['uom'],
+                    'total_qty' => $md['qty'],
+                    'total_qty_real' => $md['qty'],
+                    'id_box' => $id_table_box['id_box'], 
+                    'created_at' => date('Y-m-d H:i:s'), 
+                    'created_by' => $this->input->post('user')
+                ];
+                $this->PModel->insertData('list_storage', $DataListStorage);
+            }
         }
     
         $DataReturnWarehouse = [

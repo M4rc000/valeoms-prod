@@ -10,9 +10,7 @@ class Warehouse extends CI_Controller
 		is_logged_in();
 		$this->load->library('form_validation');
 		$this->load->model('Warehouse_model');
-		$this->load->model('Warehouse_model', 'WModel');
 		$this->load->model('Admin_model', 'Amodel');
-		$this->load->model('Production_model', 'PModel');
 	}
 
 	public function AddReceivingMaterial()
@@ -38,6 +36,48 @@ class Warehouse extends CI_Controller
 			</div>');
 
 		redirect('Warehouse/');
+	}
+
+	public function addItemBox()
+	{
+		$id_box = $this->input->post('id_box');
+		$uomname = $this->input->post('uom');
+		$material = $this->input->post('material');
+		$data = array(
+			'id_box' => $this->input->post('id_box'),
+			'id_material' => $this->input->post('reference_number'),
+			'material_desc' => $this->input->post('material'),
+			'crtby' => $this->session->userdata('username'),
+			'crtdt' => date('Y-m-d H:i:s')
+		);
+		$save_detail = $this->Amodel->insertData('box_detail', $data);
+		
+		$id_box_detail = $this->db->insert_id();
+
+		if($save_detail){
+	
+			$receiving_material = array(
+				'reference_number' => $this->input->post('reference_number'),
+				'id_box' => $this->input->post('id_box'),
+				'id_box_detail' => $id_box_detail,
+				'material' => (empty($material) ? '' : $material),
+				'qty' => $this->input->post('qty'),
+				's_loc' => $this->input->post('id_sloc'),
+				'uom' => (empty($uomname) ? '' : $uomname),
+				'created_at' => date('Y-m-d H:i:s'),
+				'created_by' => $this->session->userdata('username')
+			);
+	
+			$save = $this->Amodel->insertData('receiving_material', $receiving_material);
+			if($save){
+				$this->session->set_flashdata('SUCCESS', '<div class="alert alert-success alert-dismissible fade show mb-2" id="dismiss" role="alert" style="width: 40%">
+				<i class="bi bi-check-circle me-1"></i> New material successfully added
+				<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+				</div>');
+				redirect('Warehouse/edit_box_view/'. $id_box);
+			}
+		}
+		// print_r($data);die;
 	}
 
 	public function editReceivingMaterialTemp()
@@ -80,6 +120,43 @@ class Warehouse extends CI_Controller
 		$this->load->view('templates/sidebar', $data);
 		$this->load->view('warehouse/detail_receiving', $data);
 		$this->load->view('templates/footer');
+	}
+
+	public function edit_box_view($id)
+	{
+		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+
+		$this->load->model('Warehouse_model');
+		$data['box'] = $this->Warehouse_model->getListBoxById($id);
+		$data['id_box'] = $id;
+		$data['no_box'] = $data['box']->no_box;
+		$data['id_sloc'] = $data['box']->sloc;
+		$data['detail_box'] = $this->Warehouse_model->getDetailBox($id);
+
+		$data['users'] = $this->Warehouse_model->getAllUsers();
+
+		$data['title'] = 'Edit Box';
+		$this->load->view('templates/header', $data);
+		$this->load->view('templates/navbar', $data);
+		$this->load->view('templates/sidebar', $data);
+		$this->load->view('warehouse/edit_box', $data);
+		$this->load->view('templates/footer');
+	}
+
+	public function get_box_details(){
+		$id =$this->input->post('id_box');
+		$box= $this->Warehouse_model->getListBoxById($id);
+		$id_box = $id;
+		$no_box = $box->no_box;
+		$id_sloc = $box->sloc;
+		$detail = $this->Warehouse_model->getDetailBox($id);
+
+		$data = [
+			'status' => 'success',
+			'detail' => $detail,
+		];
+		echo json_encode($data);
 	}
 
 	public function list_storage()
@@ -194,12 +271,15 @@ class Warehouse extends CI_Controller
 		$this->load->view('print_barcode', $data);
 	}
 
+
 	public function getLastBoxId()
 	{
 		$this->load->model('Warehouse_model');
 		$lastBox = $this->Warehouse_model->getLastBox();
 		echo json_encode($lastBox);
 	}
+
+
 
 	public function delete_box()
 	{
@@ -212,6 +292,7 @@ class Warehouse extends CI_Controller
 			echo json_encode(['status' => false, 'msg' => 'Failed to delete the box.']);
 		}
 	}
+
 
 	public function get_box()
 	{
@@ -236,6 +317,8 @@ class Warehouse extends CI_Controller
 
 		echo json_encode($data);
 	}
+
+
 
 	public function add_new_box()
 	{
@@ -523,6 +606,17 @@ class Warehouse extends CI_Controller
 		echo json_encode($data);
 	}
 
+	public function delete_material_box()
+	{
+		$id = $this->input->post('id');
+		$this->Warehouse_model->deleteMaterialBox($id);
+		$data = [
+			'status' => true,
+		];
+
+		echo json_encode($data);
+	}
+
 	public function save_unpack()
 	{
 		$id_box_detail = $this->input->post('id_box_detail');
@@ -585,6 +679,51 @@ class Warehouse extends CI_Controller
 		echo json_encode($data);
 	}
 
+	public function getDataForEdit(){
+		$id_box_detail = $this->input->post('id_box_detail');
+		$detail_box = $this->Warehouse_model->getItemBox($id_box_detail);
+
+		if($detail_box){
+			$data = [
+				'status' => 'success',
+				'material' => $detail_box
+			];
+		} else {
+			$data = ['status' => 'failed'];
+		}
+		echo json_encode($data);
+	}
+
+	public function updateTotalWeightAndSloc(){
+		$id_box = $this->input->post('id_box');
+		$total_weight = $this->input->post('total_weight');
+		$sloc = $this->input->post('sloc');
+		$update = [
+			'weight' => $total_weight,
+			'sloc' => $sloc
+		];
+		$this->db->where('id_box' ,$id_box);
+		$update_box = $this->db->update('box', $update);
+
+		if($update_box){
+			$update = [
+				's_loc' => $sloc
+			];
+			$this->db->where('id_box' ,$id_box);
+			$update_receiving_material = $this->db->update('receiving_material', $update);
+
+			if($update_receiving_material){
+				$data = [
+					'status' => 'success'
+				];
+			} else {
+				$data = [
+					'status' => 'failed'
+				];
+			}
+		}
+		echo json_encode($data);
+	}
 
 	public function kitting(){
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();

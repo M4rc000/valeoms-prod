@@ -105,6 +105,11 @@ class Warehouse_model extends CI_Model
 		return $this->db->query("SELECT a.*, b.SLoc as sloc_name FROM `box` a LEFT JOIN storage b ON a.sloc = b.Id_storage")->result_array();
 	}
 
+	public function getListBoxById($id)
+	{
+		return $this->db->query("SELECT a.*, b.SLoc as sloc_name FROM `box` a LEFT JOIN storage b ON a.sloc = b.Id_storage where a.id_box = $id")->row();
+	}
+
 	public function get_receiving_by_box_id($box_id)
 	{
 		$this->db->where('id_box', $box_id);
@@ -206,6 +211,17 @@ class Warehouse_model extends CI_Model
 		return $delete;
 	}
 
+	public function deleteMaterialBox($id)
+	{
+		$this->db->where('id_box_detail', $id);
+		$delete = $this->db->delete('box_detail');
+		if($delete){
+			$this->db->where('id_box_detail', $id);
+			$delete_material = $this->db->delete('receiving_material');
+		}
+		return $delete_material;
+	}
+
 	public function deleteData($table, $where)
 	{
 		$this->db->where($where);
@@ -225,6 +241,10 @@ class Warehouse_model extends CI_Model
 	public function getBoxDetails($id_box)
 	{
 		return $this->db->get_where('box_detail', ['id_box' => $id_box])->result_array();
+	}
+
+	public function getItemBox($id){
+		return $this->db->query("SELECT a.*, b.qty, b.uom, s.Sloc, h.no_box, b.id as id_receiving_material from box_detail a left join receiving_material b on b.id_box_detail = a.id_box_Detail left join storage s on s.Id_storage = b.s_loc LEFT JOIN `box` h on h.id_box = a.id_box  where a.id_box_detail = $id")->row();
 	}
 
 	public function getAllReqNo(){

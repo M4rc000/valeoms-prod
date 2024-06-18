@@ -466,14 +466,14 @@
                 rowIndexMG++;
             });
 
-            if(materialData.length < 1 || weight.length < 1){
-                return Swal.fire({
-                    title: 'Error!',
-                    html: `<b>Weight</b> or <b>Material</b> is empty`,
-                    icon: 'error',
-                    confirmButtonText: 'Close'
-                });
-            }
+            // if(materialData.length < 1 || weight.length < 1){
+            //     return Swal.fire({
+            //         title: 'Error!',
+            //         html: `<b>Weight</b> or <b>Material</b> is empty`,
+            //         icon: 'error',
+            //         confirmButtonText: 'Close'
+            //     });
+            // }
             $.ajax({
                 url: '<?= base_url('quality/AddMediumRack'); ?>',
                 type: 'post',

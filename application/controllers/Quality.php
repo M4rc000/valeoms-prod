@@ -15,6 +15,7 @@ class Quality extends CI_Controller {
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
         
         $data['title'] = 'Material Requests';
+        $data['materials'] = $this->QModel->getAllMaterials(); 
 
         $this->load->view('templates/header', $data);
         $this->load->view('templates/navbar', $data);   
@@ -23,6 +24,63 @@ class Quality extends CI_Controller {
         $this->load->view('templates/footer');
 	}  
 	
+    function getMaterial(){
+        $materialID = htmlspecialchars($this->input->post('material_id'));
+        $result = $this->db->query("SELECT * FROM material_list WHERE Id_material = '$materialID' AND is_active = 1")->result_array();
+    
+        echo json_encode($result);
+    }
+
+    function getCalculateMaterial(){
+        $materialID = $this->input->post('material_id');
+        $materialDesc = $this->input->post('material_desc');
+        $materialNeed = $this->input->post('material_need');
+        $materialUom = $this->input->post('material_uom');
+        $Id_request = $this->QModel->getLastIdReturn();
+
+        $Data = [
+            'Id_request' => $Id_request,
+            'Id_material' => $materialID,
+            'Material_desc' => $materialDesc,
+            'Material_need' => floatval($materialNeed),
+            'Uom' => $materialUom,
+            'status' => 1, // 1: PENDING, 0: Approved
+            'Crtdt' => date('Y-m-d H:i:s'), 
+            'Crtby' => $this->input->post('user'),
+            'Upddt' => date('Y-m-d H:i:s'), 
+            'Updby' => $this->input->post('user'),
+        ];
+
+        $this->QModel->insertData('quality_request', $Data);
+
+        $Request_result = $this->db->query("SELECT * FROM quality_request WHERE Id_request = '$Id_request' AND status = 1")->result_array();
+        $Box_result = $this->db->query("SELECT 
+                b.id_box, 
+                b.no_box, 
+                b.weight, 
+                b.sloc, 
+                s.SLoc,
+                bd.product_id, 
+                bd.material_desc, 
+                bd.total_qty, 
+                bd.total_qty_real, 
+                bd.uom
+            FROM 
+                box b
+            LEFT JOIN 
+                list_storage bd ON b.id_box = bd.id_box
+            LEFT JOIN 
+                storage s ON b.sloc = s.Id_storage
+            WHERE 
+                bd.product_id = '$materialID'")->result_array();  
+
+        $result = [
+            'Request_result' => $Request_result,
+            'Box_result' => $Box_result
+        ];
+        echo json_encode($result);
+    }
+
     public function material_return(){
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
@@ -35,7 +93,7 @@ class Quality extends CI_Controller {
         $this->load->view('quality/material_return', $data);
         $this->load->view('templates/footer');
 	}  
-
+    
     function getMaterialDesc(){
         $materialID = htmlspecialchars($this->input->post('materialID'));
         $result = $this->db->query("SELECT Material_desc, Material_type, Uom FROM material_list WHERE Id_material = '$materialID' AND is_active = 1")->result_array();

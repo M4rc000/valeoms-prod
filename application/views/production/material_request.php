@@ -160,7 +160,7 @@
                     `;
 
                     // Append the HTML content to the div with id "data"
-                    $('#data').empty().append(htmlContent);
+                    $('#data-desc').empty().append(htmlContent);
                 } else {
                     // Handle case when product is not found
                     $('#data-modal').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 40%"><i class="bi bi-x-circle me-1"></i> Product ID not found<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');

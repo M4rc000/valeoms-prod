@@ -32,4 +32,43 @@ class Quality_model extends CI_Model {
     public function insertData($table,$Data){
         return $this->db->insert($table,$Data);
     }
+
+	public function getAllMaterials(){
+		return $this->db->get('material_list')->result_array();
+	}
+
+	public function getLastIdReturn() {
+        $this->db->select('Id_request');
+        $this->db->from('quality_request');
+        $this->db->order_by('Id_request', 'DESC');
+        $this->db->limit(1);
+        $query = $this->db->get();
+        
+        // Check if there are any rows returned
+        if ($query->num_rows() == 0) {
+            return 'QRA0000001';
+        } else {
+            // Get the last Id_request
+            $row = $query->row();
+            $last_id = $row->Id_request;
+            
+            // Extract the prefix and the number part
+            $prefix = substr($last_id, 0, 3);
+            $number = (int) substr($last_id, 3);
+
+            // Increment the number part
+            $number += 1;
+
+            // Check if the number part needs to reset and prefix to increment
+            if ($number > 9999999) {
+                $prefix++;
+                $number = 1;
+            }
+
+            // Format the new Id_return
+            $new_id = $prefix . str_pad($number, 7, '0', STR_PAD_LEFT);
+
+            return $new_id;
+        }
+    }
 }
