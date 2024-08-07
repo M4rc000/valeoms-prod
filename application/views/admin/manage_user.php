@@ -1,3 +1,8 @@
+<style>
+	.badge-hover:hover{
+		cursor: pointer;
+	}
+</style>
 <section class="section">
 	<button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addModal" style="color: white">
 		New user
@@ -24,24 +29,25 @@
               <table class="table datatable">
                 <thead>
                   <tr>
-                    <th>#</th>
-                    <th>Username</th>
-                    <th>Name</th>
-                    <th>Gender</th>
-                    <th>Role</th>
-                    <th>Active</th>
-                    <th>Date Joined</th>
-                    <th>Action</th>
+                    <th class="text-center">#</th>
+                    <th class="text-center">Username</th>
+                    <th class="text-center">Name</th>
+                    <th class="text-center">Gender</th>
+                    <th class="text-center">Role</th>
+                    <th class="text-center">Active</th>
+                    <th class="text-center">Date Joined</th>
+                    <th class="text-center">Update</th>
+                    <th class="text-center">Action</th>
                   </tr>
                 </thead>
                 <tbody>
 					<?php $number = 0; foreach($users as $usr) : $number++?>
 						<tr>
-							<td><?=$number;?></td>
-							<td><?=$usr['username'];?></td>
-							<td><?=$usr['name'];?></td>
-							<td><?=$usr['gender'];?></td>
-							<td>
+							<td class="text-center"><?=$number;?></td>
+							<td class="text-center"><?=$usr['username'];?></td>
+							<td class="text-center"><?=$usr['name'];?></td>
+							<td class="text-center"><?=$usr['gender'];?></td>
+							<td class="text-center">
 							<?php
 								if ($usr['role_id'] == 1) {
 									echo 'Administrator';
@@ -52,15 +58,16 @@
 								}
 							?>
 							</td>
-							<td><?=$usr['is_active'] == 1 ? '<i class="bx bxs-check-circle ps-4" style="color: #012970"></i>' : '<i class="bx bxs-x-circle" style="color: #012970"></i>'; ?></td>
-							<td><?= date('d M Y H:i', strtotime($usr['date_joined'])); ?></td>
-							<td>
-								<button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editModal<?=$usr['id'];?>">
+							<td class="text-center"><?=$usr['is_active'] == 1 ? '<i class="bx bxs-check-circle ps-4" style="color: #012970"></i>' : '<i class="bx bxs-x-circle" style="color: #012970"></i>'; ?></td>
+							<td class="text-center"><?= date('d M Y H:i', strtotime($usr['date_joined'])); ?></td>
+							<td class="text-center"><?= $usr['Upddt'] != '' ? date('d M Y H:i', strtotime($usr['Upddt'])) : '-'; ?></td>
+							<td class="text-center">
+								<span class="badge bg-success badge-hover" data-bs-toggle="modal" data-bs-target="#editModal<?=$usr['id'];?>" style=":hover{cursor: pointer;}">
 									<i class="bx bxs-edit" style="color: white;"></i>
-								</button>
-								<button class="btn btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#deleteModal<?=$usr['id'];?>">
+								</span>
+								<span class="badge bg-danger badge-hover" data-bs-toggle="modal" data-bs-target="#deleteModal<?=$usr['id'];?>" style=":hover{cursor: pointer;}">
 									<i class="bx bxs-trash"></i>
-								</button>
+								</span>
 							</td>
 						</tr>
 					<?php endforeach; ?>
@@ -109,10 +116,9 @@
 				<div class="col-4">
 					<label for="role" class="form-label">Role</label>
 					<select id="role" class="form-select" required name="role">
-						<option value="1">Administrator</option>
-						<option value="2">Warehouse</option>
-						<option value="3">Production</option>
-						<option value="4">Finnish Good</option>
+						<?php foreach($roles as $role): ?>
+							<option value="<?= $role['id']; ?>"><?= $role['role']; ?></option>
+						<?php  endforeach; ?>
 				  </select>
 				</div>
 				<div class="col-4">

@@ -2,6 +2,16 @@
 defined('BASEPATH') OR exit('No direct script access allowed');
 
 class Master_model extends CI_Model {
+    public function countAllMaterials()
+    {
+        return $this->db->query("SELECT * FROM material_list WHERE is_active = 1")->num_rows();
+    }
+
+    public function getAllMaterials($limit,$start)
+    {
+        return $this->db->get('material_list',$limit,$start)->result_array();
+    }
+
     public function getListMaterial(){
         $this->db->where('is_active', 1); 
         return $this->db->get('material_list')->result_array();
@@ -34,11 +44,17 @@ class Master_model extends CI_Model {
         $this->db->where('id',$id);  
         $this->db->update($table, $Data);
     } 
+    
+    public function updateMultipleDataBom($table, $id, $Data){
+        $this->db->where('Id_bom',$id);  
+        $this->db->update($table, $Data);
+    }
 
     public function deleteData($table, $id){
         $this->db->where('id',$id);
         $this->db->delete($table);
     }
+    
 
     // READ DATA PRINT
     public function material_list_print() {

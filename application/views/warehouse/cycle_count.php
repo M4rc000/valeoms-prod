@@ -115,7 +115,7 @@
             console.log(data);
 			$('#detailsBody').empty();
 
-            $.each(data, function(index, detail) {
+            $.each(data.detail, function(index, detail) {
                 $('#detailsBody').append(`
                     <tr>
                         <td>${detail.id_material}</td>

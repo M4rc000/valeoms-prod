@@ -1,6 +1,6 @@
 <style>
 	.select2-container {
-		z-index: 9999;
+		z-index: 99;
 	}
 
 	.select2-selection {
@@ -19,14 +19,14 @@
                         <div class="col-md-12">
                             <ul class="nav nav-tabs d-flex" id="myTabjustified" role="tablist">
                                 <li class="nav-item flex-fill" role="presentation">
-                                  <button class="nav-link w-100 active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-justified" type="button" role="tab" aria-controls="home" aria-selected="true">High Rack</button>
+                                  <button class="nav-link w-100 active" id="high-tab" data-bs-toggle="tab" data-bs-target="#high-rack" type="button" role="tab" aria-controls="home" aria-selected="true">High Rack</button>
                                 </li>
                                 <li class="nav-item flex-fill" role="presentation">
-                                  <button class="nav-link w-100" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-justified" type="button" role="tab" aria-controls="profile" aria-selected="false">Medium Rack</button>
+                                  <button class="nav-link w-100" id="medium-tab" data-bs-toggle="tab" data-bs-target="#medium-rack" type="button" role="tab" aria-controls="profile" aria-selected="false">Medium Rack</button>
                                 </li>
                             </ul>
                             <div class="tab-content pt-2" id="myTabjustifiedContent">
-                                <div class="mx-2 tab-pane fade show active" id="home-justified" role="tabpanel" aria-labelledby="home-tab">
+                                <div class="mx-2 tab-pane fade show active" id="high-rack" role="tabpanel" aria-labelledby="home-tab">
                                     <div class="row mt-4 mb-3 mx-2">
                                         <div class="col-md-3">
                                             <button type="button" class="btn btn-primary" id="add-row-btn-hg">
@@ -57,7 +57,7 @@
                                                 </div>
                                         </div>
                                     </div>
-                                    <div class="row mt-3 mx-2">
+                                    <div class="row mt-4 mx-2">
                                         <div class="col-md-6">
                                             <div class="row">
                                                 <label for="weight-hg" class="col-sm-4 col-form-label"><b>Total Weight</b></label>
@@ -82,7 +82,7 @@
                                         <div class="mt-1" id="print-button-hg"></div>
                                     </div>
                                 </div>
-                                <div class="mx-2 tab-pane fade" id="profile-justified" role="tabpanel" aria-labelledby="profile-tab">
+                                <div class="mx-2 tab-pane fade" id="medium-rack" role="tabpanel" aria-labelledby="profile-tab">
                                     <div class="row mt-4 mb-3 mx-2">
                                         <div class="col-md-3">
                                             <button type="button" class="btn btn-primary" id="add-row-btn-mg">
@@ -167,7 +167,7 @@
         </div>
     </div>
 </div>
-<script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
+<script src="<?=base_url('assets');?>/vendor/qr-code/qr-code.min.js"></script>
 <script>
     $(document).ready(function (){
         // HIGH RACK
@@ -211,23 +211,31 @@
         });
         
         function addRowHG() {
+            var material_list = <?= json_encode($material_list);?>;
+            let materialOptions = '<option value="" selected>Select Material Part No</option>';
+            material_list.forEach(ml => {
+                materialOptions += `<option value="${ml.Id_material}">${ml.Id_material}</option>`;
+            });
+
             const newRow = `
                 <tr>
                     <td class="py-3"><b>${rowIndexHG}</b></td>
                     <td>
-                        <input type="text" class="form-control" name="materials-hg[${rowIndexHG}][material_id]" required aria-label="Material ID" style="width: 160px;">
+                        <select class="form-select material-select" name="materials-hg[${(rowIndexHG-1)}][material_id]" required>
+                            ${materialOptions}
+                        </select>
                     </td>
                     <td>
-                        <input type="text" class="form-control" name="materials-hg[${rowIndexHG}][material_desc]" required aria-label="Material Description" style="width: 300px;" readonly>
+                        <input type="text" class="form-control material-desc" name="materials-hg[${rowIndexHG}][material_desc]" required aria-label="Material Description" style="width: 300px;" readonly>
                     </td>
                     <td>
-                        <input type="text" class="form-control text-center" name="materials-hg[${rowIndexHG}][material_type]" aria-label="Material Type" style="width: 120px;" readonly>
+                        <input type="text" class="form-control text-center material-type" name="materials-hg[${rowIndexHG}][material_type]" aria-label="Material Type" style="width: 120px;" readonly>
                     </td>
                     <td>
-                        <input type="text" class="form-control" name="materials-hg[${rowIndexHG}][qty]" required aria-label="Quantity" style="width: 100px;">
+                        <input type="text" class="form-control material-qty" name="materials-hg[${rowIndexHG}][qty]" required aria-label="Quantity" style="width: 100px;">
                     </td>
                     <td>
-                        <input type="text" class="form-control text-center" name="materials-hg[${rowIndexHG}][uom]" required aria-label="Unit of Measure" style="width: 100px;" readonly>
+                        <input type="text" class="form-control text-center material-uom" name="materials-hg[${rowIndexHG}][uom]" required aria-label="Unit of Measure" style="width: 100px;" readonly>
                     </td>
                     <td class="text-center">
                         <button class="btn btn-danger btn-remove-row-hg" type="button" aria-label="Delete">
@@ -236,9 +244,27 @@
                     </td>
                 </tr>
             `;
+            
             $('#table-body-hg').append(newRow);
-            rowIndexHG+=1;
             updateRowIndicesHG();
+            
+            $('.material-select').select2({
+                width: '100%'
+            });
+            
+            
+            $('.material-select').last().change(function() {
+                const selectedMaterialId = $(this).val();
+                const selectedMaterial = material_list.find(ml => ml.Id_material == selectedMaterialId);
+
+                if (selectedMaterial) {
+                    $(this).closest('tr').find('.material-desc').val(selectedMaterial.Material_desc);
+                    $(this).closest('tr').find('.material-type').val(selectedMaterial.Material_type); 
+                    $(this).closest('tr').find('.material-uom').val(selectedMaterial.Uom);
+                }
+            });
+
+            rowIndexHG += 1;
         }
 
         function updateRowIndicesHG() {
@@ -261,7 +287,7 @@
             // Iterate over each table row to gather material data
             $('table #table-body-hg tr').each(function(index, row) {
                 var rowIndexHG = index;
-                var material_id = $(row).find('input[name="materials-hg[' + rowIndexHG + '][material_id]"]').val();
+                var material_id = $(row).find('select[name="materials-hg[' + rowIndexHG + '][material_id]"]').val();
                 var material_desc = $(row).find('input[name="materials-hg[' + rowIndexHG + '][material_desc]"]').val();
                 var material_type = $(row).find('input[name="materials-hg[' + rowIndexHG + '][material_type]"]').val();
                 var qty = $(row).find('input[name="materials-hg[' + rowIndexHG + '][qty]"]').val();
@@ -271,8 +297,8 @@
                     material_id: material_id,
                     material_desc: material_desc,
                     material_type: material_type,
-                    qty: qty,
-                    uom: uom
+                    material_qty: qty,
+                    material_uom: uom
                 });
                 rowIndexHG++;
             });
@@ -295,17 +321,32 @@
                     user
                 },
                 success: function(res) {
-                    function getBarcode() {
-                        var qrcode = new QRCode(document.getElementById("qrbarcode-hg"), {
-                            text: res['no_box'],
-                            width: 150,
-                            height: 150,
-                            correctLevel: QRCode.CorrectLevel.H
+                    if(res == '2'){
+                        Swal.fire({
+                            title: "Success",
+                            text: "Materials have been requested for return",
+                            icon: "success",
+                            // showDenyButton: true,
+                            confirmButtonText: "OK",
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '<?=base_url('production/material_return');?>';
+                            }
                         });
                     }
-                    getBarcode();
-                    $('#qrdesc-hg').html('<b>BOX ID: </b>'+res['no_box']);
-                    $('#print-button-hg').html(`<button type="button" class="btn btn-warning" id="print-hg" data-box="${res['no_box']}"><i class="bx bx-printer" style="color: white"></i></button>`);
+                    else{
+                        Swal.fire({
+                            title: "Error",
+                            text: "Failed requested return for Materials",
+                            icon: "error",
+                            // showDenyButton: true,
+                            confirmButtonText: "OK",
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '<?=base_url('production/material_return');?>';
+                            }
+                        });
+                    }
                 },
                 error: function(xhr, ajaxOptions, thrownError) {
                     console.error(xhr.statusText);
@@ -313,49 +354,49 @@
             });
         });
 
-        $(document).on('click', '#print-hg', function(){
-            var no_box = $(this).data('box');
-            var logoUrl = '<?php echo base_url("assets/img/valeo.png"); ?>';
-            var printWindow = window.open('', '', 'height=750,width=500');
-            printWindow.document.write('<html><head><title>Print Barcode</title>');
-            printWindow.document.write('<style>');
-            printWindow.document.write('@page { size: 17cm 13cm; margin: 5px; }');
-            printWindow.document.write(
-                '.print-section { display: flex; flex-direction: column; width: 14cm; height: 8cm; border: 1px solid black; box-sizing: border-box; }'
-            );
-            printWindow.document.write(
-                '.row { display: flex; flex: 1; align-items: center; justify-content: space-between; border-bottom: 1px solid black; }'
-            );
-            printWindow.document.write('.row:first-child { height: 3cm; padding: 0 2px; }');
-            printWindow.document.write(
-                '.row:last-child { height:5cm; align-items: center; justify-content: center; text-align: center; }');
-            printWindow.document.write('.barcode, .valeo-logo { display: inline-block; text-align: center;}');
-            printWindow.document.write('.barcode { width: 2cm; height: 2cm; margin-left:2cm;}');
-            printWindow.document.write(
-                `.valeo-logo { width:5cm; height: 2cm;margin-right:1cm; background-position: center; }`
-            );
-            printWindow.document.write(
-                '.barcode-info { font-size: 2em; margin-top: 8px; text-align: center; width: 100%; margin-left:15px; }');
-            printWindow.document.write('#qrcode img { width: 90%; height: 90%; }');
-            printWindow.document.write('</style>');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write('<div class="print-section">');
-            printWindow.document.write('<div class="row">');
-            printWindow.document.write('<div class="barcode" id="qrcode">' + document.getElementById('qrbarcode-hg').innerHTML +
-                '</div>');
-            printWindow.document.write('<div class="valeo-logo"><img src="' + logoUrl +
-                '" alt="Valeo Logo" style="width: 100%; height: 100%;"></div>');
-            printWindow.document.write('</div>');
-            printWindow.document.write('<div class="row">');
-            printWindow.document.write(
-                '<div class="barcode-info" style="margin-top:40px;"><span>ID Box:</span><h1 style="font-size:3em; margin-top:-5;">' +
-                no_box + '</h1></div>');
-            printWindow.document.write('</div>');
-            printWindow.document.write('</div>');
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.print();
-        });
+        // $(document).on('click', '#print-hg', function(){
+        //     var no_box = $(this).data('box');
+        //     var logoUrl = '<?php echo base_url("assets/img/valeo.png"); ?>';
+        //     var printWindow = window.open('', '', 'height=750,width=500');
+        //     printWindow.document.write('<html><head><title>Print Barcode</title>');
+        //     printWindow.document.write('<style>');
+        //     printWindow.document.write('@page { size: 17cm 13cm; margin: 5px; }');
+        //     printWindow.document.write(
+        //         '.print-section { display: flex; flex-direction: column; width: 14cm; height: 8cm; border: 1px solid black; box-sizing: border-box; }'
+        //     );
+        //     printWindow.document.write(
+        //         '.row { display: flex; flex: 1; align-items: center; justify-content: space-between; border-bottom: 1px solid black; }'
+        //     );
+        //     printWindow.document.write('.row:first-child { height: 3cm; padding: 0 2px; }');
+        //     printWindow.document.write(
+        //         '.row:last-child { height:5cm; align-items: center; justify-content: center; text-align: center; }');
+        //     printWindow.document.write('.barcode, .valeo-logo { display: inline-block; text-align: center;}');
+        //     printWindow.document.write('.barcode { width: 2cm; height: 2cm; margin-left:2cm;}');
+        //     printWindow.document.write(
+        //         `.valeo-logo { width:5cm; height: 2cm;margin-right:1cm; background-position: center; }`
+        //     );
+        //     printWindow.document.write(
+        //         '.barcode-info { font-size: 2em; margin-top: 8px; text-align: center; width: 100%; margin-left:15px; }');
+        //     printWindow.document.write('#qrcode img { width: 90%; height: 90%; }');
+        //     printWindow.document.write('</style>');
+        //     printWindow.document.write('</head><body>');
+        //     printWindow.document.write('<div class="print-section">');
+        //     printWindow.document.write('<div class="row">');
+        //     printWindow.document.write('<div class="barcode" id="qrcode">' + document.getElementById('qrbarcode-hg').innerHTML +
+        //         '</div>');
+        //     printWindow.document.write('<div class="valeo-logo"><img src="' + logoUrl +
+        //         '" alt="Valeo Logo" style="width: 100%; height: 100%;"></div>');
+        //     printWindow.document.write('</div>');
+        //     printWindow.document.write('<div class="row">');
+        //     printWindow.document.write(
+        //         '<div class="barcode-info" style="margin-top:40px;"><span>ID Box:</span><h1 style="font-size:3em; margin-top:-5;">' +
+        //         no_box + '</h1></div>');
+        //     printWindow.document.write('</div>');
+        //     printWindow.document.write('</div>');
+        //     printWindow.document.write('</body></html>');
+        //     printWindow.document.close();
+        //     printWindow.print();
+        // });
 
 
 
@@ -400,23 +441,31 @@
         });
         
         function addRowMG() {
+            var material_list = <?= json_encode($material_list);?>;
+            let materialOptions = '<option value="" selected>Select Material Part No</option>';
+            material_list.forEach(ml => {
+                materialOptions += `<option value="${ml.Id_material}">${ml.Id_material}</option>`;
+            });
+
             const newRow = `
                 <tr>
                     <td class="py-3"><b>${rowIndexMG}</b></td>
                     <td>
-                        <input type="text" class="form-control" name="materials-mg[${rowIndexMG}][material_id]" required aria-label="Material ID" style="width: 160px;">
+                        <select class="form-select material-select-mg" name="materials-mg[${(rowIndexMG-1)}][material_id]" required>
+                            ${materialOptions}
+                        </select>
                     </td>
                     <td>
-                        <input type="text" class="form-control" name="materials-mg[${rowIndexMG}][material_desc]" required aria-label="Material Description" style="width: 300px;" readonly>
+                        <input type="text" class="form-control material-desc-mg" name="materials-mg[${rowIndexMG}][material_desc]" required aria-label="Material Description" style="width: 300px;" readonly>
                     </td>
                     <td>
-                        <input type="text" class="form-control text-center" name="materials-mg[${rowIndexMG}][material_type]" aria-label="Material Type" style="width: 120px;" readonly>
+                        <input type="text" class="form-control text-center material-type-mg" name="materials-mg[${rowIndexMG}][material_type]" aria-label="Material Type" style="width: 120px;" readonly>
                     </td>
                     <td>
-                        <input type="text" class="form-control" name="materials-mg[${rowIndexMG}][qty]" required aria-label="Quantity" style="width: 100px;">
+                        <input type="text" class="form-control material-qty-mg" name="materials-mg[${rowIndexMG}][qty]" required aria-label="Quantity" style="width: 100px;">
                     </td>
                     <td>
-                        <input type="text" class="form-control text-center" name="materials-mg[${rowIndexMG}][uom]" required aria-label="Unit of Measure" style="width: 100px;" readonly>
+                        <input type="text" class="form-control text-center material-uom-mg" name="materials-mg[${rowIndexMG}][uom]" required aria-label="Unit of Measure" style="width: 100px;" readonly>
                     </td>
                     <td class="text-center">
                         <button class="btn btn-danger btn-remove-row-mg" type="button" aria-label="Delete">
@@ -425,9 +474,27 @@
                     </td>
                 </tr>
             `;
+
             $('#table-body-mg').append(newRow);
+            updateRowIndicesMG();            
+            
+            $('.material-select-mg').select2({
+                width: '100%'
+            });
+            
+            
+            $('.material-select-mg').last().change(function() {
+                const selectedMaterialId = $(this).val();
+                const selectedMaterial = material_list.find(ml => ml.Id_material == selectedMaterialId);
+
+                if (selectedMaterial) {
+                    $(this).closest('tr').find('.material-desc-mg').val(selectedMaterial.Material_desc);
+                    $(this).closest('tr').find('.material-type-mg').val(selectedMaterial.Material_type); 
+                    $(this).closest('tr').find('.material-uom-mg').val(selectedMaterial.Uom);
+                }
+            });
+            
             rowIndexMG+=1;
-            updateRowIndicesMG();
         }
 
         function updateRowIndicesMG() {
@@ -450,7 +517,7 @@
             // Iterate over each table row to gather material data
             $('table #table-body-mg tr').each(function(index, row) {
                 var rowIndexMG = index;
-                var material_id = $(row).find('input[name="materials-mg[' + rowIndexMG + '][material_id]"]').val();
+                var material_id = $(row).find('select[name="materials-mg[' + rowIndexMG + '][material_id]"]').val();
                 var material_desc = $(row).find('input[name="materials-mg[' + rowIndexMG + '][material_desc]"]').val();
                 var material_type = $(row).find('input[name="materials-mg[' + rowIndexMG + '][material_type]"]').val();
                 var qty = $(row).find('input[name="materials-mg[' + rowIndexMG + '][qty]"]').val();
@@ -460,20 +527,14 @@
                     material_id: material_id,
                     material_desc: material_desc,
                     material_type: material_type,
-                    qty: qty,
-                    uom: uom
+                    material_qty: qty,
+                    material_uom: uom
                 });
                 rowIndexMG++;
             });
 
-            // if(materialData.length < 1 || weight.length < 1){
-            //     return Swal.fire({
-            //         title: 'Error!',
-            //         html: `<b>Weight</b> or <b>Material</b> is empty`,
-            //         icon: 'error',
-            //         confirmButtonText: 'Close'
-            //     });
-            // }
+            console.log(materialData);
+
             $.ajax({
                 url: '<?= base_url('production/AddMediumRack'); ?>',
                 type: 'post',
@@ -484,19 +545,39 @@
                     user
                 },
                 success: function(res) {
-                    console.log('Barcode Generate');
-                    console.log(res);
-                    function getBarcode() {
-                        var qrcode = new QRCode(document.getElementById("qrbarcode-mg"), {
-                            text: res['no_box'],
-                            width: 150,
-                            height: 150,
-                            correctLevel: QRCode.CorrectLevel.H
+                    if(res == '2'){
+                        Swal.fire({
+                            title: "Success",
+                            text: "Materials have been requested for return",
+                            icon: "success",
+                            // showDenyButton: true,
+                            confirmButtonText: "OK",
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '<?=base_url('production/material_return');?>';
+                            }
                         });
                     }
-                    getBarcode();
-                    $('#qrdesc-mg').html('<b>BOX ID: </b>'+res['no_box']);
-                    $('#print-button-mg').html(`<button class="btn btn-warning" id="print-mg" data-box="${res['no_box']}"><i class="bx bx-printer" style="color: white"></i></button>`);
+                    else{
+                        Swal.fire({
+                            title: "Error",
+                            text: "Failed requested return for Materials",
+                            icon: "error",
+                            // showDenyButton: true,
+                            confirmButtonText: "OK",
+                        }).then((result) => {
+                            if (result.isConfirmed) {
+                                window.location.href = '<?=base_url('production/material_return');?>';
+                            }
+                        });
+                    }
+
+                    $('#high-tab').removeClass('active');
+                    $('#high-rack').removeClass('show');
+                    $('#high-rack').removeClass('active');
+                    $('#medium-tab').addClass('active');
+                    $('#medium-rack').addClass('show');
+                    $('#medium-rack').addClass('active');
                 },
                 error: function(xhr, ajaxOptions, thrownError) {
                     console.error(xhr.statusText);
@@ -504,48 +585,5 @@
             });
         });
 
-        $(document).on('click', '#print-mg', function(){
-            var no_box = $(this).data('box');
-            var logoUrl = '<?php echo base_url("assets/img/valeo.png"); ?>';
-            var printWindow = window.open('', '', 'height=750,width=500');
-            printWindow.document.write('<html><head><title>Print Barcode</title>');
-            printWindow.document.write('<style>');
-            printWindow.document.write('@page { size: 17cm 13cm; margin: 5px; }');
-            printWindow.document.write(
-                '.print-section { display: flex; flex-direction: column; width: 14cm; height: 8cm; border: 1px solid black; box-sizing: border-box; }'
-            );
-            printWindow.document.write(
-                '.row { display: flex; flex: 1; align-items: center; justify-content: space-between; border-bottom: 1px solid black; }'
-            );
-            printWindow.document.write('.row:first-child { height: 3cm; padding: 0 2px; }');
-            printWindow.document.write(
-                '.row:last-child { height:5cm; align-items: center; justify-content: center; text-align: center; }');
-            printWindow.document.write('.barcode, .valeo-logo { display: inline-block; text-align: center;}');
-            printWindow.document.write('.barcode { width: 2cm; height: 2cm; margin-left:2cm;}');
-            printWindow.document.write(
-                `.valeo-logo { width:5cm; height: 2cm;margin-right:1cm; background-position: center; }`
-            );
-            printWindow.document.write(
-                '.barcode-info { font-size: 2em; margin-top: 8px; text-align: center; width: 100%; margin-left:15px; }');
-            printWindow.document.write('#qrcode img { width: 90%; height: 90%; }');
-            printWindow.document.write('</style>');
-            printWindow.document.write('</head><body>');
-            printWindow.document.write('<div class="print-section">');
-            printWindow.document.write('<div class="row">');
-            printWindow.document.write('<div class="barcode" id="qrcode">' + document.getElementById('qrbarcode-mg').innerHTML +
-                '</div>');
-            printWindow.document.write('<div class="valeo-logo"><img src="' + logoUrl +
-                '" alt="Valeo Logo" style="width: 100%; height: 100%;"></div>');
-            printWindow.document.write('</div>');
-            printWindow.document.write('<div class="row">');
-            printWindow.document.write(
-                '<div class="barcode-info" style="margin-top:40px;"><span>ID Box:</span><h1 style="font-size:3em; margin-top:-5;">' +
-                no_box + '</h1></div>');
-            printWindow.document.write('</div>');
-            printWindow.document.write('</div>');
-            printWindow.document.write('</body></html>');
-            printWindow.document.close();
-            printWindow.print();
-        });
     });
 </script>

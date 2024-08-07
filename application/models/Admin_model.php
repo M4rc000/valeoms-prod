@@ -9,8 +9,38 @@ class Admin_model extends CI_Model {
    }
     
    // READ DATA
+   public function getListStorage(){
+    return $this->db->get('storage')->result_array();
+   }
+
    public function getAllUsers(){
        return $this->db->get_where('user')->result_array();
+   }
+   
+   public function getMenuAccess($role_id){
+       return $this->db->query("SELECT user_access_menu.id, user_role.id as role_id, user_role.role, user_menu.menu
+            FROM `user_access_menu`
+            LEFT JOIN `user_role` ON user_role.id = user_access_menu.role_id
+            LEFT JOIN `user_menu` ON user_menu.id = user_access_menu.menu_id
+            WHERE user_access_menu.role_id = '$role_id'
+            ORDER BY role_id")->result_array();
+   }
+
+   public function getSubMenuAccess($role_id){
+       return $this->db->query("SELECT user_access_submenu.id, user_role.id as role_id, user_role.role, user_menu.menu, user_sub_menu.title
+            FROM `user_access_submenu`
+            LEFT JOIN `user_role` ON user_role.id = user_access_submenu.role_id
+            LEFT JOIN `user_menu` ON user_menu.id = user_access_submenu.menu_id
+            LEFT JOIN `user_sub_menu` ON user_sub_menu.id = user_access_submenu.submenu_id
+            WHERE user_access_submenu.role_id = '$role_id'
+            ORDER BY role_id")->result_array();
+   }
+   
+   public function getMenSub(){
+       return $this->db->query('SELECT user_sub_menu.id AS submenu_id, user_sub_menu.title, user_menu.id AS menu_id, user_menu.menu
+            FROM `user_sub_menu`
+            LEFT JOIN `user_menu` ON user_sub_menu.menu_id = user_menu.id
+            WHERE is_active = 1;')->result_array();
    }
 
    public function getUsers() {
@@ -27,20 +57,13 @@ class Admin_model extends CI_Model {
         return $result;
    }
 
-   public function getBooks() {
-        $months = range(1, 12);
-        $year = date('Y');
-        foreach ($months as $month) {
-            $start_date = date('Y-m-01', strtotime("$year-$month-01"));
-            $end_date = date('Y-m-t', strtotime("$year-$month-01"));
-
-            $this->db->where("crtdt BETWEEN '$start_date' AND '$end_date'");
-            $count = $this->db->count_all_results('books');    
-            $result[] = $count;
+    public function get_menu_id_by_submenu_id($submenu_id) {
+        $query = $this->db->get_where('user_sub_menu', ['id' => $submenu_id]);
+        if ($query->num_rows() > 0) {
+            return $query->row()->menu_id;
         }
-        return $result;
-   }
-
+        return null;
+    }
 
    public function getAllRoles(){
        return $this->db->get('user_role')->result_array();
@@ -103,5 +126,21 @@ class Admin_model extends CI_Model {
             </div>
             <?php
         }
+    }
+
+    public function countAllBoxes(){
+        return $this->db->query("SELECT a.*, b.SLoc as sloc_name 
+			FROM `box` a 
+			LEFT JOIN storage b ON a.sloc = b.Id_storage")->num_rows();
+    }
+
+
+    public function getBoxes($limit, $start){
+        $this->db->select('a.*, b.SLoc as sloc_name');
+        $this->db->from('box a');
+        $this->db->join('storage b', 'a.sloc = b.Id_storage', 'left');
+        $this->db->limit($limit, $start);
+        $query = $this->db->get();
+        return $query->result_array();
     }
 }

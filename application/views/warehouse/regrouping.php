@@ -131,8 +131,9 @@ function getBox() {
             var data = JSON.parse(res);
             console.log(data);
             $('#detailsBody').empty();
-
-            $.each(data, function(index, detail) {
+            
+            $.each(data.detail, function(index, detail) {
+                var number = 0;
                 $('#detailsBody').append(`
 					<tr>
 						<td>${detail.id_material}</td>
@@ -148,6 +149,7 @@ function getBox() {
 						</td>
 					</tr>
 				`);
+                number+=1;
             });
             $('.card-body').show();
 

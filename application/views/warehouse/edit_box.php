@@ -1,3 +1,14 @@
+<style>
+    .select2-container {
+		z-index: 9999;
+	}
+
+	.select2-selection {
+		padding-top: 4px !important;
+		height: 38px !important;
+        /* width: 367px !important; */
+	}
+</style>
 <section>
     <div class="row">
         <div class="col-lg-12">
@@ -24,7 +35,7 @@
                     <?= $this->session->flashdata('ERROR'); ?>
 
                     <?php } ?>
-                    <h4 class="mt-2">Box Number : <b><?= $no_box?></b></h4>
+                    <h4 class="mt-2">Box Number : <b><?= $no_box ?></b></h4>
                     <button type="button" class="btn btn-primary mb-2 mt-4" style data-bs-toggle="modal"
                         data-bs-target="#addModal1" style="font-weight: bold;" id="addBtn">
                         + Add Material
@@ -54,11 +65,11 @@
                                 <td><?php echo $material['qty']; ?></td>
                                 <td><?php echo $material['uom']; ?></td>
                                 <td>
-                                <!-- <button class="btn btn-success" data-bs-toggle="modal"
-                                        data-bs-target="#editModal<?= $material['id_box_detail']; ?>"
-                                        onclick="getDataForEdit(<?= $material['id_box_detail']; ?>)">
-                                    <i class="bx bxs-edit" style="color: white;"></i>
-                                </button> -->
+                                    <!-- <button class="btn btn-success" data-bs-toggle="modal"
+										data-bs-target="#editModal<?= $material['id_box_detail']; ?>"
+										onclick="getDataForEdit(<?= $material['id_box_detail']; ?>)">
+									<i class="bx bxs-edit" style="color: white;"></i>
+								</button> -->
                                     <button class="btn btn-danger ms-1" data-bs-toggle="modal"
                                         onclick="deleteItem(<?= $material['id_box_detail']; ?>)">
                                         <i class="bx bxs-trash"></i>
@@ -74,15 +85,17 @@
                             <b>Total weight (kg)</b>
                         </label>
                         <div class="col-sm-3">
-                            <input type="text" class="form-control" id="total_weight" onblur="getSloc()" value="<?= $box->weight ?>">
-                            <input type="hidden" class="form-control" id="sloc_select_before"  value="<?= $box->sloc ?>">
+                            <input type="text" class="form-control" id="total_weight" onblur="getSloc()"
+                                value="<?= $box->weight ?>">
+                            <input type="hidden" class="form-control" id="sloc_select_before" value="<?= $box->sloc ?>">
                         </div>
                         <label class="col-sm-2 col-form-label">
                             <b>Select SLoc</b>
                         </label>
                         <div class="col-sm-4">
                             <select id="sloc_select" class="form-select" aria-label="Default select example">
-                                <option value="<?= $box->sloc ?>" disabled selected style="color: GREY;"><?= $box->sloc_name ? $box->sloc_name : 'Please select total weight first' ?>
+                                <option value="<?= $box->sloc ?>" disabled selected style="color: GREY;">
+                                    <?= $box->sloc_name ? $box->sloc_name : 'Please select total weight first' ?>
                                 </option>
                             </select>
                         </div>
@@ -94,10 +107,11 @@
                                 <!-- Kosong -->
                             </form>
                         </div>
-                    </div> <div class="row mt-2" style="text-align: right; margin-right: 5px;">
+                    </div>
+                    <div class="row mt-2" style="text-align: right; margin-right: 5px;">
                         <div class="col-md-10"></div>
                         <div class="col-md">
-                            <button class="btn btn-primary"  id="saveEdit" onclick="saveChanges(<?= $id_box ?>)">
+                            <button class="btn btn-primary" id="saveEdit" onclick="saveChanges(<?= $id_box ?>)">
                                 Save
                             </button>
                         </div>
@@ -108,10 +122,18 @@
     </div>
 </section>
 
-<script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+<script src="<?=base_url('assets');?>/vendor/qr-code/qr-code.min.js"></script>
+<script src="<?=base_url('assets');?>/vendor/jquery/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
+$(document).ready(function (){
+    $('#addModal1').on('shown.bs.modal', function () {
+        $('#reference_number').select2({
+            dropdownParent: $('#addModal1'),
+            width: '100%'
+        });
+    });
+})
 function closeModal() {
     $('#reference_number').val("");
     $('#material').val("");
@@ -149,7 +171,7 @@ function refreshAll() {
     });
 }
 
-function getMaterial() {
+$(document).on('change', '#reference_number', function(){
     $('#material').val("");
     $('#uom').val("");
     $('#material_edit').val('');
@@ -187,7 +209,7 @@ function getMaterial() {
             });
         }
     });
-}
+});
 
 function getSloc() {
     var total_weight = $('#total_weight').val();
@@ -282,7 +304,7 @@ function deleteItem(id) {
 </script>
 
 <!-- ADD MODAL-->
-<div class="modal fade" id="addModal1" tabindex="-1">
+<div class="modal fade" id="addModal1" tabindex="-1" role="dialog" aria-hidden="true">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <?= form_open_multipart('Warehouse/AddItemBox'); ?>
@@ -295,14 +317,18 @@ function deleteItem(id) {
                 <div class="row ps-2">
                     <div class="col-6">
                         <label for="reference_number" class="form-label">Material Part Number</label>
-                        <input type="text" class="form-control" id="reference_number" name="reference_number"
-                            onblur="getMaterial()" required>
+                        <select class="form-select" id="reference_number" name="reference_number">
+                                <option value="">Select Material Part No</option>
+                            <?php foreach($materials as $mtr):?>
+                                <option value="<?=$mtr['Id_material'];?>"><?=$mtr['Id_material'];?></option>
+                            <?php endforeach; ?>
+                        </select>
                     </div>
                     <div class="col-6 mb-3">
                         <label for="material" class="form-label">Material</label>
                         <input type="text" class="form-control" id="material" name="material" required>
-                        <input type="hidden" class="form-control" id="id_box" name="id_box" value="<?=  $id_box ?>">
-                        <input type="hidden" class="form-control" id="id_sloc" name="id_sloc" value="<?=  $id_sloc ?>">
+                        <input type="hidden" class="form-control" id="id_box" name="id_box" value="<?= $id_box ?>">
+                        <input type="hidden" class="form-control" id="id_sloc" name="id_sloc" value="<?= $id_sloc ?>">
                     </div>
                     <div class="col-6 mb-3">
                         <label for="uom" class="form-label">UOM</label>
@@ -326,48 +352,54 @@ function deleteItem(id) {
 
 <?php foreach ($detail_box as $material): ?>
 <!-- EDIT MODAL -->
-<div class="modal fade" id="editModal<?= $material['id_box_detail']; ?>" tabindex="-1">
+<!-- <div class="modal fade" id="editModal<?= $material['id_box_detail']; ?>" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
-            <form id="editForm<?= $material['id_box_detail']; ?>" action="<?= base_url('warehouse/editItemMaterial'); ?>" method="post">
+            <form id="editForm<?= $material['id_box_detail']; ?>"
+                action="<?= base_url('warehouse/editItemMaterial'); ?>" method="post">
                 <div class="modal-header">
                     <h5 class="modal-title">Edit Material</h5>
                     <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                            onclick="closeModal()"></button>
+                        onclick="closeModal()"></button>
                 </div>
                 <div class="modal-body">
                     <input type="hidden" id="id_box" name="id_box">
                     <div class="row ps-2">
                         <div class="col-6">
                             <label for="reference_number" class="form-label">Material Part Number</label>
-                            <input type="text" class="form-control" id="reference_number<?= $material['id_box_detail']; ?>" name="reference_number"
-                                   onblur="getMaterial()" required>
+                            <input type="text" class="form-control"
+                                id="reference_number<?= $material['id_box_detail']; ?>" name="reference_number"
+                                onblur="getMaterial()" required>
                         </div>
                         <div class="col-6 mb-3">
                             <label for="material" class="form-label">Material</label>
-                            <input type="text" class="form-control" id="material<?= $material['id_box_detail']; ?>" name="material" required>
-                            <input type="hidden" class="form-control" id="id_box" name="id_box" value="<?=  $id_box ?>">
-                            <input type="hidden" class="form-control" id="id_sloc" name="id_sloc" value="<?=  $id_sloc ?>">
+                            <input type="text" class="form-control" id="material<?= $material['id_box_detail']; ?>"
+                                name="material" required>
+                            <input type="hidden" class="form-control" id="id_box" name="id_box" value="<?= $id_box ?>">
+                            <input type="hidden" class="form-control" id="id_sloc" name="id_sloc"
+                                value="<?= $id_sloc ?>">
                         </div>
                         <div class="col-6 mb-3">
                             <label for="uom" class="form-label">UOM</label>
-                            <input type="text" class="form-control" id="uom<?= $material['id_box_detail']; ?>" name="uom" required>
+                            <input type="text" class="form-control" id="uom<?= $material['id_box_detail']; ?>"
+                                name="uom" required>
                         </div>
                         <div class="col-6 mb-3">
                             <label for="qty" class="form-label">Quantity</label>
-                            <input type="number" class="form-control" id="qty<?= $material['id_box_detail']; ?>" name="qty" required>
+                            <input type="number" class="form-control" id="qty<?= $material['id_box_detail']; ?>"
+                                name="qty" required>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
                     <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                            onclick="closeModal()">Close</button>
+                        onclick="closeModal()">Close</button>
                     <button type="submit" class="btn btn-primary">Save changes</button>
                 </div>
             </form>
         </div>
     </div>
-</div>
+</div> -->
 <?php endforeach; ?>
 
 
@@ -426,28 +458,6 @@ function editBox(id_box, weight, sloc) {
 <?php endforeach; ?>
 </section>
 <script>
-    function getDataForEdit(id_box_detail) {
-    $.ajax({
-        url: '<?= base_url('warehouse/getDataForEdit'); ?>',
-        type: 'POST',
-        data: { id_box_detail: id_box_detail },
-        success: function(response) {
-            var data = JSON.parse(response);
-            if (data.status == 'success') {
-                console.log(data.material.reference_number);
-                $('#reference_number<?= $material['id_box_detail']; ?>').val(data.material.id_material);
-                $('#material<?= $material['id_box_detail']; ?>').val(data.material.material_desc);
-                $('#uom<?= $material['id_box_detail']; ?>').val(data.material.uom);
-                $('#qty<?= $material['id_box_detail']; ?>').val(data.material.qty);
-            } else {
-                alert('Data not found'); 
-            }
-        },
-        error: function(xhr, status, error) {
-            console.error('Error fetching data:', error);
-        }
-    });
-}
 function saveChanges(id_box) {
     var total_weight = $('#total_weight').val();
     var sloc = $('#sloc_select').val();
@@ -470,7 +480,7 @@ function saveChanges(id_box) {
                     text: "Changes saved successfully.",
                     icon: "success"
                 }).then(function() {
-                    window.location.reload();
+                    window.location.href = "<?= base_url('warehouse/list_box/0'); ?>";
                 });
             } else {
                 Swal.fire({
@@ -485,6 +495,4 @@ function saveChanges(id_box) {
         }
     });
 }
-
-
 </script>

@@ -1,7 +1,21 @@
+<style>
+    .select2-container {
+      z-index: 99;
+    }
+
+    .select2-selection {
+      padding-top: 4px !important;
+      height: 38px !important;
+    }
+    .col-md-21 {
+      flex: 0 0 auto;
+      width: 100%;
+    }
+</style>
 <section class="section">
   <div class="row">
     <div class="col-lg-12">
-      <div class="card" style="height: 400px">
+      <div class="card" style="height: 100%">
         <div class="card-body">
           <div class="row">
             <div class="col-md-2 mt-3 mb-4">
@@ -19,19 +33,66 @@
           <?php if ($this->session->flashdata('DELETED') != '') { ?>
             <?= $this->session->flashdata('DELETED'); ?>
           <?php } ?>
-          <div class="row mt-3 mb-3 justify-content-center">
-            <label for="inputText" class="col-sm-2 col-form-label"><b>Material Part No</b></label>
-            <div class="col-sm-4">
-              <input type="text" class="form-control" id="material_id" required>
+          <div class="table-responsive">
+            <div class="row mt-4 mb-4 justify-content-center">
+              <div class="col-12 col-md-4 mb-3 mb-md-0 text-center">
+                  <b>Material Part No</b>
+              </div>
+              <div class="col-12 col-md-5 mb-3 mb-md-0">
+                  <select class="form-select" id="material_id" name="material_id" required>
+                      <option value="">Select Material Part No</option>
+                      <?php foreach($materials as $mtr): ?>
+                      <option value="<?=$mtr['Id_material']?>"><?=$mtr['Id_material']?></option>
+                      <?php endforeach; ?>
+                  </select>
+              </div>
+              <div class="col-12 col-md-3">
+                  <button class="btn btn-success w-100" type="submit" onclick="getMaterialList()">
+                      Search
+                  </button>
+              </div>
             </div>
-            <div class="col-sm-2">
-              <button class="btn btn-success" type="submit" onclick="getMaterialList()">
-                Search
-              </button>
+            <div class="row mt-5 justify-content-center" id="row-pagination"></div>
+            <div class="row mt-2 mb-1 px-2">
+                <div class="col">
+                    <span style="font-size: 16px;"><b>Total Material : </b> <?=$total_rows;?></span>
+                </div>
             </div>
-          </div>
-          <div class="row mt-3">
-            <div id="data"></div>
+            <div class="row mt-1 px-2" id="data-table">
+                <div class="col-sm-12">
+                  <table class="table table-bordered mt-3" id="table-content">
+                    <thead>
+                      <tr>
+                        <th class="text-center">Material Part No</th>
+                        <th class="text-center">Material Part Name</th>
+                        <th class="text-center">Material Type</th>
+                        <th class="text-center">Uom</th>
+                        <th class="text-center">Family</th>
+                        <th class="text-center">Action</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      <?php foreach($materials as $mtr): ?>
+                        <tr>
+                          <td class="text-center"><?= $mtr['Id_material']; ?></td>
+                          <td class="text-start"><?= $mtr['Material_desc']; ?></td>
+                          <td class="text-center"><?= $mtr['Material_type']; ?></td>
+                          <td class="text-center"><?= $mtr['Uom']; ?></td>
+                          <td class="text-center"><?= $mtr['Family']; ?></td>
+                          <td class="text-center">
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#editModal<?= $mtr['Id']; ?>">
+                              <span class="badge bg-warning"><i class="bi bi-pencil-square"></i></span>
+                            </a>
+                            <a href="#" data-bs-toggle="modal" data-bs-target="#deleteModal<?= $mtr['Id']; ?>">
+                              <span class="badge bg-danger"><i class="bi bi-trash"></i></span>
+                            </a>
+                          </td>
+                        </tr>
+                      <?php endforeach; ?>
+                    </tbody>
+                  </table>
+                </div>
+            </div>
           </div>
         </div>
       </div>
@@ -41,51 +102,172 @@
 
 <!-- ADD MODAL -->
 <div class="modal fade" id="addModal" tabindex="-1">
-	<div class="modal-dialog modal-lg">
-		<div class="modal-content">
-	<?= form_open_multipart('master/AddMaterialList'); ?>
-		<div class="modal-header">
-			<h5 class="modal-title">Add Material List</h5>
-			<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-		</div>
-		<div class="modal-body">
-			<!-- GET USER -->
-			<input type="text" class="form-control" id="user" name="user" value="<?=$name['username'];?>" hidden> 
-			<div class="row ps-2">
-				<div class="col-4">
-					<label for="material_id" class="form-label">Material ID</label>
-					<input type="text" class="form-control" id="material_id" name="material_id" required>
-				</div>
-				<div class="col-4">
-					<label for="material_desc" class="form-label">Material Description</label>
-					<input type="text" class="form-control" id="material_desc" name="material_desc" required>
-				</div>
-				<div class="col-4">
-					<label for="material_type" class="form-label">Material Type</label>
-					<input type="text" class="form-control" id="material_type" name="material_type" required>
-				</div>
-			</div>
-			<div class="row ps-2 mt-3">
-				<div class="col-4">
-					<label for="uom" class="form-label">Uom</label>
-					<input type="text" class="form-control" id="uom" name="uom">
-				</div>
-				<div class="col-4">
-					<label for="family" class="form-label">Family</label>
-					<input type="text" class="form-control" id="family" name="family">
-				</div>
-			</div>
-		</div>
-		<div class="modal-footer">
-			<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-			<button type="submit" class="btn btn-primary">Save changes</button>
-		</div>
-	</form>
-		</div>
-	</div>
+  <div class="modal-dialog modal-lg">
+    <div class="modal-content">
+      <?= form_open_multipart('master/AddMaterialList'); ?>
+        <div class="modal-header">
+          <h5 class="modal-title">Add Material List</h5>
+          <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+        </div>
+        <div class="modal-body">
+          <!-- GET USER -->
+          <input type="text" class="form-control" id="user" name="user" value="<?= $name['username']; ?>" hidden> 
+          <div class="row g-3">
+            <div class="col-12 col-md-4">
+              <label for="material_id" class="form-label">Material ID</label>
+              <input type="text" class="form-control" id="material_id" name="material_id" required>
+            </div>
+            <div class="col-12 col-md-4">
+              <label for="material_desc" class="form-label">Material Description</label>
+              <input type="text" class="form-control" id="material_desc" name="material_desc" required>
+            </div>
+            <div class="col-12 col-md-4">
+              <label for="material_type" class="form-label">Material Type</label>
+              <input type="text" class="form-control" id="material_type" name="material_type" required>
+            </div>
+          </div>
+          <div class="row g-3 mt-3">
+            <div class="col-12 col-md-4">
+              <label for="uom" class="form-label">Uom</label>
+              <input type="text" class="form-control" id="uom" name="uom">
+            </div>
+            <div class="col-12 col-md-4">
+              <label for="family" class="form-label">Family</label>
+              <input type="text" class="form-control" id="family" name="family">
+            </div>
+          </div>
+        </div>
+        <div class="modal-footer">
+          <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+          <button type="submit" class="btn btn-primary">Save changes</button>
+        </div>
+      </form>
+    </div>
+  </div>
 </div>
 
+
+<!-- EDIT MODAL -->
+<?php foreach($materials as $mtr): ?>
+<div class="modal fade" id="editModal<?=$mtr['Id'];?>" tabindex="-1">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+        <?= form_open_multipart('master/EditMaterialList'); ?>
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Menu</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <input type="text" class="form-control" id="user" name="user" value="<?=$name['username'];?>" hidden> 
+                <input type="text" class="form-control" id="id" name="id" value="<?=$mtr['Id'];?>" hidden> 
+                <div class="row ps-2">
+                    <div class="col-4">
+                        <label for="material_id" class="form-label">Material ID</label>
+                        <input type="text" class="form-control" id="material_id" name="material_id" value="<?=$mtr['Id_material'];?>">
+                    </div>
+                    <div class="col-4">
+                        <label for="material_desc" class="form-label">Material Description</label>
+                        <input type="text" class="form-control" id="material_desc" name="material_desc" value="<?=$mtr['Material_desc'];?>">
+                    </div>
+                    <div class="col-4">
+                        <label for="material_type" class="form-label">Material Type</label>
+                        <input type="text" class="form-control" id="material_type" name="material_type" value="<?=$mtr['Material_type'];?>">
+                    </div>
+                </div>
+                <div class="row mt-4 ps-2">
+                    <div class="col-4">
+                        <label for="uom" class="form-label">Uom</label>
+                        <input type="text" class="form-control" id="uom" name="uom" value="<?=$mtr['Uom'];?>">
+                    </div>
+                    <div class="col-4">
+                        <label for="family" class="form-label">Family</label>
+                        <input type="text" class="form-control" id="family" name="family" value="<?=$mtr['Family'];?>">
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="submit" class="btn btn-primary">Save changes</button>
+            </div>
+        </form>
+        </div>
+    </div>
+</div>
+<?php endforeach; ?>
+
+<!-- DELETE MODAL -->
+<?php foreach($materials as $mtr): ?>
+<div class="modal fade" id="deleteModal<?=$mtr['Id'];?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h4 class="modal-title pb-0 mb-0" id="exampleModalLabel">Confirm to delete?</h4>
+            </div>
+            <div class="modal-body">
+                <input type="text" name="id" id="id" value="<?=$mtr['Id'];?>" hidden>
+                <input type="text" name="user" id="user" value="<?=$name['username'];?>" hidden>
+                <p><b>Material ID</b>: <?=$mtr['Id_material'];?></p>
+                <p><b>Material Description</b>: <?=$mtr['Material_desc'];?></p>
+            </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button type="submit" class="btn btn-primary" name="delete_user">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+<?php endforeach; ?>
+
 <script>
+  $(document).ready(function (){
+    $('#material_id').select2()
+    let table = $('#table-content').DataTable({
+     paging: false,
+     info: false,
+     searching: false   
+    });
+    // pagination();
+  });
+  
+  // SORT PAGINATION
+  // function pagination() {
+  //     var total_page = <?=$total_pages;?>;
+  //     console.log(total_page);
+  //     var paginationHTML = '';
+
+  //     for (var i = 0; i <= total_page; i++) {
+  //       if (i % 20 == 0) { // Every 21 pages, create a new column
+  //         paginationHTML += `
+  //             </ul>
+  //             </nav>
+  //             </div>
+  //             <div class="col-md-12">
+  //             <nav class="mt-1 mb-1" aria-label="Page navigation example">
+  //             <ul class="pagination" style="font-size: 15px;">
+  //         `;
+  //       }
+        
+  //       paginationHTML += `
+  //           <li class="page-item">
+  //               <a class="page-link" href="<?= base_url('master/index/'); ?>${i * 50}">${i + 1}</a>
+  //           </li>
+  //       `;
+  //     }
+
+  //     paginationHTML = `
+  //         <div class="col-md-12">
+  //             <nav class="mt-1 mb-1" aria-label="Page navigation example">
+  //                 <ul class="pagination" style="font-size: 15px;">
+  //                   ${paginationHTML}
+  //                 </ul>
+  //             </nav>
+  //         </div>
+  //     `;
+
+  //     $('#row-pagination').append(paginationHTML);
+  // }
+
+
   function getMaterialList(){
     var Id_material = $('#material_id').val();
 
@@ -118,7 +300,7 @@
       },
       success: function (res) {
         if (res.length > 0) {
-          console.log(res[0].Id_material);
+        //   console.log(res[0].Id_material);
           let rows = '';
             rows += `
               <tr>
@@ -139,7 +321,7 @@
             `;
 
             var htmlContent = `
-            <table class="table table-bordered mt-3" id="table-content">
+            <table class="table table-bordered mt-3 px-2" id="table-content">
               <thead>
                 <tr>
                   <th class="text-center">Material Part No</th>
@@ -158,8 +340,7 @@
 
         // Append the fragment to the table body
 
-        $('#data').empty().append(htmlContent);
-        new DataTable('#table-content');
+        $('#data-table').empty().append(htmlContent);
 
         let modalEdit = '';
           modalEdit += `

@@ -37,7 +37,66 @@ class Quality_model extends CI_Model {
 		return $this->db->get('material_list')->result_array();
 	}
 
-	public function getLastIdReturn() {
+    public function getMaterialList(){
+        return $this->db->query("SELECT * FROM material_list WHERE is_active = 1")->result_array();
+    }
+
+    public function getLastIdReturn() {
+        $this->db->select('id_return');
+        $this->db->from('return_warehouse');
+        $this->db->order_by('id_return', 'DESC');
+        $this->db->limit(1);
+        
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0) {
+            // Return the last ID
+            $lastReturnID = $query->row()->id_return;
+            $prefix = substr($lastReturnID, 0, 3); // Assuming 'RTA' is always the prefix
+            $numericPart = substr($lastReturnID, 3);
+        
+            // Increment the numeric part
+            $incrementedNumericPart = (int)$numericPart + 1;
+        
+            // If the numeric part reaches 10000000, reset to 1 and increment the prefix
+            if ($incrementedNumericPart >= 10000000) {
+                $incrementedNumericPart = 1;
+                
+                // Increment the last character of the prefix
+                $lastChar = substr($prefix, -1);
+                $secondChar = substr($prefix, -2, 1);
+                $firstChar = substr($prefix, -3, 1);
+                
+                // Increment the last character, if it is 'Z', reset to 'A' and increment the second last character
+                if ($lastChar === 'Z') {
+                    $lastChar = 'A';
+                    $secondChar++;
+        
+                    // If the second character is 'Z', reset to 'A' and increment the first character
+                    if ($secondChar === 'Z' + 1) {
+                        $secondChar = 'A';
+                        $firstChar++;
+                    }
+                } else {
+                    $lastChar++;
+                }
+                
+                // Combine characters to form the new prefix
+                $prefix = $firstChar . $secondChar . $lastChar;
+            }
+        
+            // Format the incremented numeric part
+            $formattedNumericPart = str_pad($incrementedNumericPart, strlen($numericPart), '0', STR_PAD_LEFT);
+        
+            // Return the next Kanban ID
+            return $prefix . $formattedNumericPart;
+        } else {
+            // Handle the case when the table is empty
+            return 'RTA0000001';
+        }        
+    }
+
+	public function getLastIdRequest() {
         $this->db->select('Id_request');
         $this->db->from('quality_request');
         $this->db->order_by('Id_request', 'DESC');
@@ -70,5 +129,11 @@ class Quality_model extends CI_Model {
 
             return $new_id;
         }
+    }
+
+    public function updateBoxQuantity($id, $total_qty_real){
+        $this->db->set('total_qty_real', $total_qty_real);
+        $this->db->where('id', $id);
+        return $this->db->update('list_storage'); 
     }
 }

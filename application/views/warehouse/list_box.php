@@ -1,11 +1,8 @@
 <section>
-    <div class="row">
-        <div class="col-lg-12">
-            <div class="card ml-5">
-                <div class="card-body table-responsive mt-2">
-                    <?php if ($this->session->flashdata('SUCCESS') != '') { ?>
-                    <?= $this->session->flashdata('SUCCESS'); ?>
-                    <?php } ?>
+    <div class="card">
+        <div class="card-body">
+            <div class="row">
+                <div class="col-md">
                     <button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addModal"
                         style="font-weight: bold;" id="addBtn">
                         Add New Box
@@ -17,26 +14,26 @@
                                 <th>No Box</th>
                                 <th>Total Weight</th>
                                 <th>SLoc</th>
+                                <th>Box Type</th>
                                 <th>Action</th>
                             </tr>
                         </thead>
                         <tbody>
-                            <?php $number = 0;
-							foreach ($list_box as $box):
-								$number++ ?>
+                            <?php foreach ($list_box as $box): ?>
                             <tr>
                                 <td><input type="checkbox" class="selectBox" value="<?= $box['no_box']; ?>" /></td>
-                                <td><?php echo $box['no_box']; ?></td>
-                                <td><?php echo $box['weight']; ?> Kg</td>
-                                <td><?php echo $box['sloc_name']; ?></td>
+                                <td><?= $box['no_box']; ?></td>
+                                <td><?= $box['weight']; ?> Kg</td>
+                                <td><?= $box['sloc_name']; ?></td>
+                                <td><?= $box['box_type']; ?></td>
                                 <td>
                                     <button class="btn btn-primary" data-bs-toggle="modal"
-                                        data-bs-target="#detailModal1<?= $box['no_box']; ?>"
+                                        data-bs-target="#detailModal1<?= $box['id_box']; ?>"
                                         onclick="getDetailBox(<?= $box['id_box']; ?>, '<?= $box['no_box']; ?>')">
                                         <i class="bx bx-show" style="color: white;"></i>
                                     </button>
-                                    <button class="btn btn-success" data-bs-toggle="modal" data-bs-target="#editModal1"
-                                        onclick="editBox('<?= $box['id_box']; ?>')">
+                                    <button class="btn btn-success"
+                                        onclick="redirectToEditBox('<?= base_url('warehouse/edit_box_view'); ?>', '<?= $box['id_box']; ?>')">
                                         <i class="bx bxs-edit" style="color: white;"></i>
                                     </button>
                                     <button class="btn btn-info" onclick="getBarcode('<?= $box['no_box']; ?>')">
@@ -50,34 +47,30 @@
                             <?php endforeach; ?>
                         </tbody>
                     </table>
-                    <!-- Button to Print Selected Barcodes with Options for High Rak and Medium Rak -->
-                    <button class="btn btn-info" onclick="printSelectedBarcodes('high')">Print Selected Barcodes (High
+                    <button class="btn btn-info" onclick="printSelectedBarcodes()">Print Selected Barcodes (High
                         Rak)</button>
-                    <button class="btn btn-info" onclick="printSelectedBarcodes('medium')">Print Selected Barcodes
+                    <button class="btn btn-info" onclick="printSelectedBarcodes()">Print Selected Barcodes
                         (Medium Rak)</button>
-
-                    <!-- JavaScript Function to Toggle Select All -->
-                    <script>
-                    function toggleSelectAll() {
-                        var selectAllCheckbox = document.getElementById('selectAll');
-                        var checkboxes = document.querySelectorAll('.selectBox');
-                        checkboxes.forEach(function(checkbox) {
-                            checkbox.checked = selectAllCheckbox.checked;
-                        });
-                    }
-                    </script>
-                    <script>
-                
-                    </script>
-                    <div class="col-md ms-5 mt-5" style="display: none;">
-                        <div id="qrcode"></div>
-                        <div id="barcode-info" class="mt-3"></div>
+                    <div>
+                        <?= $pagination; ?>
                     </div>
                 </div>
             </div>
         </div>
     </div>
-</section><!-- ADD MODAL -->
+</section>
+
+<script>
+function toggleSelectAll() {
+    const selectAllCheckbox = document.getElementById('selectAll');
+    const checkboxes = document.querySelectorAll('.selectBox');
+    checkboxes.forEach(checkbox => {
+        checkbox.checked = selectAllCheckbox.checked;
+    });
+}
+</script>
+
+<!-- ADD MODAL -->
 <div class="modal fade" id="addModal" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
@@ -109,32 +102,12 @@
                             <input type="number" class="form-control" id="number-of-boxes" name="number-of-boxes"
                                 min="1" value="1">
                         </div>
-                    </div>
-                    <div class="row mb-2">
-                        <div class="col-sm-6">
-                            <label class="col-form-label"><b>Print Barcode Size</b></label>
-                            <div>
-                                <label><input type="radio" name="print-size" value="high" checked> High</label>
-                                <label><input type="radio" name="print-size" value="medium"> Medium</label>
-                            </div>
-                        </div>
-                    </div>
-                    <div class="row">
-                        <div class="col-sm-12">
-                            <h5>Details</h5>
-                            <table class="table table-bordered" id="detailsTable">
-                                <thead>
-                                    <tr>
-                                        <th>Material Part Number</th>
-                                        <th>Material Part Name</th>
-                                        <th>QTY</th>
-                                        <th>UOM</th>
-                                    </tr>
-                                </thead>
-                                <tbody id="detailsBody">
-                                    <!-- Details will be appended here by JavaScript -->
-                                </tbody>
-                            </table>
+                        <div class="col-sm-6 mt-3">
+                            <b>Box Type</b>
+                            <select class="form-select" name="box_type">
+                                <option value="HIGH" selected>High</option>
+                                <option value="MEDIUM">Medium</option>
+                            </select>
                         </div>
                     </div>
                 </div>
@@ -143,9 +116,11 @@
                         onclick="closeModal()">Close</button>
                     <button type="submit" class="btn btn-primary">Save</button>
                 </div>
-            </form>
         </div>
+
+        </form>
     </div>
+</div>
 </div>
 
 <script>
@@ -211,7 +186,6 @@ function generateBarcodeData(boxNumber, printSize) {
 }
 </script>
 
-
 <!-- EDIT MODAL -->
 <div class="modal fade" id="editModal1" tabindex="-1">
     <div class="modal-dialog modal-lg">
@@ -256,7 +230,7 @@ function generateBarcodeData(boxNumber, printSize) {
                                     <!-- Details will be appended here by JavaScript -->
                                 </tbody>
                             </table>
-                            <button type="button" class="btn btn-success" onclick="addNewItemRow()">Add Item</button>
+                            <button type="button" class="btn btn-success">Add Item</button>
                         </div>
                     </div>
                 </div>
@@ -270,27 +244,63 @@ function generateBarcodeData(boxNumber, printSize) {
     </div>
 </div>
 
-<!-- DETAIL MODAL -->
-<div class="modal fade" id="detailModal" tabindex="-1">
+<!-- DETAIL MODAL-->
+<?php foreach ($list_box as $box): ?>
+<div class="modal fade" id="detailModal1<?= $box['id_box']; ?>" tabindex="-1" style="display: none;">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
-                <h5 class="modal-title">Box Details</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                <h5 class="modal-title">Detail Box</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
+                    onclick="closeModal()"></button>
             </div>
             <div class="modal-body">
-                <!-- Details will be appended here by JavaScript -->
-            </div>
-            <div class="modal-footer">
-                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <div class="row mb-2">
+                    <b>No Box : <?= $box['no_box'] ?></b>
+                </div>
+                <div class="row mb-2">
+                    <label class="col-sm-3 col-form-label">
+                        <b>Total weight (kg)</b>
+                    </label>
+                    <div class="col-sm-3">
+                        <input type="text" class="form-control" id="total_weight" value="<?= $box['weight'] ?>"
+                            disabled>
+                    </div>
+                    <label class="col-sm-2 col-form-label">
+                        <b>SLoc</b>
+                    </label>
+                    <div class="col-sm-4 mb-4">
+                        <input type="text" class="form-control" id="total_weight" value="<?= $box['sloc_name'] ?>"
+                            disabled>
+                    </div>
+                </div>
+                <table class="table datatable table-bordered">
+                    <thead>
+                        <tr>
+                            <th>#</th>
+                            <th>Reference Number</th>
+                            <th>Material</th>
+                            <th>QTY</th>
+                            <th>UOM</th>
+                        </tr>
+                    </thead>
+                    <tbody id="detailTable<?= $box['id_box']; ?>">
+                    </tbody>
+                </table>
+                <div class="modal-footer">
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
+                        onclick="closeModal(<?= $box['id_box']; ?>)">Close</button>
+                </div>
             </div>
         </div>
     </div>
 </div>
+<?php endforeach; ?>
 
-<script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
-<script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
-<script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
+<!-- <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script> -->
+<script src="<?= base_url('assets'); ?>/vendor/qr-code/qr-code.min.js"></script>
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script> -->
 <script>
 function closeModal() {
     $('#id_box').val("");
@@ -324,14 +334,19 @@ function editBox(id_box) {
                 $('#detailsBody').empty();
                 $.each(data.details, function(index, detail) {
                     $('#detailsBody').append('<tr>' +
-                        '<td><input type="text" class="form-control" name="details[' + index +
-                        '][id_material]" value="' + detail.id_material + '" required></td>' +
-                        '<td><input type="text" class="form-control" name="details[' + index +
+                        '<td><input type="text" class="form-control" name="details[' +
+                        index +
+                        '][id_material]" value="' + detail.id_material +
+                        '" required></td>' +
+                        '<td><input type="text" class="form-control" name="details[' +
+                        index +
                         '][material_desc]" value="' + detail.material_desc +
                         '" required></td>' +
-                        '<td><input type="number" class="form-control" name="details[' + index +
+                        '<td><input type="number" class="form-control" name="details[' +
+                        index +
                         '][qty]" value="' + detail.qty + '" required></td>' +
-                        '<td><input type="text" class="form-control" name="details[' + index +
+                        '<td><input type="text" class="form-control" name="details[' +
+                        index +
                         '][uom]" value="' + detail.uom + '" required></td>' +
                         '<td><button type="button" class="btn btn-danger" onclick="removeItemRow(this)">Remove</button></td>' +
                         '</tr>');
@@ -357,8 +372,10 @@ function editBox(id_box) {
 function addNewItemRow() {
     var index = $('#detailsBody tr').length;
     $('#detailsBody').append('<tr>' +
-        '<td><input type="text" class="form-control" name="details[' + index + '][id_material]" required></td>' +
-        '<td><input type="text" class="form-control" name="details[' + index + '][material_desc]" required></td>' +
+        '<td><input type="text" class="form-control" name="details[' + index +
+        '][id_material]" required></td>' +
+        '<td><input type="text" class="form-control" name="details[' + index +
+        '][material_desc]" required></td>' +
         '<td><input type="number" class="form-control" name="details[' + index + '][qty]" required></td>' +
         '<td><input type="text" class="form-control" name="details[' + index + '][uom]" required></td>' +
         '<td><button type="button" class="btn btn-danger" onclick="removeItemRow(this)">Remove</button></td>' +
@@ -420,31 +437,38 @@ function getSlocEdit() {
     });
 }
 
-function getDetailBox(id_box, no_box) {
+function getDetailBox(id, no_box) {
     $.ajax({
-        url: '<?php echo base_url('warehouse/get_box_details'); ?>',
+        url: '<?php echo base_url('warehouse/get_detail_box'); ?>',
         type: 'POST',
         data: {
-            id_box: id_box
+            id: id,
         },
         success: function(res) {
             var data = JSON.parse(res);
-            if (data.status) {
-                $('#detailModal').find('.modal-body').empty();
-                $.each(data.details, function(index, detail) {
-                    $('#detailModal').find('.modal-body').append('<p>' +
-                        '<b>Part Number:</b> ' + detail.id_material + '<br>' +
-                        '<b>Part Name:</b> ' + detail.material_desc + '<br>' +
-                        '<b>QTY:</b> ' + detail.qty + '<br>' +
-                        '<b>UOM:</b> ' + detail.uom + '<br>' +
-                        '</p><hr>');
-                });
-                $('#detailModal').modal('show');
+            $('#detailModal1' + id + ' tbody').empty();
+            if (data.status && data.dt.length > 0) {
+                $('#detailModal1' + id).modal('show');
+                var dt = data.dt;
+                console.log(no_box);
+
+                for (var i = 0; i < dt.length; i++) {
+                    var row = '<tr>' +
+                        '<td style="text-align: left;">' + (i + 1) + '</td>' +
+                        '<td style="text-align: left;">' + dt[i].id_material + '</td>' +
+                        '<td style="text-align: left;">' + dt[i].material_desc + '</td>' +
+                        '<td style="text-align: left;">' + dt[i].qty + '</td>' +
+                        '<td style="text-align: left;">' + dt[i].uom + '</td>' +
+                        '</tr>';
+                    $('#detailModal1' + id + ' tbody').append(row);
+                }
             } else {
                 Swal.fire({
                     icon: 'error',
-                    title: 'Error',
-                    text: data.msg
+                    title: 'Data Incomplete!',
+                    text: 'Please edit the box data to complete the information for this box.'
+                }).then(function() {
+                    window.location.reload();
                 });
             }
         },
@@ -456,14 +480,15 @@ function getDetailBox(id_box, no_box) {
             });
         }
     });
+
 }
 
-function printSelectedBarcodes() {
+function printSelectedBarcodes(printSize) {
     var selectedBoxes = [];
     $('.selectBox:checked').each(function() {
         selectedBoxes.push($(this).val());
     });
-    console.log(selectedBoxes);
+
     if (selectedBoxes.length === 0) {
         Swal.fire({
             icon: 'warning',
@@ -473,11 +498,10 @@ function printSelectedBarcodes() {
         return;
     }
 
-    var logoUrl = '<?php echo base_url("assets/img/valeo_logo.jpg"); ?>';
-    var qrcodeContainer = document.createElement('div');
+    var logoUrl = '<?= base_url('assets'); ?>/img/valeo_logo.jpg';
 
     function generateQRCode(no_box, callback) {
-    var qrcodeContainer = document.createElement('div');
+        var qrcodeContainer = document.createElement('div');
         var qrcode = new QRCode(qrcodeContainer, {
             text: no_box,
             width: 70,
@@ -487,15 +511,9 @@ function printSelectedBarcodes() {
 
         setTimeout(function() {
             var qrcodeImg = qrcodeContainer.querySelector('img').src;
-            callback(no_box, qrcodeImg); 
-        }, 500); 
+            callback(no_box, qrcodeImg);
+        }, 500);
     }
-
-    $('.selectBox:checked').each(function() {
-        var no_box = $(this).val();
-        generateQRCode(no_box, addBarcodeToPrintWindow); // Memanggil fungsi generateQRCode untuk setiap kotak yang dipilih
-    });
-
 
     var printWindow = window.open('', '', 'height=800,width=1200');
     printWindow.document.write('<html><head><title>Print Barcodes</title>');
@@ -514,8 +532,7 @@ function printSelectedBarcodes() {
     printWindow.document.write('.barcode, .valeo-logo { display: inline-block; text-align: center;}');
     printWindow.document.write('.barcode { width: 2cm; height: 2cm; margin:5px;}');
     printWindow.document.write(
-        `.valeo-logo { width: 2cm; height: 2cm; margin-right: 10px; margin-top: 1px;margin-buttom: 1px; }`
-    );
+        '.valeo-logo { width: 2cm; height: 2cm; margin-right: 10px; margin-top: 1px;margin-buttom: 1px; }');
     printWindow.document.write('</style>');
     printWindow.document.write('</head><body>');
 
@@ -527,8 +544,7 @@ function printSelectedBarcodes() {
             '" alt="Valeo Logo" style="width: 100%; height: 100%;"></div>');
         printWindow.document.write('</div>');
         printWindow.document.write('<div class="row">');
-        printWindow.document.write(
-            '<div class="barcode-info">ID Box:<br><h1 style="font-size:6em; margin-top:24px;">' +
+        printWindow.document.write('<div class="barcode-info">ID Box:<br><h1 style="font-size:6em; margin-top:24px;">' +
             no_box + '</h1></div>');
         printWindow.document.write('</div>');
         printWindow.document.write('</div>');
@@ -536,8 +552,8 @@ function printSelectedBarcodes() {
 
     function processNextBox(index) {
         if (index < selectedBoxes.length) {
-            generateQRCode(selectedBoxes[index], function(qrcodeImg) {
-                addBarcodeToPrintWindow(selectedBoxes[index], qrcodeImg);
+            generateQRCode(selectedBoxes[index], function(no_box, qrcodeImg) {
+                addBarcodeToPrintWindow(no_box, qrcodeImg);
                 processNextBox(index + 1);
             });
         } else {
@@ -547,9 +563,8 @@ function printSelectedBarcodes() {
         }
     }
 
-    // processNextBox(0);
+    processNextBox(0);
 }
-
 
 function deleteBox(id_box) {
     Swal.fire({
@@ -683,9 +698,8 @@ function generateBoxIds(lastBoxId, count) {
     return boxIds;
 }
 
-
 function printBarcodeHigh(idBox) {
-    var logoUrl = '<?php echo base_url("assets/img/valeo.png"); ?>';
+    var logoUrl = '<?= base_url('assets'); ?>/img/valeo_logo.jpg';
     var printWindow = window.open('', '', 'height=750,width=500');
     printWindow.document.write('<html><head><title>Print Barcode</title>');
     printWindow.document.write('<style>');
@@ -701,9 +715,7 @@ function printBarcodeHigh(idBox) {
         '.row:last-child { height:5cm; align-items: center; justify-content: center; text-align: center; }');
     printWindow.document.write('.barcode, .valeo-logo { display: inline-block; text-align: center;}');
     printWindow.document.write('.barcode { width: 2cm; height: 2cm; margin-left:2cm;}');
-    printWindow.document.write(
-        `.valeo-logo { width:5cm; height: 2cm;margin-right:1cm; background-position: center; }`
-    );
+    printWindow.document.write('.valeo-logo { width:5cm; height: 2cm;margin-right:1cm; background-position: center; }');
     printWindow.document.write(
         '.barcode-info { font-size: 2em; margin-top: 8px; text-align: center; width: 100%; margin-left:15px; }');
     printWindow.document.write('#qrcode img { width: 90%; height: 90%; }');
@@ -726,11 +738,9 @@ function printBarcodeHigh(idBox) {
     printWindow.document.close();
     printWindow.print();
 }
-
-
 
 function printBarcodeMedium(idBox) {
-    var logoUrl = '<?php echo base_url("assets/img/valeo.png"); ?>';
+    var logoUrl = '<?= base_url('assets'); ?>/img/valeo_logo.jpg';
     var printWindow = window.open('', '', 'height=750,width=500');
     printWindow.document.write('<html><head><title>Print Barcode</title>');
     printWindow.document.write('<style>');
@@ -746,9 +756,7 @@ function printBarcodeMedium(idBox) {
         '.row:last-child { height:5cm; align-items: center; justify-content: center; text-align: center; }');
     printWindow.document.write('.barcode, .valeo-logo { display: inline-block; text-align: center;}');
     printWindow.document.write('.barcode { width: 2cm; height: 2cm; margin-left:2cm;}');
-    printWindow.document.write(
-        `.valeo-logo { width:5cm; height: 2cm;margin-right:1cm; background-position: center; }`
-    );
+    printWindow.document.write('.valeo-logo { width:5cm; height: 2cm;margin-right:1cm; background-position: center; }');
     printWindow.document.write(
         '.barcode-info { font-size: 2em; margin-top: 8px; text-align: center; width: 100%; margin-left:15px; }');
     printWindow.document.write('#qrcode img { width: 90%; height: 90%; }');
@@ -770,54 +778,6 @@ function printBarcodeMedium(idBox) {
     printWindow.document.write('</body></html>');
     printWindow.document.close();
     printWindow.print();
-}
-
-
-let printCount = 0;
-
-
-function printBarcode(idBox) {
-    var logoUrl = '<?php echo base_url("assets/img/valeo.png"); ?>';
-    var printWindow = window.open('', '', 'height=750,width=500');
-    printWindow.document.write('<html><head><title>Print Barcode</title>');
-    printWindow.document.write('<style>');
-    printWindow.document.write('@page { size: 17cm 13cm; margin: 5px; }');
-    printWindow.document.write(
-        '.print-section { display: flex; flex-direction: column; width: 14cm; height: 8cm; border: 1px solid black; box-sizing: border-box; }'
-    );
-    printWindow.document.write(
-        '.row { display: flex; flex: 1; align-items: center; justify-content: space-between; border-bottom: 1px solid black; }'
-    );
-    printWindow.document.write('.row:first-child { height: 3cm; padding: 0 2px; }');
-    printWindow.document.write(
-        '.row:last-child { height:5cm; align-items: center; justify-content: center; text-align: center; }');
-    printWindow.document.write('.barcode, .valeo-logo { display: inline-block; text-align: center;}');
-    printWindow.document.write('.barcode { width: 2cm; height: 2cm; margin-left:2cm;}');
-    printWindow.document.write(
-        `.valeo-logo { width:5cm; height: 2cm;margin-right:1cm; background-position: center; }`
-    );
-    printWindow.document.write(
-        '.barcode-info { font-size: 2em; margin-top: 8px; text-align: center; width: 100%; margin-left:15px; }');
-    printWindow.document.write('#qrcode img { width: 90%; height: 90%; }');
-    printWindow.document.write('</style>');
-    printWindow.document.write('</head><body>');
-    printWindow.document.write('<div class="print-section">');
-    printWindow.document.write('<div class="row">');
-    printWindow.document.write('<div class="barcode" id="qrcode">' + document.getElementById('qrcode').innerHTML +
-        '</div>');
-    printWindow.document.write('<div class="valeo-logo"><img src="' + logoUrl +
-        '" alt="Valeo Logo" style="width: 100%; height: 100%;"></div>');
-    printWindow.document.write('</div>');
-    printWindow.document.write('<div class="row">');
-    printWindow.document.write(
-        '<div class="barcode-info" style="margin-top:40px;"><span>ID :</span><h1 style="font-size:3em; margin-top:-5;">' +
-        idBox + '</h1></div>');
-    printWindow.document.write('</div>');
-    printWindow.document.write('</div>');
-    printWindow.document.write('</body></html>');
-    printWindow.document.close();
-    printWindow.print();
-    printCount++;
 }
 
 function getBarcode(no_box) {
@@ -835,7 +795,7 @@ function getBarcode(no_box) {
 }
 
 function printMultipleBarcodes(boxIds, printSize) {
-    var logoUrl = '<?php echo base_url("assets/img/valeo.png"); ?>';
+    var logoUrl = '<?= base_url('assets'); ?>/img/valeo_logo.jpg';
     var printWindow = window.open('', '', 'height=750,width=500');
     printWindow.document.write('<html><head><title>Print Barcode</title>');
     printWindow.document.write('<style>');
@@ -851,9 +811,7 @@ function printMultipleBarcodes(boxIds, printSize) {
         '.row:last-child { height:8cm; align-items: center; justify-content: center; text-align: center; }');
     printWindow.document.write('.barcode, .valeo-logo { display: inline-block; text-align: center;}');
     printWindow.document.write('.barcode { width: 2cm; height: 2cm; margin:5cm;}');
-    printWindow.document.write(
-        `.valeo-logo { width:5cm; height: 2cm;margin-right:1cm; background-position: center; }`
-    );
+    printWindow.document.write('.valeo-logo { width:5cm; height: 2cm;margin-right:1cm; background-position: center; }');
     printWindow.document.write(
         '.barcode-info { font-size: 2em; margin-top: 8px; text-align: center; width: 100%; margin-left:15px; }');
     printWindow.document.write('#qrcode img { width: 90%; height: 90%; }');
@@ -868,7 +826,7 @@ function printMultipleBarcodes(boxIds, printSize) {
     printWindow.document.write('</div>');
     printWindow.document.write('<div class="row">');
     printWindow.document.write(
-        '<div class="barcode-info" style="margin-top:40px;"><span> Box:</span><h1 style="font-size:3em; margin-top:-5;">' +
+        '<div class="barcode-info" style="margin-top:40px;"><span>ID Box:</span><h1 style="font-size:3em; margin-top:-5;">' +
         idBox + '</h1></div>');
     printWindow.document.write('</div>');
     printWindow.document.write('</div>');
@@ -876,7 +834,6 @@ function printMultipleBarcodes(boxIds, printSize) {
     printWindow.document.close();
     printWindow.print();
 }
-
 
 function generateBoxIds(lastBoxId, count) {
     const prefix = 'CKA'; // Prefix yang diinginkan
@@ -895,8 +852,10 @@ function generateBoxIds(lastBoxId, count) {
     return boxIds;
 }
 
-
-
+function redirectToEditBox(baseUrl, idBox) {
+    var url = baseUrl + '/' + idBox;
+    window.open(url, '_blank');
+}
 
 // Function to handle form submission
 $('#addForm').on('submit', function(event) {
@@ -971,12 +930,10 @@ function deleteItem(id) {
                         icon: 'error',
                         title: 'Error',
                         text: 'An error occurred while processing your request.'
-
                     });
                 }
             });
         }
-
     });
 }
 </script>

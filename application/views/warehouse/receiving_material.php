@@ -135,7 +135,7 @@
                         </div>
                         <div class="col-6">
                             <label for="qty" class="form-label">Quantity</label>
-                            <input type="number" class="form-control" id="qty" name="qty" required>
+                            <input type="text" class="form-control" id="qty" name="qty" required>
                         </div>
                         <input type="hidden" id="receiving_date" name="receiving_date">
                     </div>

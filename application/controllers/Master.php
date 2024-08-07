@@ -10,109 +10,123 @@ class Master extends CI_Controller {
         is_logged_in();
         $this->load->library('form_validation');
         $this->load->model('Master_model', 'MModel');
+        $this->load->library('pagination');
     }
 	
 	public function index()
-	{
+    {
+        $data['title'] = 'Material List';
+
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
-        $data['title'] = 'Material List';
         $data['material_list'] = $this->MModel->getMaterials();
-        
+        $data['total_rows'] = $this->MModel->countAllMaterials();
+
+        $config['base_url'] = base_url('master/index');
+        $config['total_rows'] = $this->MModel->countAllMaterials();
+        $config['per_page'] = 50;
+
+        $this->pagination->initialize($config);
+
+        $data['start'] = $this->uri->segment(3) ? $this->uri->segment(3) : 0;
+        $data['materials'] = $this->MModel->getAllMaterials($config['per_page'], $data['start']);
+
+        $data['total_pages'] = ceil($config['total_rows'] / $config['per_page']);
+
         $this->load->view('templates/header', $data);
         $this->load->view('templates/navbar');   
         $this->load->view('templates/sidebar');   
         $this->load->view('master/material_list', $data);
         $this->load->view('templates/footer');
-	}
-
-    // CREATE MATERIAL LIST
-    public function AddMaterialList(){
-        $Data = array(
-            'Id_material' => $this->input->post('material_id'),
-            'Material_desc' => $this->input->post('material_desc'),
-            'Material_type' => $this->input->post('material_type'),
-            'Uom' => $this->input->post('uom'),
-            'Family' => $this->input->post('family'),
-            'crtdt' => date('Y-d-m H:i'),
-            'crtby' => $this->input->post('user'),
-            'upddt' => date('Y-d-m H:i'),
-            'updby' => $this->input->post('user')
-        );
-
-
-        $this->MModel->insertData('material_list', $Data);
-        $this->session->set_flashdata('SUCCESS',
-        '
-            <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
-                <i class="bi bi-check-circle me-1"></i> New Material List successfully added
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        ');
-        redirect('master/');
     }
 
-    // READ MATERIAL LIST
-    public function getMaterialList(){
-        $id_material = htmlspecialchars($this->input->post('Id_material'));
-        $result = $this->db->query("SELECT Id, Id_material, Material_desc, Material_type, Uom, Family FROM material_list WHERE Id_material = '$id_material'")->result_array();
-       
-        echo json_encode($result);
-    }
+        // CREATE MATERIAL LIST
+        public function AddMaterialList(){
+            $Data = array(
+                'Id_material' => $this->input->post('material_id'),
+                'Material_desc' => $this->input->post('material_desc'),
+                'Material_type' => $this->input->post('material_type'),
+                'Uom' => $this->input->post('uom'),
+                'Family' => $this->input->post('family'),
+                'Crtdt' => date('Y-d-m H:i'),
+                'Crtby' => $this->input->post('user'),
+                'Upddt' => date('Y-d-m H:i'),
+                'Updby' => $this->input->post('user')
+            );
 
-    // UPDATE MATERIAL LIST
-    public function EditMaterialList(){
-        $id = $this->input->post('id');
-        
-        $Data = array(
-            'Id_material' => $this->input->post('material_id'),
-            'Material_desc' => $this->input->post('material_desc'),
-            'Material_type' => $this->input->post('material_type'),
-            'Uom' => $this->input->post('uom'),
-            'Family' => $this->input->post('family'),
-            'Upddt' => date('Y-d-m H:i'),
-            'Updby' => $this->input->post('user')
-        );
 
-        $this->MModel->updateData('material_list', $id, $Data);
-        $this->session->set_flashdata('EDIT',
-        '
-        <div class="row mt-2">
-            <div class="col-md">
+            $this->MModel->insertData('material_list', $Data);
+            $this->session->set_flashdata('SUCCESS',
+            '
                 <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
-                    <i class="bi bi-check-circle me-1"></i> Material List successfully updated
+                    <i class="bi bi-check-circle me-1"></i> New Material List successfully added
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
-            </div>
-        </div>
-        ');
+            ');
+            redirect('master/');
+        }
+
+        // READ MATERIAL LIST
+        public function getMaterialList(){
+            $id_material = htmlspecialchars($this->input->post('Id_material'));
+            $result = $this->db->query("SELECT Id, Id_material, Material_desc, Material_type, Uom, Family FROM material_list WHERE Id_material = '$id_material'")->result_array();
         
-        redirect('master/');
-    }
+            echo json_encode($result);
+        }
 
-    // DELETE MATERIAL LIST
-    public function DeleteMaterialID(){
-        $id = $this->input->post('id');
-        $this->MModel->deleteData('material_list', $id);
-        $this->session->set_flashdata('DELETED',
-        '
-        <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
-            <i class="bi bi-check-circle me-1"></i> Material List successfully deleted
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        ');
+        // UPDATE MATERIAL LIST
+        public function EditMaterialList(){
+            $id = $this->input->post('id');
+            
+            $Data = array(
+                'Id_material' => $this->input->post('material_id'),
+                'Material_desc' => $this->input->post('material_desc'),
+                'Material_type' => $this->input->post('material_type'),
+                'Uom' => $this->input->post('uom'),
+                'Family' => $this->input->post('family'),
+                'Upddt' => date('Y-d-m H:i'),
+                'Updby' => $this->input->post('user')
+            );
 
-        redirect('master/');  
-    }
+            $this->MModel->updateData('material_list', $id, $Data);
+            $this->session->set_flashdata('EDIT',
+            '
+            <div class="row mt-2">
+                <div class="col-md">
+                    <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
+                        <i class="bi bi-check-circle me-1"></i> Material List successfully updated
+                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+                    </div>
+                </div>
+            </div>
+            ');
+            
+            redirect('master/');
+        }
 
+        // DELETE MATERIAL LIST
+        public function DeleteMaterialID(){
+            $id = $this->input->post('id');
+            $this->MModel->deleteData('material_list', $id);
+            $this->session->set_flashdata('DELETED',
+            '
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
+                <i class="bi bi-check-circle me-1"></i> Material List successfully deleted
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            ');
+
+            redirect('master/');  
+        }
 
 	public function bom()
 	{
+        $data['title'] = 'BOM';
+
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
-        $data['title'] = 'BOM';
         $data['bom'] = $this->MModel->getBom();
         $data['bom_distint'] = $this->MModel->getBomDistinct();
         $data['materials'] = $this->MModel->getListMaterial();
@@ -157,60 +171,68 @@ class Master extends CI_Controller {
         );
 
         $this->MModel->insertData('bom', $Data);
-        $this->session->set_flashdata('SUCCESS',
-        '
-            <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
-                <i class="bi bi-check-circle me-1"></i> New Material\'s BOM successfully added
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        ');
+        $check_insert = $this->db->affected_rows();
+
+        if($check_insert > 0){
+            $this->session->set_flashdata('success_AddMaterialBom', 'Material\'s Bom have been successfully added');
+        }
+        else{
+            $this->session->set_flashdata('failed_AddMaterialBom', 'Failed to add Material\'s Bom');
+        }
+
         redirect('master/bom');
     }
 
     // ADD NEW BOM
     function addNewBom(){
         $materials = $this->input->post('materials');
-        $DataProduct = array(
-            'Id_fg' => $this->input->post('products_id'),
-            'Fg_desc' => $this->input->post('product_desc'),
-            'is_active' => 1,
-            // ADD HERE
+        $id_fg = $this->input->post('products_id');
 
-            'Crtdt' => date('Y-d-m H:i'),
-            'Crtby' => $this->input->post('user'),
-            'Upddt' => date('Y-d-m H:i'),
-            'Updby' => $this->input->post('user')
-        );
+        // CHECK IF BOM ALREADY EXIST
+        $Bom = $this->db->query("SELECT Id_fg FROM BOM WHERE Id_fg = '$id_fg' and is_active = 1")->result_array();
+        $check_bom = count($Bom);
+        if($check_bom > 0){
+            $this->session->set_flashdata('duplicate_add_new_bom', $id_fg);
+            redirect('master/bom');
+        }
 
-        $insertData = array();
+        $insert_bom = 0;
         foreach ($materials as $material) {
-            $row = array_merge($DataProduct, array(
+            $DataBOM = [
                 'Id_material' => $material['material_id'],
                 'Material_desc' => $material['material_desc'],
                 'Material_type' => $material['material_type'],
                 'Qty' => floatval($material['qty']),
-                'Uom' => $material['uom']
-            ));
-            $insertData[] = $row;
-            // echo '<br>';
-            // var_dump($row); // Output each row data
-            // echo '<br>';
+                'Uom' => $material['uom'],
+                'Id_fg' => $this->input->post('products_id'),
+                'Fg_desc' => $this->input->post('product_desc'),
+                'is_active' => 1,
+                'Crtdt' => date('Y-d-m H:i:s'),
+                'Crtby' => $this->input->post('user'),
+                'Upddt' => date('Y-d-m H:i:s'),
+                'Updby' => $this->input->post('user')
+            ];
+       
+            $this->MModel->insertData('bom', $DataBOM);
+            $check_insert = $this->db->affected_rows();
+            if($check_insert > 0){
+                $insert_bom += 1;
+            }
         }
-        // die(); 
 
-        $this->db->insert_batch('bom', $insertData);
-        $this->session->set_flashdata('SUCCESS',
-        '
-            <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
-                <i class="bi bi-check-circle me-1"></i> New BOM successfully added
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-        ');
+        if($insert_bom > 0){
+            $this->session->set_flashdata('success_add_new_bom', $id_fg);
+        }
+        else{
+            $this->session->set_flashdata('failed_add_new_bom', $id_fg);
+        }
+
         redirect('master/bom');
     }
 
+    
     // READ BOM
-    public function getBomList(){
+    function getBomList(){
         $Id_product = htmlspecialchars($this->input->post('Id_product'));
         if($Id_product){
             $result = $this->db->query("SELECT * FROM bom WHERE Id_fg = '$Id_product' AND is_active = 1")->result_array();
@@ -222,7 +244,7 @@ class Master extends CI_Controller {
         echo json_encode($result);
     }    
     
-    public function getAllBom(){
+    function getAllBom(){
         // Load the model
         $this->load->model('Bom_model');
 
@@ -255,9 +277,9 @@ class Master extends CI_Controller {
  
 
     // UPDATE Material BOM
-    public function EditBomMaterial(){
+    function EditBomMaterial() {
         $id = $this->input->post('id');
-        
+        $materialID = $this->input->post('material_id');
         $Data = array(
             'Id_fg' => $this->input->post('id_fg'),
             'Id_material' => $this->input->post('material_id'),
@@ -265,30 +287,26 @@ class Master extends CI_Controller {
             'Material_type' => $this->input->post('material_type'),
             'Uom' => $this->input->post('uom'),
             'Qty' => $this->input->post('qty'),
-            'Upddt' => date('Y-d-m H:i'),
+            'Upddt' => date('Y-m-d H:i:s'), // Adjusted date format
             'Updby' => $this->input->post('user')
         );
-
-        $this->db->where('Id_bom',$id);  
+    
+        $this->db->where('Id_bom', $id);  
         $this->db->update('bom', $Data);
-
-        $this->session->set_flashdata('EDIT',
-        '
-        <div class="row mt-2">
-            <div class="col-md">
-                <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
-                    <i class="bi bi-check-circle me-1"></i> Material Bom successfully updated
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            </div>
-        </div>
-        ');
-        
+        $check_update = $this->db->affected_rows();
+    
+        if ($check_update > 0) {
+            $this->session->set_flashdata('success_EditBomMaterial', 'Material ' . $materialID . ' has been successfully updated');
+        } else {
+            $this->session->set_flashdata('failed_EditBomMaterial', 'Material ' . $materialID . ' failed to update');
+        }
+    
         redirect('master/bom');
-    }
+    } 
+
 
     // DELETE Material BOM
-    public function deleteMaterialBom(){
+    function deleteMaterialBom(){
         $id = $this->input->post('id');
 
         $Data = [
@@ -311,4 +329,28 @@ class Master extends CI_Controller {
         redirect('master/bom');
     }
 
+    function deleteMultipleMaterialBom(){
+        $data = $this->input->post('selectedIds');
+
+        $DeleteDataBom = 0; 
+    
+        foreach ($data as $dt) {
+            $DataBOM = [
+                'is_active' => 0,
+                'Upddt' => date('Y-d-m H:i'),
+                'Updby' => $this->input->post('user')
+            ];
+            $this->MModel->updateMultipleDataBom('bom', $dt, $DataBOM);
+            $check_delete = $this->db->affected_rows();
+            
+            if ($check_delete > 0) {
+                $DeleteDataBom += 1;
+            }
+        }
+
+        // Determine the result based on the number of successful deletions
+        $result = $DeleteDataBom > 0 ? 1 : 0;
+
+        echo json_encode($result);
+    }
 }

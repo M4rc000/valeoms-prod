@@ -5,18 +5,24 @@
 		<div class="card">
 		<div class="card-body profile-card pt-4 d-flex flex-column align-items-center">
 
-			<img src="<?=base_url('assets');?>/img/man.png" alt="Profile" class="rounded-circle">
+			<img src="<?=base_url('assets');?>/img/<?= $name['gender'] == 'Male' ? 'Man' : 'Woman';?>.png" alt="Profile" class="rounded-circle">
 			<h2><?=($user['name']);?></h2>
 			<h3>
-				<?php
-					if ($user['role_id'] == 1) {
-						echo 'Administrator';
-					} elseif ($user['role_id'] == 2) {
-						echo 'Warehouse';
-					} else {
-						echo 'Production';
-					}
-				?>
+			<?php
+				$role_query = $this->db->get('user_role');
+				$role_mapping = [];
+
+				foreach ($role_query->result_array() as $role) {
+					$role_mapping[$role['id']] = $role['role'];
+				}
+
+				if (isset($name['name'])) {
+					$role_id = $name['role_id'];
+					echo isset($role_mapping[$role_id]) ? $role_mapping[$role_id] : 'Unknown Role';
+				} else {
+					echo 'Unknown';
+				}
+			?>
 			</h3>
 			<div class="social-links mt-2">
 			</div>
@@ -55,7 +61,7 @@
 
 				<div class="row">
 				<div class="col-lg-3 col-md-4 label">Email</div>
-				<div class="col-lg-9 col-md-8">marcoantoniomadgaskar@gmail.com</div>
+				<div class="col-lg-9 col-md-8">-</div>
 				</div>
 
 			</div>

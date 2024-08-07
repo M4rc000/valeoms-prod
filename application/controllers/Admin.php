@@ -8,15 +8,16 @@ class Admin extends CI_Controller {
         parent::__construct();
         is_logged_in();
         $this->load->library('form_validation');
+        $this->load->library('pagination');
         $this->load->model('Admin_model','AModel');
+        $this->load->model('Warehouse_model', 'WModel');
     }
 	
-	public function index()
-	{
+	public function index(){
+        $data['title'] = 'Dashboard';
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
         
-        $data['title'] = 'Dashboard';
         $data['user'] = $this->AModel->getAllUsers();
         $data['userDataChart'] = $this->AModel->getUsers();
 
@@ -28,12 +29,13 @@ class Admin extends CI_Controller {
 	}
     
     public function manage_user() {
+        $data['title'] = 'Manage User';
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
 
-        $data['title'] = 'Manage User';
         $data['users'] = $this->AModel->getAllUsers();
+        $data['roles'] = $this->AModel->getAllRoles();
 
         $this->load->view('templates/header', $data);
         $this->load->view('templates/navbar', $data);
@@ -42,16 +44,16 @@ class Admin extends CI_Controller {
         $this->load->view('templates/footer');
     }
 
-	public function manage_role()
-	{
+	public function manage_role(){
+        $data['title'] = 'Manage Role';
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
-        $data['title'] = 'Manage User Role';
         $this->load->model('Admin_model','AModel');
         
         $data['roles'] = $this->AModel->getAllRoles();
         $data['menu'] = $this->AModel->getAllMenu();
+        $data['mensub'] = $this->AModel->getMenSub();
 
         $this->load->view('templates/header', $data);
         $this->load->view('templates/navbar', $data);   
@@ -60,13 +62,40 @@ class Admin extends CI_Controller {
         $this->load->view('templates/footer');
 	}
 
-	public function manage_menu()
-	{
+    public function UpdateConfigRole() {
+        $role_id = $this->input->post('role');
+        $sub_menu = $this->input->post('sub_menu');
+        $menu_ids = $this->input->post('menu_ids');
+        $submenu_ids = $this->input->post('submenu_ids');
+        $all_sub_menus = $this->input->post('all_sub_menus');
+    
+        // Delete existing data
+        $this->db->where('role_id', $role_id);
+        $this->db->delete('user_access_submenu');
+    
+        // Insert new access configuration
+        foreach ($all_sub_menus as $index => $submenu_id) {
+            $menu_id = $menu_ids[$index];
+            if (isset($sub_menu[$submenu_id])) {
+                $data = [
+                    'role_id' => $role_id,
+                    'menu_id' => $menu_id,
+                    'submenu_id' => $submenu_id,
+                ];
+                $this->db->insert('user_access_submenu', $data);
+            }
+        }
+    
+        $this->session->set_flashdata('message', '<div class="alert alert-success" role="alert">Role configuration updated!</div>');
+        redirect('admin/manage_role');
+    }      
+
+	public function manage_menu(){
+        $data['title'] = 'Manage Menu';
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
 
-        $data['title'] = 'Manage Menu';
         $this->load->model('Admin_model','AModel');
         
         $data['menus'] = $this->AModel->getAllMenu();
@@ -80,11 +109,11 @@ class Admin extends CI_Controller {
 
 	public function manage_sub_menu()
 	{
+        $data['title'] = 'Manage Sub-Menu';
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
 
-        $data['title'] = 'Manage Sub-Menu';
         $this->load->model('Admin_model','AModel');
         
         $data['menus'] = $this->AModel->getAllMenu();
@@ -96,7 +125,6 @@ class Admin extends CI_Controller {
         $this->load->view('admin/manage_sub_menu',$data);
         $this->load->view('templates/footer');
 	}
-
 
 
     // ACTION
@@ -189,54 +217,6 @@ class Admin extends CI_Controller {
             redirect('admin/manage_role');
         }
 
-        public function editRole() {
-            $id = $this->input->post('id');
-            $upload_image = $_FILES['img']['name'];
-                
-            if ($upload_image) {
-                $config['allowed_types'] = 'gif|jpg|png|jpeg|webp';
-                $config['max_size']      = '5048';
-                $config['upload_path']   = './assets/images/profile/';
-
-                $this->load->library('upload', $config);
-
-                if ($this->upload->do_upload('img')) {  
-                    $old_image = $data['user']['image'];  
-                    if ($old_image != 'default.webp') {
-                        unlink(FCPATH . './assets/images/profile/' . $old_image);
-                    }                
-                    $new_image = $this->upload->data('file_name');
-                    $data['img'] = $new_image;   
-
-                    $Data = array(
-                        'name' => $this->input->post('name'),
-                        'username' => $this->input->post('username'),
-                        'email' => $this->input->post('email'),
-                        'password' => $this->input->post('password'),
-                        'role_id' => $this->input->post('role'),
-                        'is_active' => $this->input->post('aktif'),
-                        'image' => $new_image
-                    );               
-                } else {
-                    echo $this->upload->display_errors();
-                }            
-            }
-            else{
-                $Data = array(
-                    'name' => $this->input->post('name'),
-                    'username' => $this->input->post('username'),
-                    'email' => $this->input->post('email'),
-                    'password' => $this->input->post('password'),
-                    'role_id' => $this->input->post('role'),
-                    'is_active' => $this->input->post('aktif')
-                );
-            }
-                
-
-            $this->AModel->updateData('user', $id, $Data);
-            $_SESSION['message'] = 'edit';
-            redirect('admin/manage_user'); 
-        }
 
         public function deleteRole() {
             $this->load->model('Admin_model','AModel');
@@ -253,18 +233,31 @@ class Admin extends CI_Controller {
             header("Location: " . base_url('admin/manage_role'));       
         }
 
-        public function roleAccess($role_id)
-        {
-            $this->load->helper('bms_helper');
+        public function roleAccess($role_id){
             $data['title'] = 'Role Access';
-                $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+            $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+            $data['name'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
 
             
             $data['role'] = $this->db->get_where('user_role', ['id' => $role_id])->row_array();
 
-            // $this->db->where('id !=', 1);
             $data['menu'] = $this->db->get('user_menu')->result_array();
+            $data['accessmenu'] = $this->AModel->getMenuAccess($role_id);
+            $data['accesssubmenu'] = $this->AModel->getSubMenuAccess($role_id);
+            $data['roles'] = $this->AModel->getAllRoles();
 
+            $this->db->select('user_menu.*');
+            $this->db->from('user_menu');
+            $this->db->join('user_access_menu', 'user_menu.id = user_access_menu.menu_id AND user_access_menu.role_id = ' . $role_id, 'left');
+            $this->db->where('user_access_menu.menu_id IS NULL');
+            $data['menus'] = $this->db->get()->result_array();
+
+            $this->db->select('user_sub_menu.*');
+            $this->db->from('user_sub_menu');
+            $this->db->join('user_access_submenu', 'user_sub_menu.id = user_access_submenu.submenu_id AND user_access_submenu.role_id = ' . $role_id, 'left');
+            $this->db->where('user_access_submenu.submenu_id IS NULL');
+            $data['submenus'] = $this->db->get()->result_array();
+             
             $this->load->view('templates/header', $data);
             $this->load->view('templates/navbar', $data);   
             $this->load->view('templates/sidebar');   
@@ -278,26 +271,60 @@ class Admin extends CI_Controller {
             </button>
             </div>');
         }
+            function addRoleAccessMenu(){
+                $role_id = $this->input->post('role_id');
+                $data = [
+                    'role_id' => $role_id,
+                    'menu_id' => $this->input->post('menu_id')
+                ];
 
-        public function changeAccess()
-        {
-            $menu_id = $this->input->post('menuId');
-            $role_id = $this->input->post('roleId');
-
-            $data = [
-                'role_id' => $role_id,
-                'menu_id' => $menu_id
-            ];
-
-            $result = $this->db->get_where('user_access_menu', $data);
-
-            if ($result->num_rows() < 1) {
-                $this->db->insert('user_access_menu', $data);
-            } else {
-                $this->db->delete('user_access_menu', $data);
+                $this->AModel->insertData('user_access_menu', $data);
+                $this->session->set_flashdata('success', 'New menu Access permissions have been added');
+                redirect('admin/roleAccess/'. $role_id);
             }
-        }
 
+            function DeleteRoleAccessMenu(){
+                $id = $this->input->post('id');
+                $role_id = $this->input->post('role_id');
+                $this->AModel->deleteData ('user_access_menu', $id);
+                $this->session->set_flashdata('success', 'Menu Access permissions have been deleted');
+                redirect('admin/roleAccess/'. $role_id);
+            }
+
+            function addRoleAccessSubMenu(){
+                $role_id = $this->input->post('role_id');
+                $data = [
+                    'role_id' => $role_id,
+                    'menu_id' => $this->input->post('meenu_id'),
+                    'submenu_id' => $this->input->post('submenu_id'),
+                ];
+
+                $this->AModel->insertData('user_access_submenu', $data);
+                $this->session->set_flashdata('success', 'New Submenu Access permissions have been added');
+                redirect('admin/roleAccess/'. $role_id);
+            }
+
+            function DeleteRoleAccessSubMenu(){
+                $id = $this->input->post('id');
+                $role_id = $this->input->post('role_id');
+                $this->AModel->deleteData ('user_access_submenu', $id);
+                $this->session->set_flashdata('success', 'Submenu Access permissions have been deleted');
+                redirect('admin/roleAccess/'. $role_id);
+            }
+
+            function getSubMenuBasedOnMenu(){
+                $menu_id = $this->input->post('menu_id');
+                $role_id = $this->input->post('role_id');
+
+                $this->db->select("user_sub_menu.*");
+                $this->db->from("user_sub_menu");
+                $this->db->join("user_access_submenu", "user_sub_menu.id = user_access_submenu.submenu_id AND user_access_submenu.role_id = $role_id", "left outer");
+                $this->db->where("user_access_submenu.submenu_id IS NULL");
+                $this->db->where("user_sub_menu.menu_id", $menu_id);
+                $query = $this->db->get();
+                $result = $query->result_array();
+                echo json_encode($result);
+            }
 
         // MANAGE MENU
         public function AddMenu() {
@@ -401,4 +428,84 @@ class Admin extends CI_Controller {
             </div>');
             header("Location: " . base_url('admin/manage_sub_menu'));
         }
+
+    public function manage_storage(){
+	
+        $data['title'] = 'Manage Storage';
+
+        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+
+        $this->load->model('Warehouse_model', 'WModel');
+        $data['storage'] = $this->AModel->getListStorage();
+
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/navbar', $data);   
+        $this->load->view('templates/sidebar');   
+        $this->load->view('admin/manage_storage',$data);
+        $this->load->view('templates/footer');
+    }
+
+        function getBoxBySloc(){
+            $idStorage = $this->input->post('idStorage');
+
+            $query = $this->db->query("SELECT b.id_box, b.no_box, b.weight, b.box_type
+                FROM box b
+                LEFT JOIN list_storage ls ON ls.id_box = b.id_box
+                WHERE ls.sloc = '$idStorage'")->row_array();
+            $query_length = $this->db->query("SELECT b.id_box, b.no_box, b.weight, b.box_type
+                FROM box b
+                LEFT JOIN list_storage ls ON ls.id_box = b.id_box
+                WHERE ls.sloc = '$idStorage'")->num_rows();
+
+            $result = [
+                'result' => $query,
+                'result_length' => $query_length
+            ];
+
+            echo json_encode($result);
+        }
+    
+    public function manage_box() {
+        $data['title'] = 'Manage Box';
+    
+        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+    
+        $config['base_url'] = base_url('admin/manage_box');
+        $config['total_rows'] = $this->AModel->countAllBoxes();
+        $config['per_page'] = 50;
+    
+        // Add these two lines for pagination styling (Bootstrap 4)
+        $config['full_tag_open'] = '<nav aria-label="Page navigation example"><ul class="pagination">';
+        $config['full_tag_close'] = '</ul></nav>';
+        $config['first_link'] = '&laquo;';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_link'] = '&raquo;';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['next_link'] = '&rsaquo;';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['prev_link'] = '&lsaquo;';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a class="page-link">';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['attributes'] = array('class' => 'page-link');
+    
+        $this->pagination->initialize($config);
+    
+        $data['start'] = $this->uri->segment(3, 0);
+        $data['list_box'] = $this->AModel->getBoxes($config['per_page'], $data['start']);
+    
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/navbar', $data);   
+        $this->load->view('templates/sidebar');   
+        $this->load->view('admin/manage_box', $data);
+        $this->load->view('templates/footer');
+    }   
 }

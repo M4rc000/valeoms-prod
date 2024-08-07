@@ -1,46 +1,38 @@
 <div class="content-wrapper">
-	<div class="row">
-		<div class="col-sm">
-			<div class="card shadow" style="border-bottom: 2px solid #4b49ac; height: 40px; border-radius: 5px">
-				<div class="card-body">
-					<h5 class="text-left mb-5" style="line-height: 0px; font-size: 14px; font-weight: 100;">
-						<span style="font-weight: 700;"><?= ucfirst($menus); ?></span> / <?= $title; ?>
-					</h5>
-				</div>
-			</div>
-		</div>
-	</div>
-	<br>
 	<div class="card shadow">
 		<div class="card-body">
 			<div class="container">
 				<div class="row">
 					<div class="col-12 grid-margin">
 						<div class="card-body">
+							<!-- GET USER -->
+							<input type="text" name="user" id="user" value="<?=$name['username'];?>" hidden>
 							<div class="container">
-								<h4 class="card-title"><?= $title; ?></h4>
-								<form class="form-sample">
-									<br>
-                                    <div class="row">
-                                        <div class="col-md-6">
-											<div class="form-group row">
-												<label class="col-sm-3 col-form-label">New Password</label>
-												<div class="col-sm-9">
-												<div class="input-group mb-3">
-														<input type="password" class="form-control" name="new_password" id="new_password"
-															placeholder="New password" required>
-														<span class="mdi mdi-eye-off pl-2 pr-2" id="toggle-new-password" style="cursor: pointer; font-size: 20px; border: 1px solid #e6e7e8; border-radius: 0 2px 2px 0; background-color: whitesmoke; padding-top: 13px"></span>
-													</div>
-												</div>
-											</div>
-										</div>
+									<div class="row mt-5 mx-2">
+                                        <div class="col-md-12">
+                                            <div class="row">
+                                                <label for="newpassword1" class="col-sm-3 col-form-label">New password</label>
+                                                <div class="col-sm-5">
+                                                    <input type="password" min="1" class="form-control" id="newpassword1" name="newpassword1" required>
+                                                </div>
+                                            </div>
+                                        </div>
                                     </div>
-								</form>
+									<div class="row mt-3 mx-2">
+                                        <div class="col-md-12">
+                                            <div class="row">
+                                                <label for="newpassword2" class="col-sm-3 col-form-label">Confirmation Password</label>
+                                                <div class="col-sm-5">
+                                                    <input type="password" min="1" class="form-control" id="newpassword2" name="newpassword2" required>
+                                                </div>
+                                            </div>
+                                        </div>
+                                    </div>
 							</div>
 						</div>
 					</div>
-					<div class="col-md-12">
-						<button type="submit" class="btn btn-primary" style="background-color: #4b49ac;">Save</button>
+					<div class="col-md text-end">
+						<button type="button" class="btn btn-primary" onclick="changepassword()">Save</button>
 					</div>
 				</div>
 			</div>
@@ -49,31 +41,51 @@
 </div>
 
 <script>
-	$(document).ready(function () {
-		$("#toggle-old-password").click(function () {
-			var passwordInput = $("#old_password");
-			var icon = $(this);
+	function changepassword(){
+		var newpassword1 = $('#newpassword1').val();
+		var newpassword2 = $('#newpassword2').val();
+		var id = <?=$name['id'];?>;
+		var user = $('#user').val();
 
-			if (passwordInput.attr("type") === "password") {
-				passwordInput.attr("type", "text");
-				icon.removeClass("mdi-eye-off").addClass("mdi-eye");
-			} else {
-				passwordInput.attr("type", "password");
-				icon.removeClass("mdi-eye").addClass("mdi-eye-off");
-			}
-		});
-
-		$("#toggle-new-password").click(function () {
-			var passwordInput = $("#new_password");
-			var icon = $(this);
-
-			if (passwordInput.attr("type") === "password") {
-				passwordInput.attr("type", "text");
-				icon.removeClass("mdi-eye-off").addClass("mdi-eye");
-			} else {
-				passwordInput.attr("type", "password");
-				icon.removeClass("mdi-eye").addClass("mdi-eye-off");
-			}
-		});
-	});
+		if(newpassword1 != newpassword2){
+			Swal.fire({
+				title: "Error",
+				text: "Password doesn't match",
+				icon: "error"
+			});
+		}
+		else{
+			$.ajax({
+				url: '<?= base_url('user/changenewpassword'); ?>',
+				type: 'post',
+				dataType: 'json',
+				data: {
+					newpassword1, newpassword2, id, user
+				},
+				success: function(res) {
+					if(res == 'success'){
+						Swal.fire({
+							title: "Success",
+							text: "Password has been changed",
+							icon: "success"
+						}).then(() => {
+							window.location.href = '<?=base_url('user/change_password');?>';
+						});
+					}
+					else{
+						Swal.fire({
+							title: "Error",
+							text: "Failed to change password",
+							icon: "error"
+						}).then(() => {
+							window.location.href = '<?=base_url('user/change_password');?>';
+						});
+					}
+				},
+				error: function(xhr, ajaxOptions, thrownError) {
+					console.error(xhr.statusText);
+				}
+			});
+		}
+	}
 </script>

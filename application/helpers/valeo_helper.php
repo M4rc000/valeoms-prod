@@ -35,3 +35,17 @@ function check_access($role_id, $menu_id)
         return "checked='checked'";
     }
 }
+
+function check_access_submenu($role_id, $menu_id, $submenu_id)
+{
+    $ci = get_instance();
+
+    $ci->db->where('role_id', $role_id);
+    $ci->db->where('menu_id', $menu_id);
+    $ci->db->where('submenu_id', $submenu_id); 
+    $result = $ci->db->get('user_access_submenu');
+
+    if ($result->num_rows() > 0) {
+        return "checked='checked'";
+    }
+}

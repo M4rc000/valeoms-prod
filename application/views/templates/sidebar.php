@@ -22,11 +22,12 @@
         <?php 
           $menuId = $m['id'];
           $querySubMenu = "SELECT *
-                            FROM `user_sub_menu` JOIN `user_menu` 
-                              ON `user_sub_menu`.`menu_id` = `user_menu`.`id`
+                            FROM `user_sub_menu` 
+                            JOIN `user_menu` ON `user_sub_menu`.`menu_id` = `user_menu`.`id`
+                            JOIN `user_access_submenu` ON `user_sub_menu`.`id` = `user_access_submenu`.`submenu_id`
                             WHERE `user_sub_menu`.`menu_id` = $menuId
-                              AND `user_sub_menu`.`is_active` = 1
-                      ";
+                            AND `user_access_submenu`.`role_id` = $role_id
+                            AND `user_sub_menu`.`is_active` = 1";
           $subMenu = $this->db->query($querySubMenu)->result_array();
         ?>
 
@@ -40,7 +41,6 @@
       <?php endforeach; ?>
     <?php endforeach; ?>
     </ul>
-
   </aside><!-- End Sidebar-->
 
   <main id="main" class="main">
@@ -49,7 +49,7 @@
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
-            <a><?=ucfirst(strtolower(explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'))[2]));?></a>
+            <a><?=ucfirst(strtolower(explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'))[1]));?></a>
           </li>
           <li class="breadcrumb-item active"><?=$title;?></li>
         </ol>

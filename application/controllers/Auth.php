@@ -35,7 +35,10 @@ class Auth extends CI_Controller {
         $username = $this->input->post('username');
         $password = $this->input->post('password');
 
-        $user = $this->db->get_where('user', ['username' => $username])->row_array();
+        // $user = $this->db->get_where('user', ['username' => $username])->row_array();
+        $sql = "SELECT * FROM `user` WHERE BINARY `username` = ?";
+        $query = $this->db->query($sql, [$username]);
+        $user = $query->row_array();
 
         // jika usernya ada
         if ($user) {
@@ -52,11 +55,8 @@ class Auth extends CI_Controller {
                     if ($user['role_id'] == 1) {
                         redirect('admin');
                     }
-                    elseif ($user['role_id'] == 2) {
-                        redirect('warehouse');
-                    }
                     else {
-                        redirect('production');
+                        redirect('user');
                     }
                 } else {
                     $this->session->set_flashdata('wrong_password',
@@ -67,7 +67,6 @@ class Auth extends CI_Controller {
                     </div>
                     '
                     );
-                    // echo "password is wrong";
                     redirect('auth');
                 }
             } else {
@@ -78,14 +77,13 @@ class Auth extends CI_Controller {
                     <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
                 </div>
                 ');
-                // echo "username is wrong";
                 redirect('auth');
             }
         } else {
             $this->session->set_flashdata('not_active_username',
             '
-            <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
-                <i class="bi bi-x-circle me-1"></i> Your username has not been activated
+            <div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 100%">
+                <i class="bi bi-x-circle me-1"></i> Your username is wrong
                 <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
             </div>
             '
