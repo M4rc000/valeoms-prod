@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title><?=$title;?> | Valeo Management System</title>
+  <title><?=$title;?> | VMS Dev</title>
 
   <!-- Favicons -->
   <link href="<?=base_url('assets');?>/img/valeo.png" rel="icon">
@@ -19,8 +19,8 @@
   <link href="<?=base_url('assets');?>/vendor/bootstrap/css/bootstrap.min.css" rel="stylesheet">
   <link href="<?=base_url('assets');?>/vendor/bootstrap-icons/bootstrap-icons.css" rel="stylesheet">
   <link href="<?=base_url('assets');?>/vendor/boxicons/css/boxicons.min.css" rel="stylesheet">
-  <link href="<?=base_url('assets');?>/vendor/quill/quill.snow.css" rel="stylesheet">
-  <link href="<?=base_url('assets');?>/vendor/quill/quill.bubble.css" rel="stylesheet">
+  <!-- <link href="<?=base_url('assets');?>/vendor/quill/quill.snow.css" rel="stylesheet">
+  <link href="<?=base_url('assets');?>/vendor/quill/quill.bubble.css" rel="stylesheet"> -->
   <link href="<?=base_url('assets');?>/vendor/remixicon/remixicon.css" rel="stylesheet">
   <link href="<?=base_url('assets');?>/vendor/simple-datatables/style.css" rel="stylesheet">
   <link rel="stylesheet" href="<?=base_url('assets');?>/vendor/select2/select2.css">
@@ -43,5 +43,6 @@
   <!-- JQUERY -->
   <script src="<?=base_url('assets');?>/vendor/jquery/jquery.min.js"></script>
   <script src="<?=base_url('assets/');?>vendor/datatables/datatables.js"></script>
+  <script src="<?=base_url('assets');?>/vendor/sweet-alert/sweet-alert.js"></script>
 </head>
 <body>

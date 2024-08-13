@@ -43,28 +43,41 @@ class Master extends CI_Controller {
 
         // CREATE MATERIAL LIST
         public function AddMaterialList(){
+            $Id_material = $this->input->post('material_id');
+            $Material_desc = $this->input->post('material_desc');
             $Data = array(
                 'Id_material' => $this->input->post('material_id'),
                 'Material_desc' => $this->input->post('material_desc'),
                 'Material_type' => $this->input->post('material_type'),
                 'Uom' => $this->input->post('uom'),
                 'Family' => $this->input->post('family'),
+                'is_active' => 1,
                 'Crtdt' => date('Y-d-m H:i'),
                 'Crtby' => $this->input->post('user'),
                 'Upddt' => date('Y-d-m H:i'),
                 'Updby' => $this->input->post('user')
             );
 
+            // CHECK DUPLICATE
+            $query = "SELECT * FROM `material_list` WHERE Id_material = ? OR Material_desc = ?";
+            $CheckDuplicate = $this->db->query($query, array($Id_material, $Material_desc))->num_rows();
 
-            $this->MModel->insertData('material_list', $Data);
-            $this->session->set_flashdata('SUCCESS',
-            '
-                <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
-                    <i class="bi bi-check-circle me-1"></i> New Material List successfully added
-                    <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>
-            ');
-            redirect('master/');
+            if ($CheckDuplicate > 0) {
+                // MATERIAL'S DUPLICATE
+                $this->session->set_flashdata('DUPLICATE_AddMaterialList','Material\'s already exist');
+                redirect('master/');
+            } else {
+                $this->MModel->insertData('material_list', $Data);
+                $check_insert = $this->db->affected_rows();
+                
+                if($check_insert > 0){
+                    $this->session->set_flashdata('SUCCESS_AddMaterialList','New Material has successfully added');
+                }
+                else{
+                    $this->session->set_flashdata('FAILED_AddMaterialList','Failed to add a new material');
+                }
+                redirect('master/');
+            }
         }
 
         // READ MATERIAL LIST
@@ -90,17 +103,14 @@ class Master extends CI_Controller {
             );
 
             $this->MModel->updateData('material_list', $id, $Data);
-            $this->session->set_flashdata('EDIT',
-            '
-            <div class="row mt-2">
-                <div class="col-md">
-                    <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
-                        <i class="bi bi-check-circle me-1"></i> Material List successfully updated
-                        <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                    </div>
-                </div>
-            </div>
-            ');
+            $check_insert = $this->db->affected_rows();
+
+            if($check_insert > 0 ){
+                $this->session->set_flashdata('SUCCESS_EditMaterialList','Material has successfully updated');
+            }
+            else{
+                $this->session->set_flashdata('FAILED_EditMaterialList','Failed to update a material');
+            }
             
             redirect('master/');
         }
@@ -108,15 +118,16 @@ class Master extends CI_Controller {
         // DELETE MATERIAL LIST
         public function DeleteMaterialID(){
             $id = $this->input->post('id');
-            $this->MModel->deleteData('material_list', $id);
-            $this->session->set_flashdata('DELETED',
-            '
-            <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
-                <i class="bi bi-check-circle me-1"></i> Material List successfully deleted
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>
-            ');
+            $user = $this->input->post('user');
+            $this->db->query("UPDATE `material_list` SET is_active = 0 WHERE Id = '$id' AND Updby = '$user'");
+            $check_delete = $this->db->affected_rows();
 
+            if($check_delete > 0){
+                $this->session->set_flashdata('SUCCESS_DeleteMaterialID','Material has successfully deleted');
+            }
+            else{
+                $this->session->set_flashdata('FAILED_DeleteMaterialID','Failed to delete a Material');
+            }
             redirect('master/');  
         }
 
@@ -174,10 +185,10 @@ class Master extends CI_Controller {
         $check_insert = $this->db->affected_rows();
 
         if($check_insert > 0){
-            $this->session->set_flashdata('success_AddMaterialBom', 'Material\'s Bom have been successfully added');
+            $this->session->set_flashdata('success_AddMaterialBom', 'Material Bom has been successfully added');
         }
         else{
-            $this->session->set_flashdata('failed_AddMaterialBom', 'Failed to add Material\'s Bom');
+            $this->session->set_flashdata('failed_AddMaterialBom', 'Failed to add Material Bom');
         }
 
         redirect('master/bom');
@@ -330,27 +341,30 @@ class Master extends CI_Controller {
     }
 
     function deleteMultipleMaterialBom(){
-        $data = $this->input->post('selectedIds');
-
+        $data = $this->input->post('selectedItems');
+    
         $DeleteDataBom = 0; 
     
         foreach ($data as $dt) {
             $DataBOM = [
                 'is_active' => 0,
-                'Upddt' => date('Y-d-m H:i'),
+                'Upddt' => date('Y-m-d H:i'),
                 'Updby' => $this->input->post('user')
             ];
-            $this->MModel->updateMultipleDataBom('bom', $dt, $DataBOM);
+            
+            // Ensure that 'id' is correctly passed and processed
+            $this->MModel->updateMultipleDataBom('bom', $dt['id'], $DataBOM);
             $check_delete = $this->db->affected_rows();
             
             if ($check_delete > 0) {
                 $DeleteDataBom += 1;
             }
         }
-
+    
         // Determine the result based on the number of successful deletions
         $result = $DeleteDataBom > 0 ? 1 : 0;
-
+    
         echo json_encode($result);
     }
+    
 }

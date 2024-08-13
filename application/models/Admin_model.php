@@ -143,4 +143,8 @@ class Admin_model extends CI_Model {
         $query = $this->db->get();
         return $query->result_array();
     }
+
+    public function getLastRoleId(){
+        return $this->db->query("SELECT * FROM `user_role` ORDER BY `id` DESC LIMIT 1")->result_array();
+    }
 }

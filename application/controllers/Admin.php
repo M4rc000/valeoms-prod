@@ -15,6 +15,7 @@ class Admin extends CI_Controller {
 	
 	public function index(){
         $data['title'] = 'Dashboard';
+
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
         
@@ -30,6 +31,7 @@ class Admin extends CI_Controller {
     
     public function manage_user() {
         $data['title'] = 'Manage User';
+
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
@@ -46,6 +48,7 @@ class Admin extends CI_Controller {
 
 	public function manage_role(){
         $data['title'] = 'Manage Role';
+
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
@@ -54,6 +57,7 @@ class Admin extends CI_Controller {
         $data['roles'] = $this->AModel->getAllRoles();
         $data['menu'] = $this->AModel->getAllMenu();
         $data['mensub'] = $this->AModel->getMenSub();
+        $data['lastRoleId'] = $this->AModel->getLastRoleId();
 
         $this->load->view('templates/header', $data);
         $this->load->view('templates/navbar', $data);   
@@ -92,6 +96,7 @@ class Admin extends CI_Controller {
 
 	public function manage_menu(){
         $data['title'] = 'Manage Menu';
+
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
@@ -110,6 +115,7 @@ class Admin extends CI_Controller {
 	public function manage_sub_menu()
 	{
         $data['title'] = 'Manage Sub-Menu';
+
         $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
@@ -141,10 +147,16 @@ class Admin extends CI_Controller {
             );
 
             $this->AModel->insertData('user', $Data);
-            $this->session->set_flashdata('SUCCESS','<div class="alert alert-success alert-dismissible fade show mb-2" id="dismiss" role="alert" style="width: 40%">
-                <i class="bi bi-check-circle me-1"></i> New User successfully added
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>');
+
+            $check_insert = $this->db->affected_rows();
+
+            if($check_insert > 0){
+                $this->session->set_flashdata('SUCCESS_AddUser','New user has been successfully added');
+            }
+            else{
+                $this->session->set_flashdata('FAILED_AddUser','Failed to add a new user');
+            }
+
             redirect('admin/manage_user');
         }
 
@@ -157,29 +169,36 @@ class Admin extends CI_Controller {
                     'gender' => $this->input->post('gender'),
                     'role_id' => $this->input->post('role'),
                     'is_active' => $this->input->post('active'),
-                    'date_joined' => date('d-m-Y H:i')
+                    'Upddt' => date('Y-m-d H:i')
                 );
 
             $this->AModel->updateData('user', $id, $Data);
-            $this->session->set_flashdata('EDIT','<div class="alert alert-warning alert-dismissible fade show" role="alert" style="width: 40%">
-                <i class="bi bi-check-circle me-1"></i> User successfully updated
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>');
+            $check_insert = $this->db->affected_rows();
+
+            if($check_insert > 0){
+                $this->session->set_flashdata('SUCCESS_EditUser','User has been successfully updated');
+            }
+            else{
+                $this->session->set_flashdata('FAILED_EditUser','Failed to update a user');
+            }
+
             redirect('admin/manage_user'); 
         }
 
-        public function deleteUser() {
-            $this->load->model('Admin_model','AModel');
-        
+        public function deleteUser() {        
             $id = $this->input->post('id');
             $this->AModel->deleteData('user', $id);
         
-            $this->session->set_flashdata('DELETED','<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 40%">
-            <i class="bi bi-check-circle me-1"></i> User successfully deleted
-                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>');
-            header("Location: " . base_url('admin/manage_user'));
-                
+            $check_insert = $this->db->affected_rows();
+
+            if($check_insert > 0){
+                $this->session->set_flashdata('SUCCESS_deleteUser','User has been successfully deleted');
+            }
+            else{
+                $this->session->set_flashdata('FAILED_deleteUser','Failed to delete a user');
+            }
+
+            redirect('admin/manage_user'); 
         }
         
 
@@ -197,23 +216,16 @@ class Admin extends CI_Controller {
                 'updby' => $this->input->post('user')
             );
 
-            if($this->db->get_where('user_role', array('role' => $role, 'id' => $id))->num_rows() > 0){
-                $this->session->set_flashdata('DUPLICATES','<div class="alert alert-warning alert-dismissible fade show" role="alert">
-                Role is duplicates
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-                </div>');
+            $this->AModel->insertData('user_role', $Data);
+            $check_insert = $this->db->affected_rows();
+
+            if($check_insert > 0){
+                $this->session->set_flashdata('SUCCESS_addRole','New role has successfully added');
             }
             else{
-                $this->session->set_flashdata('SUCCESS','<div class="alert alert-success alert-dismissible fade show" role="alert">
-                Data Role successfully added
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-                </div>');
-                $this->AModel->insertData('user_role', $Data);
+                $this->session->set_flashdata('FAILED_addRole','Failed to add a new role');
             }
+
             redirect('admin/manage_role');
         }
 

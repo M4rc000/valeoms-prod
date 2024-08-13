@@ -1,13 +1,13 @@
 <style>
     .select2-container {
-		z-index: 9999;
-	}
+        z-index: 9999;
+    }
 
-	.select2-selection {
-		padding-top: 4px !important;
-		height: 38px !important;
+    .select2-selection {
+        padding-top: 4px !important;
+        height: 38px !important;
         /* width: 367px !important; */
-	}
+    }
 </style>
 <section>
     <div class="row">
@@ -65,16 +65,16 @@
                                 <td><?php echo $material['qty']; ?></td>
                                 <td><?php echo $material['uom']; ?></td>
                                 <td>
-                                    <!-- <button class="btn btn-success" data-bs-toggle="modal"
-										data-bs-target="#editModal<?= $material['id_box_detail']; ?>"
-										onclick="getDataForEdit(<?= $material['id_box_detail']; ?>)">
-									<i class="bx bxs-edit" style="color: white;"></i>
-								</button> -->
-                                    <button class="btn btn-danger ms-1" data-bs-toggle="modal"
+                                    <button class="btn btn-success btn-edit"
+                                        data-id="<?= $material['id_box_detail']; ?>">
+                                        <i class="bx bxs-edit" style="color: white;"></i>
+                                    </button>
+                                    <button class="btn btn-danger ms-1"
                                         onclick="deleteItem(<?= $material['id_box_detail']; ?>)">
                                         <i class="bx bxs-trash"></i>
                                     </button>
                                 </td>
+
                             </tr>
 
                             <?php endforeach; ?>
@@ -122,18 +122,19 @@
     </div>
 </section>
 
-<script src="<?=base_url('assets');?>/vendor/qr-code/qr-code.min.js"></script>
-<script src="<?=base_url('assets');?>/vendor/jquery/jquery.min.js"></script>
+<script src="<?= base_url('assets'); ?>/vendor/qr-code/qr-code.min.js"></script>
+<script src="<?= base_url('assets'); ?>/vendor/jquery/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
-$(document).ready(function (){
-    $('#addModal1').on('shown.bs.modal', function () {
+$(document).ready(function() {
+    $('#addModal1').on('shown.bs.modal', function() {
         $('#reference_number').select2({
             dropdownParent: $('#addModal1'),
             width: '100%'
         });
     });
 })
+
 function closeModal() {
     $('#reference_number').val("");
     $('#material').val("");
@@ -171,7 +172,7 @@ function refreshAll() {
     });
 }
 
-$(document).on('change', '#reference_number', function(){
+$(document).on('change', '#reference_number', function() {
     $('#material').val("");
     $('#uom').val("");
     $('#material_edit').val('');
@@ -318,9 +319,9 @@ function deleteItem(id) {
                     <div class="col-6">
                         <label for="reference_number" class="form-label">Material Part Number</label>
                         <select class="form-select" id="reference_number" name="reference_number">
-                                <option value="">Select Material Part No</option>
-                            <?php foreach($materials as $mtr):?>
-                                <option value="<?=$mtr['Id_material'];?>"><?=$mtr['Id_material'];?></option>
+                            <option value="">Select Material Part No</option>
+                            <?php foreach ($materials as $mtr): ?>
+                            <option value="<?= $mtr['Id_material']; ?>"><?= $mtr['Id_material']; ?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -352,58 +353,62 @@ function deleteItem(id) {
 
 <?php foreach ($detail_box as $material): ?>
 <!-- EDIT MODAL -->
-<!-- <div class="modal fade" id="editModal<?= $material['id_box_detail']; ?>" tabindex="-1">
+<div class="modal fade" id="editModal<?= $material['id_box_detail']; ?>" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form id="editForm<?= $material['id_box_detail']; ?>"
                 action="<?= base_url('warehouse/editItemMaterial'); ?>" method="post">
                 <div class="modal-header">
                     <h5 class="modal-title">Edit Material</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        onclick="closeModal()"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                 </div>
                 <div class="modal-body">
-                    <input type="hidden" id="id_box" name="id_box">
+                    <input type="hidden" id="id_box_detail" name="id_box_detail"
+                        value="<?= $material['id_box_detail']; ?>">
                     <div class="row ps-2">
                         <div class="col-6">
                             <label for="reference_number" class="form-label">Material Part Number</label>
                             <input type="text" class="form-control"
                                 id="reference_number<?= $material['id_box_detail']; ?>" name="reference_number"
-                                onblur="getMaterial()" required>
+                                value="<?= $material['id_material']; ?>" required>
                         </div>
                         <div class="col-6 mb-3">
                             <label for="material" class="form-label">Material</label>
                             <input type="text" class="form-control" id="material<?= $material['id_box_detail']; ?>"
-                                name="material" required>
-                            <input type="hidden" class="form-control" id="id_box" name="id_box" value="<?= $id_box ?>">
-                            <input type="hidden" class="form-control" id="id_sloc" name="id_sloc"
-                                value="<?= $id_sloc ?>">
+                                name="material" value="<?= $material['material_desc']; ?>" required>
                         </div>
                         <div class="col-6 mb-3">
                             <label for="uom" class="form-label">UOM</label>
                             <input type="text" class="form-control" id="uom<?= $material['id_box_detail']; ?>"
-                                name="uom" required>
+                                name="uom" value="<?= $material['uom']; ?>" required>
                         </div>
                         <div class="col-6 mb-3">
                             <label for="qty" class="form-label">Quantity</label>
                             <input type="number" class="form-control" id="qty<?= $material['id_box_detail']; ?>"
-                                name="qty" required>
+                                name="qty" value="<?= $material['qty']; ?>" required>
                         </div>
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                        onclick="closeModal()">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
                     <button type="submit" class="btn btn-primary">Save changes</button>
                 </div>
             </form>
         </div>
     </div>
-</div> -->
+</div>
 <?php endforeach; ?>
 
 
 <script>
+$(document).ready(function() {
+    $('.btn-edit').on('click', function() {
+        var id = $(this).data('id');
+        $('#editModal' + id).modal('show');
+    });
+});
+
+
 function closeModal() {
     $('#id_box').val("");
     $('#weight').val("");
@@ -458,36 +463,50 @@ function editBox(id_box, weight, sloc) {
 <?php endforeach; ?>
 </section>
 <script>
-function saveChanges(id_box) {
-    var total_weight = $('#total_weight').val();
-    var sloc = $('#sloc_select').val();
-    sloc = sloc ? sloc : $('#sloc_select_before').val();
+$(document).ready(function() {
+    $('.btn-edit').on('click', function() {
+        var id = $(this).data('id');
+        var box = $(this).data('box');
+        var weight = $(this).data('weight');
+        var sloc = $(this).data('sloc');
+
+        // Set data to modal fields
+        $('#editModal input#id_box').val(id);
+        $('#editModal input#weight').val(weight);
+        $('#editModal select#sloc').val(sloc);
+        $('#editModal').modal('show');
+    });
+});
+
+function saveChanges() {
+    var id_box = $('#editModal input#id_box').val();
+    var weight = $('#editModal input#weight').val();
+    var sloc = $('#editModal select#sloc').val();
 
     $.ajax({
         url: '<?= base_url('warehouse/updateTotalWeightAndSloc'); ?>',
         type: 'POST',
         data: {
-            total_weight: total_weight,
-            sloc: sloc,
-            id_box: id_box
+            id_box: id_box,
+            weight: weight,
+            sloc: sloc
         },
         success: function(response) {
             var data = JSON.parse(response);
             if (data.status == 'success') {
-                console.log('Changes saved successfully');
                 Swal.fire({
                     title: "Success!",
                     text: "Changes saved successfully.",
                     icon: "success"
                 }).then(function() {
-                    window.location.href = "<?= base_url('warehouse/list_box/0'); ?>";
+                    window.location.reload();
                 });
             } else {
                 Swal.fire({
                     icon: 'error',
                     title: 'Something wrong!',
+                    text: data.msg
                 });
-
             }
         },
         error: function(xhr, status, error) {

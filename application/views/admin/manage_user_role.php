@@ -5,21 +5,6 @@
 		<div class="col-lg-12">
 			<div class="card">
 				<div class="card-body table-responsive">
-				<?php if ($this->session->flashdata('SUCCESS') != '') { ?>
-					<?= $this->session->flashdata('SUCCESS'); ?>
-				<?php } ?>
-				<?php if ($this->session->flashdata('DUPLICATES') != '') { ?>
-					<?= $this->session->flashdata('DUPLICATES'); ?>
-				<?php } ?>
-				<?php if ($this->session->flashdata('DELETED') != '') { ?>
-					<?= $this->session->flashdata('DELETED'); ?>
-				<?php } ?>
-				<?php if ($this->session->flashdata('EDIT') != '') { ?>
-					<?= $this->session->flashdata('EDIT'); ?>
-				<?php } ?>
-				<?php if ($this->session->flashdata('ERROR') != '') { ?>
-					<?= $this->session->flashdata('ERROR'); ?>
-				<?php } ?>
               <table class="table datatable">
                 <thead>
                   <tr>
@@ -67,7 +52,6 @@
 </section>
 
 
-	
 <!-- ADD MODAL-->
 <div class="modal fade" id="addModal" tabindex="-1">
 	<div class="modal-dialog modal-lg">
@@ -83,7 +67,7 @@
 			<div class="row ps-2">
 				<div class="col-4">
 					<label for="id" class="form-label">ID</label>
-					<input type="text" class="form-control" id="id" name="id">
+					<input type="text" class="form-control" id="id" name="id" value="<?=intval($lastRoleId[0]['id'])+1;?>" readonly>
 				</div>
 				<div class="col-4">
 					<label for="role" class="form-label">Role</label>
@@ -228,3 +212,27 @@
         });
     });
 </script>
+
+
+
+<!-- SWEET ALERT -->
+<?php if ($this->session->flashdata('SUCCESS_addRole')): ?>
+    <script>
+        Swal.fire({
+            title: "Success",
+            html: `<?=$this->session->flashdata('SUCCESS_addRole');?>`,
+            icon: "success"
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('FAILED_addRole')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Success",
+                html: `<?=$this->session->flashdata('FAILED_addRole');?>`,
+                icon: "success"
+            });
+        });
+    </script>
+<?php endif; ?>

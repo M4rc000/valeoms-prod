@@ -8,6 +8,7 @@
 		height: 38px !important;
 	}
 </style>
+
 <section style="font-family: Nunito;">
 	<div class="row">
 		<div class="col-lg-12">
@@ -378,7 +379,7 @@
                     let rows = '';
                     for (let number = 0; number < res.length; number++) {
                         rows += `
-                        <tr data-id="${res[number].Id_bom}">
+                        <tr data-id="${res[number].Id_bom}" data-Idmaterial="${res[number].Id_material}" data-Materialdesc="${res[number].Material_desc}" data-Qty="${res[number].Qty}" data-Uom="${res[number].Uom}">
 							<td><input type="checkbox" class="form-check-input"></td>
                             <td>${res[number].Id_material}</td>
                             <td>${res[number].Material_desc}</td>
@@ -396,7 +397,7 @@
 
                     var htmlContent = `
 						<div class="table-responsive">
-							<table class="table table-bordered mt-3" id="table-content">
+							<table class="table table-bordered mt-3" id="table-content" style="width: 100%">
 								<thead>
 									<tr>
 										<th class="text-center">#</th>
@@ -422,47 +423,101 @@
 					`;
 
                     $('#data').empty().append(htmlContent);
-                    new DataTable('#table-content');
+                    var table = $('#table-content').DataTable({
+						"pageLength": 10
+					});
 
 					$('#select-delete').on('click', function() {
 						var user = $('#user').val();
 						// Collect all checked checkboxes
-						let selectedIds = [];
+						let selectedItems = [];
 						$('#table-content tbody input[type="checkbox"]:checked').each(function() {
-							selectedIds.push($(this).closest('tr').data('id'));
+							let id = $(this).closest('tr').data('id');
+							let Id_material = $(this).closest('tr').data('idmaterial'); 
+							let Material_desc = $(this).closest('tr').data('materialdesc');
+							let Qty = $(this).closest('tr').data('qty');
+							let Uom = $(this).closest('tr').data('uom');
+
+							selectedItems.push({ id: id, Id_Material: Id_material, Material_desc: Material_desc, Qty: Qty, Uom: Uom });
 						});
 
-						if (selectedIds.length > 0) {
-							$.ajax({
-								url: '<?=base_url('master/deleteMultipleMaterialBom');?>',
-								type: 'POST',
-								data: { selectedIds, user },
-								success: function(res) {
-									if(res == 1){
-										$('#table-content').DataTable().destroy();
+						if (selectedItems.length > 0) {
 
-										selectedIds.forEach(function(id) {
-											$('#table-content tbody tr[data-id="' + id + '"]').remove();
-										});
+							// Generate table rows for each selected item
+							var number = 0;
+							let tableRows = selectedItems.map(item => 
+								`<tr>
+									<td class="text-center">${++number}</td>
+									<td class="text-center">${item.Id_Material}</td>
+									<td class="text-start">${item.Material_desc}</td>
+									<td class="text-center">${item.Qty}</td>
+									<td class="text-center">${item.Uom}</td>
+								</tr>`
+							).join('');
 
-										$('#table-content').DataTable();
-										
-										Swal.fire({
-											title: "Success",
-											html: `Data Material's Bom have been successfully deleted`,
-											icon: "success"
-										});		
-									}
-									else{
-										Swal.fire({
-											title: "Error",
-											html: `Failed to delete material's bom`,
-											icon: "error"
-										});		
-									}
-								},
-								error: function(xhr, status, error) {
-									console.error('Error deleting records:', error);
+							let tableHTML = `
+								<div class="table-responsive">
+									<table class="table table-bordered" id="tbl-selectedItems">
+										<thead>
+											<tr>
+												<th class="text-center">#</th>
+												<th class="text-center">Material Part No</th>
+												<th class="text-center">Material Part Name</th>
+												<th class="text-center">Qty</th>
+												<th class="text-center">Uom</th>
+											</tr>
+										</thead>
+										<tbody>
+											${tableRows}
+										</tbody>
+									</table>
+								</div>`;
+
+
+
+							Swal.fire({
+								title: "Are you sure?",
+								html: tableHTML,
+								width: 900,
+								icon: "question",
+								showCancelButton: true,
+								confirmButtonColor: "#3085d6",
+								cancelButtonColor: "#d33",
+								confirmButtonText: "Yes, delete it!"
+								}).then((result) => {
+								if (result.isConfirmed) {
+									$.ajax({
+										url: '<?=base_url('master/deleteMultipleMaterialBom');?>',
+										type: 'POST',
+										data: { selectedItems, user },
+										success: function(res) {
+											if(res == 1){
+												$('#table-content').DataTable().destroy();
+
+												selectedItems.forEach(function(item) {
+													$('#table-content tbody tr[data-id="' + item.id + '"]').remove();
+												});
+
+												$('#table-content').DataTable();
+												
+												Swal.fire({
+													title: "Success",
+													html: `Data Material's Bom have been successfully deleted`,
+													icon: "success"
+												});		
+											}
+											else{
+												Swal.fire({
+													title: "Error",
+													html: `Failed to delete material's bom`,
+													icon: "error"
+												});		
+											}
+										},
+										error: function(xhr, status, error) {
+											console.error('Error deleting records:', error);
+										}
+									});
 								}
 							});
 						} else {
@@ -482,7 +537,7 @@
 									<div class="modal-content">
 										<?= form_open_multipart('master/EditBomMaterial'); ?>
 											<div class="modal-header">
-												<h5 class="modal-title">Edit Menu</h5>
+												<h5 class="modal-title">Edit Bom's Material</h5>
 												<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 											</div>
 											<div class="modal-body">

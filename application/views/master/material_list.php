@@ -12,6 +12,7 @@
       width: 100%;
     }
 </style>
+
 <section class="section">
   <div class="row">
     <div class="col-lg-12">
@@ -24,15 +25,6 @@
               </button>
             </div>
           </div>
-          <?php if ($this->session->flashdata('Error') != '') { ?>
-            <?= $this->session->flashdata('Error'); ?>
-          <?php } ?>
-          <?php if ($this->session->flashdata('EDIT') != '') { ?>
-            <?= $this->session->flashdata('EDIT'); ?>
-          <?php } ?>
-          <?php if ($this->session->flashdata('DELETED') != '') { ?>
-            <?= $this->session->flashdata('DELETED'); ?>
-          <?php } ?>
           <div class="table-responsive">
             <div class="row mt-4 mb-4 justify-content-center">
               <div class="col-12 col-md-4 mb-3 mb-md-0 text-center">
@@ -41,7 +33,7 @@
               <div class="col-12 col-md-5 mb-3 mb-md-0">
                   <select class="form-select" id="material_id" name="material_id" required>
                       <option value="">Select Material Part No</option>
-                      <?php foreach($materials as $mtr): ?>
+                      <?php foreach($material_list as $mtr): ?>
                       <option value="<?=$mtr['Id_material']?>"><?=$mtr['Id_material']?></option>
                       <?php endforeach; ?>
                   </select>
@@ -58,7 +50,7 @@
                     <span style="font-size: 16px;"><b>Total Material : </b> <?=$total_rows;?></span>
                 </div>
             </div>
-            <div class="row mt-1 px-2" id="data-table">
+            <div class="row mt-1 px-3" id="data-table">
                 <div class="col-sm-12">
                   <table class="table table-bordered mt-3" id="table-content">
                     <thead>
@@ -123,13 +115,13 @@
             </div>
             <div class="col-12 col-md-4">
               <label for="material_type" class="form-label">Material Type</label>
-              <input type="text" class="form-control" id="material_type" name="material_type" required>
+              <input type="text" class="form-control" id="material_type" name="material_type">
             </div>
           </div>
           <div class="row g-3 mt-3">
             <div class="col-12 col-md-4">
               <label for="uom" class="form-label">Uom</label>
-              <input type="text" class="form-control" id="uom" name="uom">
+              <input type="text" class="form-control" id="uom" name="uom" required>
             </div>
             <div class="col-12 col-md-4">
               <label for="family" class="form-label">Family</label>
@@ -146,7 +138,6 @@
   </div>
 </div>
 
-
 <!-- EDIT MODAL -->
 <?php foreach($materials as $mtr): ?>
 <div class="modal fade" id="editModal<?=$mtr['Id'];?>" tabindex="-1">
@@ -154,7 +145,7 @@
         <div class="modal-content">
         <?= form_open_multipart('master/EditMaterialList'); ?>
             <div class="modal-header">
-                <h5 class="modal-title">Edit Menu</h5>
+                <h5 class="modal-title">Edit Material</h5>
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body">
@@ -200,6 +191,7 @@
 <div class="modal fade" id="deleteModal<?=$mtr['Id'];?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
     <div class="modal-dialog">
         <div class="modal-content">
+          <?= form_open_multipart('master/DeleteMaterialID'); ?> 
             <div class="modal-header">
                 <h4 class="modal-title pb-0 mb-0" id="exampleModalLabel">Confirm to delete?</h4>
             </div>
@@ -213,6 +205,7 @@
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
                 <button type="submit" class="btn btn-primary" name="delete_user">Confirm</button>
             </div>
+          </form>
         </div>
     </div>
 </div>
@@ -226,48 +219,8 @@
      info: false,
      searching: false   
     });
-    // pagination();
   });
   
-  // SORT PAGINATION
-  // function pagination() {
-  //     var total_page = <?=$total_pages;?>;
-  //     console.log(total_page);
-  //     var paginationHTML = '';
-
-  //     for (var i = 0; i <= total_page; i++) {
-  //       if (i % 20 == 0) { // Every 21 pages, create a new column
-  //         paginationHTML += `
-  //             </ul>
-  //             </nav>
-  //             </div>
-  //             <div class="col-md-12">
-  //             <nav class="mt-1 mb-1" aria-label="Page navigation example">
-  //             <ul class="pagination" style="font-size: 15px;">
-  //         `;
-  //       }
-        
-  //       paginationHTML += `
-  //           <li class="page-item">
-  //               <a class="page-link" href="<?= base_url('master/index/'); ?>${i * 50}">${i + 1}</a>
-  //           </li>
-  //       `;
-  //     }
-
-  //     paginationHTML = `
-  //         <div class="col-md-12">
-  //             <nav class="mt-1 mb-1" aria-label="Page navigation example">
-  //                 <ul class="pagination" style="font-size: 15px;">
-  //                   ${paginationHTML}
-  //                 </ul>
-  //             </nav>
-  //         </div>
-  //     `;
-
-  //     $('#row-pagination').append(paginationHTML);
-  // }
-
-
   function getMaterialList(){
     var Id_material = $('#material_id').val();
 
@@ -300,7 +253,6 @@
       },
       success: function (res) {
         if (res.length > 0) {
-        //   console.log(res[0].Id_material);
           let rows = '';
             rows += `
               <tr>
@@ -349,7 +301,7 @@
               <div class="modal-content">
                 <?= form_open_multipart('master/EditMaterialList'); ?>
                     <div class="modal-header">
-                        <h5 class="modal-title">Edit Menu</h5>
+                        <h5 class="modal-title">Edit Material</h5>
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
@@ -393,7 +345,7 @@
 
         let modalDelete = '';
           modalDelete += `
-          <?= form_open_multipart('master/deleteMaterialBom'); ?>
+          <?= form_open_multipart('master/DeleteMaterialID'); ?>
               <div class="modal fade" id="deleteModal${res[0].Id}" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
                   <div class="modal-dialog">
                       <div class="modal-content">
@@ -436,3 +388,80 @@
     });
   }
 </script>
+
+<!-- SWEET ALERT  -->
+<?php if ($this->session->flashdata('DUPLICATE_AddMaterialList')): ?>
+    <script>
+        Swal.fire({
+            title: "Warning",
+            html: `<?=$this->session->flashdata('DUPLICATE_AddMaterialList');?>`,
+            icon: "warning"
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('SUCCESS_AddMaterialList')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Success",
+                html: `<?=$this->session->flashdata('SUCCESS_AddMaterialList');?>`,
+                icon: "success"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('FAILED_AddMaterialList')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Error",
+                html: "<?= $this->session->flashdata('FAILED_AddMaterialList'); ?>",
+                icon: "error"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('SUCCESS_EditMaterialList')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Success",
+                html: "<?= $this->session->flashdata('SUCCESS_EditMaterialList'); ?>",
+                icon: "success"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('FAILED_AddMaterialList')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Error",
+                html: "<?= $this->session->flashdata('FAILED_AddMaterialList'); ?>",
+                icon: "error"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('SUCCESS_DeleteMaterialID')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Success",
+                html: "<?= $this->session->flashdata('SUCCESS_DeleteMaterialID'); ?>",
+                icon: "success"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('FAILED_DeleteMaterialID')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Error",
+                html: "<?= $this->session->flashdata('FAILED_DeleteMaterialID'); ?>",
+                icon: "error"
+            });
+        });
+    </script>
+<?php endif; ?>
