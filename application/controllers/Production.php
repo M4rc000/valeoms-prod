@@ -284,10 +284,9 @@ class Production extends CI_Controller {
             $materialID = $this->input->post('material_id');
             $production_plan = $this->input->post('production_planning');
             $ProductID = $this->db->query("SELECT * FROM production_plan WHERE Production_plan = '$production_plan'")->result_array();
-            $kanban_id = $this->PModel->getLastKanbanID();
 
             $Data = array(
-                'id_kanban_box' => $kanban_id,
+                'Id_kanban_box' => $this->input->post('kanbanBox_id'),
                 'Id_material' => $materialID,
                 'Material_desc' => $this->input->post('material_desc'),
                 'Material_qty' => $this->input->post('qty'),

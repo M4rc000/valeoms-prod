@@ -17,8 +17,6 @@ class Warehouse extends CI_Controller
 		$this->load->model('Production_model', 'PModel');
 	}
 
-
-
 	public function AddReceivingMaterial()
 	{
 		$reference_number = $this->input->post('reference_number');
@@ -36,19 +34,156 @@ class Warehouse extends CI_Controller
 
 		$this->Amodel->insertData('receiving_material_temp', $data);
 
+		// Update space_now values after adding new material
+		$this->WModel->updateSpaceNow();
+
 		$this->session->set_flashdata('SUCCESS', '<div class="alert alert-success alert-dismissible fade show mb-2" id="dismiss" role="alert" style="width: 40%">
-			<i class="bi bi-check-circle me-1"></i> New receiving material successfully added
-			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-			</div>');
+            <i class="bi bi-check-circle me-1"></i> New receiving material successfully added
+            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>');
 
 		redirect('Warehouse/');
 	}
 
+	public function save_new_box()
+	{
+		$total_weight = $this->input->post('total_weight');
+		$id_sloc = $this->input->post('id_sloc');
+		$material = $this->db->query("SELECT * FROM receiving_material_temp")->result();
+
+		if (empty($material)) {
+			$data = [
+				'status' => false,
+				'msg' => 'Material is empty'
+			];
+			echo json_encode($data);
+			return;
+		}
+
+		// Check if there is space available in the specified SLoc
+		if (!$this->WModel->checkSpaceAvailability($id_sloc)) {
+			$data = [
+				'status' => false,
+				'msg' => 'No space available in the selected SLoc'
+			];
+			echo json_encode($data);
+			return;
+		}
+
+		try {
+			$formatted_box_number = $this->generateFormattedBoxNumber();
+		} catch (Exception $e) {
+			log_message('error', 'Error generating box number: ' . $e->getMessage());
+			echo json_encode(['status' => false, 'msg' => 'Error generating box number: ' . $e->getMessage()]);
+			return;
+		}
+
+		$header = [
+			'weight' => $total_weight,
+			'no_box' => $formatted_box_number,
+			'sloc' => $id_sloc,
+			'crtby' => $this->session->userdata('username'),
+			'crtdt' => date('Y-m-d H:i:s')
+		];
+
+		try {
+			$this->Amodel->insertData('box', $header);
+		} catch (Exception $e) {
+			log_message('error', 'Error inserting box header: ' . $e->getMessage());
+			echo json_encode(['status' => false, 'msg' => 'Error inserting box header: ' . $e->getMessage()]);
+			return;
+		}
+
+		$id_box = $this->db->insert_id();
+		$id_box_detail_array = array();
+
+		try {
+			foreach ($material as $key => $v) {
+				$data = [
+					'id_box' => $id_box,
+					'id_material' => $v->reference_number,
+					'material_desc' => $v->material_desc,
+					'crtby' => $this->session->userdata('username'),
+					'crtdt' => date('Y-m-d H:i:s')
+				];
+				$this->Amodel->insertData('box_detail', $data);
+				$id_box_detail_array[] = $this->db->insert_id();
+			}
+
+			foreach ($material as $key => $v) {
+				$id_box_detail = array_shift($id_box_detail_array);
+
+				$data = [
+					'id_box' => $id_box,
+					'id_box_detail' => $id_box_detail,
+					'reference_number' => $v->reference_number,
+					'material' => $v->material_desc,
+					'qty' => $v->qty,
+					'uom' => $v->uom,
+					's_loc' => $id_sloc,
+					'barcode' => $formatted_box_number,
+					'receiving_date' => $v->receiving_date,
+					'created_by' => $this->session->userdata('username'),
+					'created_at' => date('Y-m-d H:i:s')
+				];
+				$this->Amodel->insertData('receiving_material', $data);
+
+				$cek_storage = $this->db->query("SELECT total_qty from list_storage where sloc = $id_sloc")->row();
+				if (!empty($cek_storage)) {
+					$qty = $cek_storage->total_qty + $v->qty;
+				} else {
+					$qty = $v->qty;
+				}
+				$list_storage = [
+					'id_box' => $id_box,
+					'product_id' => $v->reference_number,
+					'material_desc' => $v->material_desc,
+					'total_qty' => $qty,
+					'total_qty_real' => $qty,
+					'sloc' => $id_sloc,
+					'uom' => $v->uom,
+					'created_by' => $this->session->userdata('username'),
+					'created_at' => date('Y-m-d H:i:s')
+				];
+				$this->Amodel->insertData('list_storage', $list_storage);
+			}
+
+			// Increment the space_now for the specified SLoc
+			$this->WModel->incrementSpace($id_sloc);
+
+		} catch (Exception $e) {
+			log_message('error', 'Error inserting box details: ' . $e->getMessage());
+			echo json_encode(['status' => false, 'msg' => 'Error inserting box details: ' . $e->getMessage()]);
+			return;
+		}
+
+		$data = [
+			'status' => true,
+			'no_box' => $formatted_box_number,
+		];
+
+		echo json_encode($data);
+	}
+
+
+	public function sloc_availability()
+	{
+		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+		$data['name'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+		$data['sloc_availability'] = $this->WModel->getSLocAvailability();
+
+		$data['title'] = 'SLoc Availability';
+
+		$this->load->view('templates/header', $data);
+		$this->load->view('templates/navbar', $data);
+		$this->load->view('templates/sidebar', $data);
+		$this->load->view('warehouse/sloc_availability', $data);
+		$this->load->view('templates/footer');
+	}
+
+
 	public function production_request()
 	{
-		$data['title'] = 'Production Request';
-		// is_allowed_submenu($data['title']);
-
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
 		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
@@ -56,11 +191,39 @@ class Warehouse extends CI_Controller
 		$data['production_request'] = $this->Warehouse_model->getProductionRequest();
 		$data['users'] = $this->Warehouse_model->getAllUsers();
 
+		$data['title'] = 'Production Request';
 		$this->load->view('templates/header', $data);
 		$this->load->view('templates/navbar', $data);
 		$this->load->view('templates/sidebar', $data);
 		$this->load->view('warehouse/production_request', $data);
 		$this->load->view('templates/footer');
+	}
+
+	public function approveProductionRequest()
+	{
+		$production_plan = $this->input->post('production_plan');
+
+		$data_request = $this->db->query("SELECT * from production_request where Production_plan = '$production_plan'")->result();
+
+		foreach ($data_request as $v) {
+			$id_material = $v->Id_material;
+			$sloc = $v->Sloc;
+			$id_box = $v->id_box;
+			$qty = $v->Qty;
+
+			// Update jumlah qty di list_storage
+			$this->db->query("UPDATE list_storage SET total_qty = total_qty - ? WHERE product_id = ? AND sloc = ? AND id_box = ?", array($qty, $id_material, $sloc, $id_box));
+		}
+
+		$approved1 = $this->db->query("UPDATE production_request SET status = 'APPROVED' WHERE Production_plan = '$production_plan'");
+		$approved2 = $this->db->query("UPDATE production_plan SET status = 'APPROVED' WHERE Production_plan = '$production_plan'");
+
+		if ($approved1 && $approved2) {
+			echo json_encode(['status' => true]);
+		} else {
+			echo json_encode(['status' => false]);
+		}
+
 	}
 
 
@@ -195,7 +358,6 @@ class Warehouse extends CI_Controller
         </div>');
 		redirect('Warehouse/');
 	}
-
 	public function index()
 	{
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
@@ -203,6 +365,7 @@ class Warehouse extends CI_Controller
 
 		$this->load->model('Warehouse_model');
 		$data['receiving_material'] = $this->Warehouse_model->getReceivingMaterials();
+		$data['material_list'] = $this->Warehouse_model->getMaterialList();
 		$data['material_list'] = $this->Warehouse_model->getMaterialList();
 		// print_r($data['material']);die;
 		$data['users'] = $this->Warehouse_model->getAllUsers();
@@ -214,7 +377,6 @@ class Warehouse extends CI_Controller
 		$this->load->view('warehouse/detail_receiving', $data);
 		$this->load->view('templates/footer');
 	}
-
 	public function edit_box_view($id)
 	{
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
@@ -256,9 +418,6 @@ class Warehouse extends CI_Controller
 
 	public function list_storage()
 	{
-		$data['title'] = 'List Storage';
-		// is_allowed_submenu($data['title']);
-
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
 		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
@@ -266,6 +425,7 @@ class Warehouse extends CI_Controller
 		$data['list_storage'] = $this->Warehouse_model->getListStorage();
 		$data['users'] = $this->Warehouse_model->getAllUsers();
 
+		$data['title'] = 'List Storage';
 		$this->load->view('templates/header', $data);
 		$this->load->view('templates/navbar', $data);
 		$this->load->view('templates/sidebar', $data);
@@ -292,17 +452,14 @@ class Warehouse extends CI_Controller
 
 	public function list_material_report()
 	{
-		$data['title'] = 'List Material Report';
-		// is_allowed_submenu($data['title']);
-
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
 		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
 		$this->load->model('Warehouse_model');
 		$data['list_storage'] = $this->Warehouse_model->getListStorage();
 		$data['users'] = $this->Warehouse_model->getAllUsers();
-		$data['materials'] = $this->db->query("SELECT * FROM material_list WHERE is_active = 1")->result_array();
 
+		$data['title'] = 'List Material Report';
 		$this->load->view('templates/header', $data);
 		$this->load->view('templates/navbar', $data);
 		$this->load->view('templates/sidebar', $data);
@@ -312,9 +469,6 @@ class Warehouse extends CI_Controller
 
 	public function regrouping()
 	{
-		$data['title'] = 'Re-Grouping';
-		// is_allowed_submenu($data['title']);
-
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
 		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
@@ -322,6 +476,7 @@ class Warehouse extends CI_Controller
 		$data['list_box'] = $this->Warehouse_model->getListBox();
 		$data['users'] = $this->Warehouse_model->getAllUsers();
 
+		$data['title'] = 'Re-Grouping';
 		$this->load->view('templates/header', $data);
 		$this->load->view('templates/navbar', $data);
 		$this->load->view('templates/sidebar', $data);
@@ -331,9 +486,6 @@ class Warehouse extends CI_Controller
 
 	public function cycle_count()
 	{
-		$data['title'] = 'Cycle Count';
-		// is_allowed_submenu($data['title']);
-
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
 		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
 
@@ -341,6 +493,7 @@ class Warehouse extends CI_Controller
 		$data['list_box'] = $this->Warehouse_model->getListBox();
 		$data['users'] = $this->Warehouse_model->getAllUsers();
 
+		$data['title'] = 'Cycle Count';
 		$this->load->view('templates/header', $data);
 		$this->load->view('templates/navbar', $data);
 		$this->load->view('templates/sidebar', $data);
@@ -405,6 +558,7 @@ class Warehouse extends CI_Controller
 		redirect('warehouse/list_box/0');
 	}
 
+
 	private function printMultipleBarcodes($box_ids)
 	{
 		$data['box_ids'] = $box_ids;
@@ -421,6 +575,7 @@ class Warehouse extends CI_Controller
 
 
 
+
 	public function delete_box()
 	{
 		$id_box = $this->input->post('id_box');
@@ -432,7 +587,6 @@ class Warehouse extends CI_Controller
 			echo json_encode(['status' => false, 'msg' => 'Failed to delete the box.']);
 		}
 	}
-
 
 	public function get_box()
 	{
@@ -457,8 +611,6 @@ class Warehouse extends CI_Controller
 
 		echo json_encode($data);
 	}
-
-
 
 	public function getMaterialByReferenceNumber($reference_number)
 	{
@@ -541,112 +693,6 @@ class Warehouse extends CI_Controller
 		return $formatted_box_number;
 	}
 
-	public function save_new_box()
-	{
-		$total_weight = $this->input->post('total_weight');
-		$id_sloc = $this->input->post('id_sloc');
-		$material = $this->db->query("SELECT * FROM receiving_material_temp")->result();
-
-		if (empty($material)) {
-			$data = [
-				'status' => false,
-				'msg' => 'Material is empty'
-			];
-			echo json_encode($data);
-			return;
-		}
-
-		try {
-			$formatted_box_number = $this->generateFormattedBoxNumber();
-		} catch (Exception $e) {
-			log_message('error', 'Error generating box number: ' . $e->getMessage());
-			echo json_encode(['status' => false, 'msg' => 'Error generating box number: ' . $e->getMessage()]);
-			return;
-		}
-
-		$header = [
-			'weight' => $total_weight,
-			'no_box' => $formatted_box_number,
-			'sloc' => $id_sloc,
-			'crtby' => $this->session->userdata('username'),
-			'crtdt' => date('Y-m-d H:i:s')
-		];
-
-		try {
-			$this->Amodel->insertData('box', $header);
-		} catch (Exception $e) {
-			log_message('error', 'Error inserting box header: ' . $e->getMessage());
-			echo json_encode(['status' => false, 'msg' => 'Error inserting box header: ' . $e->getMessage()]);
-			return;
-		}
-
-		$id_box = $this->db->insert_id();
-		$id_box_detail_array = array();
-
-		try {
-			foreach ($material as $key => $v) {
-				$data = [
-					'id_box' => $id_box,
-					'id_material' => $v->reference_number,
-					'material_desc' => $v->material_desc,
-					'crtby' => $this->session->userdata('username'),
-					'crtdt' => date('Y-m-d H:i:s')
-				];
-				$this->Amodel->insertData('box_detail', $data);
-				$id_box_detail_array[] = $this->db->insert_id();
-			}
-
-			foreach ($material as $key => $v) {
-				$id_box_detail = array_shift($id_box_detail_array);
-
-				$data = [
-					'id_box' => $id_box,
-					'id_box_detail' => $id_box_detail,
-					'reference_number' => $v->reference_number,
-					'material' => $v->material_desc,
-					'qty' => $v->qty,
-					'uom' => $v->uom,
-					's_loc' => $id_sloc,
-					'barcode' => $formatted_box_number,
-					'receiving_date' => $v->receiving_date,
-					'created_by' => $this->session->userdata('username'),
-					'created_at' => date('Y-m-d H:i:s')
-				];
-				$this->Amodel->insertData('receiving_material', $data);
-
-				$cek_storage = $this->db->query("SELECT total_qty from list_storage where sloc = $id_sloc")->row();
-				if (!empty($cek_storage)) {
-					$qty = $cek_storage->total_qty + $v->qty;
-				} else {
-					$qty = $v->qty;
-				}
-				$list_storage = [
-					'id_box' => $id_box,
-					'product_id' => $v->reference_number,
-					'material_desc' => $v->material_desc,
-					'total_qty' => $qty,
-					'total_qty_real' => $qty,
-					'sloc' => $id_sloc,
-					'uom' => $v->uom,
-					'created_by' => $this->session->userdata('username'),
-					'created_at' => date('Y-m-d H:i:s')
-				];
-				$this->Amodel->insertData('list_storage', $list_storage);
-			}
-		} catch (Exception $e) {
-			log_message('error', 'Error inserting box details: ' . $e->getMessage());
-			echo json_encode(['status' => false, 'msg' => 'Error inserting box details: ' . $e->getMessage()]);
-			return;
-		}
-
-		$data = [
-			'status' => true,
-			'no_box' => $formatted_box_number,
-		];
-
-		echo json_encode($data);
-	}
-
 	public function detail_receiving($box_id)
 	{
 		$this->load->model('Warehouse_model');
@@ -663,7 +709,6 @@ class Warehouse extends CI_Controller
 
 		echo json_encode($data);
 	}
-
 
 	public function list_box()
 	{
@@ -729,8 +774,7 @@ class Warehouse extends CI_Controller
 
 		echo json_encode($data);
 	}
-	
-	
+
 	public function get_material_report()
 	{
 		$id = $this->input->post('id_material');
@@ -1275,42 +1319,6 @@ class Warehouse extends CI_Controller
 		echo json_encode($res);
 	}
 
-	public function approveProductionRequest()
-	{
-		$production_plan = $this->input->post('production_plan');
-		$data_update = $this->input->post('data_items');
-
-		foreach ($data_update as $v) {
-			$id_material = $v['Id_material'];
-			$sloc = $v['sloc_id'];
-			$id_box = $v['id_box'];
-
-
-			// Update sloc and box production_request
-			$this->db->query("UPDATE production_request SET Sloc = ?, id_box = ? WHERE id_material = ? AND Production_plan = ? ", array($sloc, $id_box, $id_material, $production_plan));
-		}
-
-		$data_request = $this->db->query("SELECT * from production_request where Production_plan = '$production_plan'")->result();
-		foreach ($data_request as $v) {
-			$id_material = $v->Id_material;
-			$sloc = $v->Sloc;
-			$id_box = $v->id_box;
-			$qty = $v->Qty;
-
-			// Update jumlah qty di list_storage
-			$this->db->query("UPDATE list_storage SET total_qty = total_qty - ? WHERE product_id = ? AND sloc = ? AND id_box = ?", array($qty, $id_material, $sloc, $id_box));
-		}
-
-		$approved1 = $this->db->query("UPDATE production_request SET status = 'APPROVED' WHERE Production_plan = '$production_plan'");
-		$approved2 = $this->db->query("UPDATE production_plan SET status = 'APPROVED' WHERE Production_plan = '$production_plan'");
-
-		if ($approved1 && $approved2) {
-			echo json_encode(['status' => true]);
-		} else {
-			echo json_encode(['status' => false]);
-		}
-	}
-	
 	function RejectReturnRequest()
 	{
 		$id_return = $this->input->post('idReturn');
@@ -1331,37 +1339,6 @@ class Warehouse extends CI_Controller
 		}
 
 		echo json_encode($result);
-	}
-
-	public function get_sloc_options() {
-		$id_material = $this->input->post('id_material');
-		
-		$query = "
-			SELECT a.sloc as sloc_id, b.Sloc as sloc_name
-			FROM list_storage a
-			LEFT JOIN storage b ON b.Id_storage = a.sloc
-			WHERE a.product_id = ? AND a.sloc is not null
-		";
-		// Execute query with parameter binding
-		$data = $this->db->query($query, [$id_material])->result_array();
-		
-		echo json_encode($data);
-	}
-	
-	public function get_id_box_options() {
-		$id_material = $this->input->post('id_material');
-		$sloc_id = $this->input->post('sloc_id');
-		
-		$query = "
-			SELECT a.id_box, b.no_box
-			FROM list_storage a
-			LEFT JOIN box b ON b.id_box = a.id_box
-			WHERE a.product_id = ? AND a.sloc = ?
-		";
-		
-		$data = $this->db->query($query, [$id_material, $sloc_id])->result_array();
-		
-		echo json_encode($data);
 	}
 }
 ?>

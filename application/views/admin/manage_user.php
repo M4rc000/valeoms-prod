@@ -280,9 +280,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
-                title: "Error",
+                title: "Success",
                 html: `<?=$this->session->flashdata('FAILED_AddUser');?>`,
-                icon: "error"
+                icon: "success"
             });
         });
     </script>
