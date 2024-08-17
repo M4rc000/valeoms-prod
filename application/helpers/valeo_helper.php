@@ -8,13 +8,9 @@ function is_logged_in()
     } else {
         $role_id = $ci->session->userdata('role_id');
         $menu = $ci->uri->segment(1);
-        // $submenu = $ci->uri->segment(2);
 
         $queryMenu = $ci->db->get_where('user_menu', ['menu' => $menu])->row_array();
         $menu_id = $queryMenu['id'];
-        
-        // $querySubMenu = $ci->db->get_where('user_sub_menu', ['title' => $submenu])->row_array();
-        // $submenu_id = $querySubMenu['id'];
 
         $userAccess = $ci->db->get_where('user_access_menu', [
             'role_id' => $role_id,
@@ -24,32 +20,6 @@ function is_logged_in()
         if ($userAccess->num_rows() < 1) {
             redirect('auth/blocked');
         }
-    }
-}
-
-function is_allowed_submenu($submenu) 
-{
-    $ci = get_instance();
-    $role_id = $ci->session->userdata('role_id');
-    $menu = $ci->uri->segment(1);
-
-    $queryMenu = $ci->db->get_where('user_menu', ['menu' => $menu])->row_array();
-    $menu_id = $queryMenu['id'];
-    
-    $querySubMenu = $ci->db->get_where('user_sub_menu', [
-        'title' => $submenu,
-        'menu_id' => $menu_id
-        ])->row_array();
-    $submenu_id = $querySubMenu['id'];
-
-    $userAccess = $ci->db->get_where('user_access_submenu', [
-        'role_id' => $role_id,
-        'menu_id' => $menu_id,
-        'submenu_id' => $submenu_id
-    ]);
-    
-    if($userAccess->num_rows() == 0) {
-        redirect('auth/blocked');
     }
 }
 

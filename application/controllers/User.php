@@ -67,12 +67,3 @@ class User extends CI_Controller {
             echo json_encode($result);
         }
 }
-
-
-
-
-
-
-
-
-
