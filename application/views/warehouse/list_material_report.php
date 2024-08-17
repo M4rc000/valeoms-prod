@@ -1,3 +1,13 @@
+<style>
+    .select2-container {
+        z-index: 9999;
+    }
+
+    .select2-selection {
+        padding-top: 4px !important;
+        height: 38px !important;
+    }
+</style>
 <section>
     <div class="row">
         <div class="col-lg-12">
@@ -129,9 +139,10 @@
 
 
 <script>
-$(document).ready(function(){
+$(document).ready(function() {
     $('#id_material').select2();
-});
+})
+
 function getMaterialReport() {
     var id_material = $('#id_material').val();
 
@@ -143,6 +154,7 @@ function getMaterialReport() {
         },
         success: function(res) {
             var data = JSON.parse(res);
+            console.log(data);
             console.log(data.dt.qty);
             if (data.status) {
                 if (data.early_qty == 0) {
@@ -158,9 +170,9 @@ function getMaterialReport() {
                         <td>${data.dt.material}</td>
                         <td>${early_qty}</td>
                         <td>${data.dt.uom}</td>
-                        <td>${data.dt.created_at}</td>
+                        <td>${data.dt.receiving_date}</td>
                         <td>${qty}</td>
-                        <td>${data.last_update_time}</td>
+                        <td>${data.dt.last_update}</td>
                     </tr>
                 `);
                 $('.card-body').show();

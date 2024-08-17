@@ -183,6 +183,24 @@
             success: function(res) {
                 $('#preview-barcode').empty();
 
+                // DISABLED SLOC AND APPROVE BUTTON
+                $('#submit-box').prop('disabled', true);
+                $('#sloc').prop('disabled', true);
+
+                document.addEventListener('keydown', function(e) {
+                    // F5 key
+                    if (e.key === 'F5') {
+                        e.preventDefault();
+                        alert('Page refresh is disabled.');
+                    }
+                    // Ctrl + R key combination
+                    if ((e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) {
+                        e.preventDefault();
+                        alert('Page refresh is disabled.');
+                    }
+                });
+
+
                 if(res.result == 3){
                     Swal.fire({
                         title: "Success",

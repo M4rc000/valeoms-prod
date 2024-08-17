@@ -79,7 +79,7 @@
 			<div class="row ps-2">
 				<div class="col-4">
 					<label for="id" class="form-label">Menu ID</label>
-					<input type="text" class="form-control" id="id" name="id" required>
+					<input type="text" class="form-control" id="id" name="id" readonly value="<?=intval($lastMenuId[0]['id'])+1;?>">
 				</div>
 				<div class="col-4">
 					<label for="menu" class="form-label">Menu</label>
@@ -153,3 +153,73 @@
 		</div>
 	</form>
 <?php endforeach; ?>
+
+
+
+<!-- SWEET ALERT -->
+<?php if ($this->session->flashdata('SUCCESS_AddMenu')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Success",
+                html: "<?= $this->session->flashdata('SUCCESS_AddMenu'); ?>",
+                icon: "success"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('FAILED_AddMenu')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Error",
+                html: "<?= $this->session->flashdata('FAILED_AddMenu'); ?>",
+                icon: "error"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('SUCCESS_editMenu')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Success",
+                html: "<?= $this->session->flashdata('SUCCESS_editMenu'); ?>",
+                icon: "success"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('FAILED_editMenu')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Error",
+                html: "<?= $this->session->flashdata('FAILED_editMenu'); ?>",
+                icon: "error"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('SUCCESS_deleteMenu')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Success",
+                html: "<?= $this->session->flashdata('SUCCESS_deleteMenu'); ?>",
+                icon: "success"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('FAILED_deleteMenu')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Error",
+                html: "<?= $this->session->flashdata('FAILED_deleteMenu'); ?>",
+                icon: "error"
+            });
+        });
+    </script>
+<?php endif; ?>

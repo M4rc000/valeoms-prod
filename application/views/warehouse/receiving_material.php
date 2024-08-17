@@ -109,8 +109,8 @@
             </div>
         </div>
 </section>
-<script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
-
+<!-- <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script> -->
+<script src="<?=base_url('assets');?>/vendor/qr-code/qr-code.min.js"></script>
 
 <!-- ADD MODAL-->
 <div class="modal fade" id="addModal1" tabindex="-1">

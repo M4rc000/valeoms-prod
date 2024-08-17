@@ -117,7 +117,7 @@
 									</div>
 									<div class="row mt-5 justify-content-end mx-3">
 										<div class="col-12 col-md-3 text-end">
-											<button type="submit" class="btn btn-success w-100" style="width: 150px">Submit</button>
+											<button type="submit" class="btn btn-success w-100" id="btn-submit" style="width: 150px">Submit</button>
 										</div>
 									</div>
 								</form>
@@ -402,6 +402,11 @@
 			var checkNewData = "<?= $this->session->flashdata('kanban_data') ? count($kanbanData = $this->session->flashdata('kanban_data')) : '' ?>";
 	
 			if(checkNewData.length > 0){
+				$('#material_id').prop('disabled', true);
+				$('#material_desc').prop('disabled', true);
+				$('#qty').prop('disabled', true);
+				$('#production_planning').prop('disabled', true);
+				$('#btn-submit').prop('disabled', true);
 				generateBarcode();
 			}
 		}

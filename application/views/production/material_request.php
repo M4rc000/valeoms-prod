@@ -39,7 +39,7 @@
                                 <div class="container mt-5">
                                     <div class="row justify-content-center gap-1" id="base-search">
                                         <div class="col-12 col-md-3 mb-3 mb-md-0 text-md-end">
-                                            <label for="product_id" class="col-form-label"><b>Product ID</b></label>
+                                            <label for="product_id" class="col-form-label"><b>Product FG ID</b></label>
                                         </div>
                                         <div class="col-12 col-md-5 mb-3 mb-md-0">
                                             <select id="product_id" class="form-select">

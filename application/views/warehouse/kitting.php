@@ -98,7 +98,7 @@
                 if (res) {
                     $('#get-req-PNo').prop('disabled', true);
 
-                    // console.log(res);
+                    console.log(res);
                     var reqNo = res.Request_result[0].Id_request;
                     var Id_fg = res.Request_result[0].Id_fg;
                     var Fg_desc = res.Request_result[0].Fg_desc;
@@ -617,6 +617,24 @@
     });
 </script>
 
+
+<!-- DELETE MODAL -->
+<div class="modal fade" id="refresh-page" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+	<div class="modal-dialog">
+		<div class="modal-content">
+				<div class="modal-header">
+					<h4 class="modal-title pb-0 mb-0" id="exampleModalLabel">Confirm to refresh?</h4>
+				</div>
+				<div class="modal-body">
+					<span>Did you have already unpack all the boxes ?</span>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+					<a href="<?=base_url('warehouse/kitting')?>"><button type="button" class="btn btn-primary" name="delete_user">Confirm</button></a>
+				</div>
+		</div>
+	</div>
+</div>
 
 <?php if ($this->session->flashdata('success')): ?>
     <script>

@@ -69,10 +69,10 @@ class Production extends CI_Controller {
             $productDesc = $this->input->post('productDescription');
             $product_plan_qty = $this->input->post('qty');
             $user = $this->input->post('user');
- 
+         
             // Get the last production plan
             $production_plan = $this->PModel->getLastProductionPlan();
-        
+            
             // Data for Table production_plan
             $Data = [
                 'Production_plan' => $production_plan,
@@ -85,13 +85,13 @@ class Production extends CI_Controller {
                 'Upddt' => date('Y-m-d H:i'),
                 'Updby' => $user
             ];
-        
+            
             // Insert data into production_plan table
             $this->PModel->insertData('production_plan', $Data);
-        
+            
             // Retrieve BOM data
             $result = $this->db->query("SELECT * FROM bom WHERE Id_fg = '$productID'")->result_array();
-        
+            
             // Prepare and insert data into production_plan_detail table
             foreach ($result as $row) {
                 $detailData = [
@@ -107,17 +107,38 @@ class Production extends CI_Controller {
                     'Updby' => $user
                 ];
         
-                // Insert into production_plan_detail table
-                $this->PModel->insertData('production_plan_detail', $detailData);
+                // Insert into production_plan_detail table and get last inserted ID
+                $this->db->insert('production_plan_detail', $detailData);
+                $Production_plan_detail_id = $this->db->insert_id();
+                
+                // Prepare and insert data into production_request table
+                $ProductionRequestData = [
+                    'Production_plan_detail_id' => $Production_plan_detail_id,
+                    'Id_request' => $this->PModel->getLastReqNo(),
+                    'Id_material' => $row['Id_material'],
+                    'Material_desc' => $row['Material_desc'],
+                    'Qty' => $row['Qty'] * $product_plan_qty,
+                    'Sloc' => '',
+                    'id_box' => '',
+                    'Production_plan' => $production_plan,
+                    'Crtdt' => date('Y-m-d H:i:s'), 
+                    'Crtby' => $user
+                ];
+        
+                $this->PModel->insertData('production_request', $ProductionRequestData);
             }
-
+        
+            // Redirect to the production plan edit page
             redirect('production/edit_production_plan/' . $production_plan);
         }
+        
 
         public function editProductionPlan(){
             $production_plan = $this->input->post('production_plan');
             $Production_plan_detail_id = $this->input->post('prod_plan_id');
             $id_material = $this->input->post('materials_id');
+            $user = $this->input->post('user');
+            $date = date('Y-m-d H:i:s');
 
             $data = [
                 'Qty' => $this->input->post('qty'),
@@ -128,8 +149,17 @@ class Production extends CI_Controller {
             // Check if the record already exists
             $existing_request = $this->PModel->getRequest($production_plan, $Production_plan_detail_id);
         
+            $check_success = 0;
+
             if ($existing_request) {
                 $this->PModel->updateDataPP('production_request', $data, ['Production_plan' => $production_plan, 'Production_plan_detail_id' => $Production_plan_detail_id]);
+                $this->db->query("UPDATE `production_plan_detail` SET status = 1, Updby = '$user', Upddt = '$date' WHERE id = '$Production_plan_detail_id'");
+                
+                $checkinsert = $this->db->affected_rows();
+
+                if($checkinsert > 0){
+                    $check_success += 1;
+                }
             } else {
                 $data = array_merge($data, [
                     'Production_plan_detail_id' => $Production_plan_detail_id,
@@ -143,12 +173,43 @@ class Production extends CI_Controller {
                     'Crtby' => $this->input->post('user')
                 ]);
                 $this->PModel->insertData('production_request', $data);
+
+                $this->db->query("UPDATE `production_plan_detail` SET status = 1 WHERE id = '$Production_plan_detail_id'");
+
+                $checkinsert = $this->db->affected_rows();
+
+                if($checkinsert > 0){
+                    $check_success += 1;
+                }
             }
-        
-            $this->session->set_flashdata('success', 'Material Qty have been updated');
+
+            if($check_success > 0){
+                $this->session->set_flashdata('SUCCESS_editProductionPlan', 'Material Qty have been updated');
+            }
+            else{
+                $this->session->set_flashdata('FAILED_editProductionPlan', 'Failed to update material qty');
+            }
+
             redirect('production/edit_production_plan/'. $production_plan);
         }        
         
+        function update_status_edit_production_plan() {
+            $data = $this->input->post('data');
+            $user = $this->input->post('user');
+            $id = $this->db->escape_str($data['id']);
+            $status = (int) $data['status'];
+        
+            $this->db->set('status', $status);
+            $this->db->set('Upddt', date('Y-m-d H:i:s'));
+            $this->db->set('Updby', $user);
+            $this->db->where('id', $id);
+            $this->db->update('production_plan_detail');
+        
+            $result = $this->db->affected_rows() > 0 ? 1 : 0;
+            
+            echo json_encode($result);
+        }        
+
         function getSlocStorage(){
             $materialId = $this->input->post('materialId');
             $result = $this->db->query("SELECT 
@@ -284,9 +345,10 @@ class Production extends CI_Controller {
             $materialID = $this->input->post('material_id');
             $production_plan = $this->input->post('production_planning');
             $ProductID = $this->db->query("SELECT * FROM production_plan WHERE Production_plan = '$production_plan'")->result_array();
+            $kanban_id = $this->PModel->getLastKanbanID();
 
             $Data = array(
-                'Id_kanban_box' => $this->input->post('kanbanBox_id'),
+                'id_kanban_box' => $kanban_id,
                 'Id_material' => $materialID,
                 'Material_desc' => $this->input->post('material_desc'),
                 'Material_qty' => $this->input->post('qty'),

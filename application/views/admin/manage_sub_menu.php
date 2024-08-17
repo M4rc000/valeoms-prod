@@ -1,3 +1,13 @@
+<style>
+	.select2-container {
+		z-index: 9999;
+	}
+
+	.select2-selection {
+		padding-top: 4px !important;
+		height: 38px !important;
+	}
+</style>
 <section class="section">
 	<button type="button" class="btn btn-primary mb-2" data-bs-toggle="modal" data-bs-target="#addModal" style="color: white">
 		New submenu
@@ -6,21 +16,6 @@
 		<div class="col-lg-12">
 			<div class="card">
 				<div class="card-body table-responsive mt-2">
-					<?php if ($this->session->flashdata('SUCCESS') != '') { ?>
-						<?= $this->session->flashdata('SUCCESS'); ?>
-					<?php } ?>
-					<?php if ($this->session->flashdata('DUPLICATES') != '') { ?>
-						<?= $this->session->flashdata('DUPLICATES'); ?>
-					<?php } ?>
-					<?php if ($this->session->flashdata('DELETED') != '') { ?>
-						<?= $this->session->flashdata('DELETED'); ?>
-					<?php } ?>
-					<?php if ($this->session->flashdata('EDIT') != '') { ?>
-						<?= $this->session->flashdata('EDIT'); ?>
-					<?php } ?>
-					<?php if ($this->session->flashdata('ERROR') != '') { ?>
-						<?= $this->session->flashdata('ERROR'); ?>
-					<?php } ?>
               <table class="table datatable">
                 <thead>
                   <tr>
@@ -76,10 +71,8 @@
           </div>
         </div>
       </div>
-    </section>
+</section>
 
-
-	
 <!-- ADD MODAL-->
 <div class="modal fade" id="addModal" tabindex="-1">
 	<div class="modal-dialog modal-lg">
@@ -152,7 +145,11 @@
 				<div class="row ps-2">
 					<div class="col-4">
 						<label for="menu_id" class="form-label">Menu ID</label>
-						<input type="text" class="form-control" id="menu_id" name="menu_id" value="<?=$sb['menu_id'];?>">
+						<select id="menu_id" class="form-select" required name="active">
+							<?php foreach($menus as $menu): ?>
+								<option <?= $menu['id'] == $sb['menu_id'] ? 'selected' : '';?> value="<?=$menu['id'];?>"><?= $menu['menu']?></option>
+							<?php endforeach; ?>
+						</select>
 						<input type="text" class="form-control" id="id" name="id" value="<?=$sb['id'];?>" hidden>
 					</div>
 					<div class="col-4">
@@ -224,5 +221,84 @@
       var iconValue = $(this).val();
       $('.icon-show').html('<i class="' + iconValue + '"></i>');
     });
+
+	$('.modal').on('shown.bs.modal', function () {
+		$(this).find('#menu_id').select2({
+			dropdownParent: $(this)
+		});
+		$(this).find('#active').select2({
+			dropdownParent: $(this)
+		});
+	});
   });
 </script>
+
+
+
+<!-- SWEET ALERT -->
+<?php if ($this->session->flashdata('SUCCESS_AddSubMenu')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Success",
+                html: "<?= $this->session->flashdata('SUCCESS_AddSubMenu'); ?>",
+                icon: "success"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('FAILED_AddSubMenu')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Error",
+                html: "<?= $this->session->flashdata('FAILED_AddSubMenu'); ?>",
+                icon: "error"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('SUCCESS_editSubMenu')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Success",
+                html: "<?= $this->session->flashdata('SUCCESS_editSubMenu'); ?>",
+                icon: "success"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('FAILED_editSubMenu')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Error",
+                html: "<?= $this->session->flashdata('FAILED_editSubMenu'); ?>",
+                icon: "error"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('SUCCESS_DeleteSubMenu')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Success",
+                html: "<?= $this->session->flashdata('SUCCESS_DeleteSubMenu'); ?>",
+                icon: "success"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('FAILED_DeleteSubMenu')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Error",
+                html: "<?= $this->session->flashdata('FAILED_DeleteSubMenu'); ?>",
+                icon: "error"
+            });
+        });
+    </script>
+<?php endif; ?>

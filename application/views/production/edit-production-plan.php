@@ -1,14 +1,26 @@
+<?php
+    function formatQuantity($qty) {
+        // Convert to float and format with up to 3 decimal places
+        $formattedQty = number_format((float)$qty, 3, '.', '');
+        // Remove trailing zeros
+        $formattedQty = rtrim(rtrim($formattedQty, '0'), '.');
+        return $formattedQty;
+    }
+?>
+
 <section>
     <div class="card">
         <div class="card-body">
-            <div class="table-responsive">
-                <div class="row mt-5 px-2">
-                    <div class="col-md mb-2">
-                        <span>
-                            <b>BILL OF MATERIAL</b>
-                        </span>
-                    </div>
-                    <hr style="border: 1.5px solid black">
+            <!-- GET USER -->
+            <input type="text" class="form-control" id="user" name="user" value="<?=$name['username'];?>" hidden>
+            <div class="row mt-5 px-2">
+                <div class="col-md mb-2">
+                    <span>
+                        <b>BILL OF MATERIAL</b>
+                    </span>
+                </div>
+                <hr style="border: 1.5px solid black">
+                <div class="table-responsive">
                     <table class="table table-bordered" id="tbl-bom">
                         <thead style="font-size: 14px">
                             <tr>
@@ -19,6 +31,7 @@
                                 <th scope="col" rowspan="2" class="text-center">Material Need</th>
                                 <th scope="col" rowspan="2" class="text-center">Qty</th>
                                 <th scope="col" rowspan="2" class="text-center">Uom</th>
+                                <th scope="col" rowspan="2" class="text-center">Status</th>
                                 <th scope="col" rowspan="2" class="text-center">Action</th>
                             </tr>
                         </thead>
@@ -30,10 +43,18 @@
                                 <td><?=$pp['Id_material'];?></td>
                                 <td><?=$pp['Material_desc'];?></td>
                                 <td class="text-center"><?=$pp['Material_need'];?></td>
-                                <td class="text-center"><?=(floor($pp['Qty']) == $pp['Qty']) ? $pp['Qty'] : number_format($pp['Qty'], 2, '.', '');?></td>
+                                <td class="text-center">
+                                    <?= ($pp['Uom'] == 'PC' || $pp['Uom'] == 'pc') ? rtrim(rtrim(number_format($pp['Qty'], 3, '.', ''), '0'), '.') : rtrim(rtrim(number_format($pp['Qty'], 3, '.', ''), '0'), '.'); ?>
+                                </td>
                                 <td class="text-center"><?=$pp['Uom'];?></td>
                                 <td class="text-center">
-                                    <a href="#" class="edit-material-request" data-bs-toggle="modal" data-bs-target="#editMaterialRequest<?=$pp['id'];?>">
+                                    <input type="checkbox" class="form-check-input checkbox-material"
+                                        data-id="<?=$pp['id'];?>" style="width: 18px; height: 18px"
+                                        <?=$pp['status'] == 1 ? 'checked':''; ?>>
+                                </td>
+                                <td class="text-center">
+                                    <a href="#" class="edit-material-request" data-bs-toggle="modal"
+                                        data-bs-target="#editMaterialRequest<?=$pp['id'];?>">
                                         <span class="badge bg-warning"><i class="bx bx-pencil"></i></span>
                                     </a>
                                 </td>
@@ -43,17 +64,19 @@
                     </table>
                 </div>
             </div>
-            <div class="row mt-3">
-                <div class="col-12 text-end">
-                    <a href="<?=base_url('production/');?>" class="btn btn-success w-20">
-                        Save
-                    </a>
-                </div>
+        </div>
+        <div class="row mt-3 px-5 mb-2">
+            <div class="col-md-12 text-start">
+                <span><strong>Status: </strong> <span id="status-count">0/0</span></span>
+            </div>
+            <div class="col-12 text-end">
+                <a href="<?=base_url('production/');?>" class="w-20">
+                    <button class="btn btn-success" id="button-save">Save</button>
+                </a>
             </div>
         </div>
     </div>
 </section>
-
 
 <!-- MATERIAL REQUEST MODAL -->
 <?php foreach($production_plans as $pp):?>
@@ -93,7 +116,7 @@
                     </div>
                     <div class="col-12 col-md-3">
                         <label for="qty" class="form-label"><b>Qty</b></label>
-                        <input type="text" class="form-control" id="qty" name="qty" value="<?=$pp['Qty'];?>">
+                        <input type="text" class="form-control" id="qty" name="qty" value="<?= formatQuantity($pp['Qty']); ?>">
                     </div>
                     <div class="col-12 col-md-3">
                         <label for="stock_on_hand" class="form-label"><b class="px-2">Stock on hand</b> 
@@ -120,41 +143,101 @@
 <script src="<?=base_url('assets');?>/vendor/sweet-alert/sweet-alert.js"></script>
 <script>
     $(document).ready(function() {
+        function updateButtonState() {
+            var totalCheckboxes = $('.checkbox-material').length;
+            var checkedCheckboxes = $('.checkbox-material:checked').length;
+            
+            // Update the status text dynamically
+            $('#status-count').text(checkedCheckboxes + '/' + totalCheckboxes);
+            
+            // Enable or disable the button based on whether all checkboxes are checked
+            if (totalCheckboxes === checkedCheckboxes) {
+                $('#button-save').prop('disabled', false);
+            } else {
+                $('#button-save').prop('disabled', true);
+            }
+        }
+
+
         $('.edit-material-request').on('click', function(event) {
             event.preventDefault();
             var row = $(this).closest('tr');
             var materialId = row.find('td:eq(2)').text(); 
-            
+
             $.ajax({
                 url: '<?=base_url('production/getSlocStorage');?>', 
                 method: 'POST',
-                data: {
-                    materialId
-                },
+                data: { materialId },
                 success: function(res) {
                     var result = JSON.parse(res);
-
                     var stock_on_hand = 0;
-                    for(var i = 0; i < result.length; i++){
-                        stock_on_hand+= parseInt(result[i].total_qty);
+                    
+                    for (var i = 0; i < result.length; i++) {
+                        stock_on_hand += parseInt(result[i].total_qty, 10);
                     }
-
+                    
                     $('#stock_on_hand').val(stock_on_hand);
                 },
                 error: function(xhr, status, error) {
-                    // alert('Failed to update production plan');
+                    console.error('Failed to fetch stock on hand:', error);
                 }
             });
         });
+
+        $('.checkbox-material').change(function() {
+            var isChecked = $(this).is(':checked');
+            var productionPlanId = $(this).data('id');
+            var user = $('#user').val();
+
+            var data = {
+                id: productionPlanId,
+                status: isChecked ? 1 : 0
+            };
+
+            $.ajax({
+                url: '<?=base_url('production/update_status_edit_production_plan');?>',
+                type: 'POST',
+                data: { data, user },
+                dataType: 'json',
+                success: function(res) {
+                    if (res === 0) {
+                        Swal.fire({
+                            title: "Error",
+                            text: "Failed to save status",
+                            icon: "error"
+                        });
+                    }
+                    updateButtonState(); // Update the save button state
+                },
+                error: function(xhr, status, error) {
+                    console.error('Error updating status:', error);
+                }
+            });
+        });
+
+        updateButtonState();
     });
 </script>
 
-<?php if ($this->session->flashdata('success')): ?>
+
+
+
+<!-- SWEET ALERT -->
+<?php if ($this->session->flashdata('SUCCESS_editProductionPlan')): ?>
     <script>
         Swal.fire({
             title: "Success",
-            text: "<?= $this->session->flashdata('success'); ?>",
+            text: "<?= $this->session->flashdata('SUCCESS_editProductionPlan'); ?>",
             icon: "success"
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('FAILED_editProductionPlan')): ?>
+    <script>
+        Swal.fire({
+            title: "Error",
+            text: "<?= $this->session->flashdata('FAILED_editProductionPlan'); ?>",
+            icon: "error"
         });
     </script>
 <?php endif; ?>

@@ -5,7 +5,7 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title><?=$title;?> | Valeo Management System</title>
+  <title><?=$title;?> | VMS Dev</title>
 
   <!-- Favicons -->
   <link href="<?=base_url('assets');?>/img/valeo.png" rel="icon">

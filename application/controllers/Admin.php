@@ -104,6 +104,7 @@ class Admin extends CI_Controller {
         $this->load->model('Admin_model','AModel');
         
         $data['menus'] = $this->AModel->getAllMenu();
+        $data['lastMenuId'] = $this->db->query("SELECT id FROM `user_menu` ORDER BY id DESC LIMIT 1")->result_array();
 
         $this->load->view('templates/header', $data);
         $this->load->view('templates/navbar', $data);   
@@ -350,10 +351,15 @@ class Admin extends CI_Controller {
             );
 
             $this->AModel->insertData('user_menu', $Data);
-            $this->session->set_flashdata('SUCCESS','<div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
-            <i class="bi bi-check-circle me-1"></i> New menu successfully added
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>');
+
+            $check_insert = $this->db->affected_rows();
+
+            if($check_insert > 0){
+                $this->session->set_flashdata('SUCCESS_AddMenu','New menu has been successfully added');
+            }
+            else{
+                $this->session->set_flashdata('FAILED_AddMenu','Failed to add new menu');
+            }
             redirect('admin/manage_menu');
         }
 
@@ -366,10 +372,16 @@ class Admin extends CI_Controller {
             );
 
             $this->AModel->updateData('user_menu', $id, $Data);
-            $this->session->set_flashdata('EDIT','<div class="alert alert-warning alert-dismissible fade show" role="alert" style="width: 40%">
-            <i class="bi bi-check-circle me-1"></i> Menu successfully updated
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>');
+
+            $check_insert = $this->db->affected_rows();
+
+            if($check_insert > 0){
+                $this->session->set_flashdata('SUCCESS_editMenu','Menu has been successfully updated');
+            }
+            else{
+                $this->session->set_flashdata('FAILED_editMenu','Failed to update the menu');
+            }
+
             redirect('admin/manage_menu');
         }
 
@@ -379,11 +391,17 @@ class Admin extends CI_Controller {
             $id = $this->input->post('id');
         
             $this->AModel->deleteData('user_menu', $id);
-            $this->session->set_flashdata('DELETED','<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 40%">
-            <i class="bi bi-check-circle me-1"></i> Menu successfully deleted
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>');
-            header("Location: " . base_url('admin/manage_menu'));
+
+            $check_insert = $this->db->affected_rows();
+
+            if($check_insert > 0){
+                $this->session->set_flashdata('SUCCESS_deleteMenu','Menu has been successfully deleted');
+            }
+            else{
+                $this->session->set_flashdata('FAILED_deleteMenu','Failed to delete the menu');
+            }
+
+            redirect('admin/manage_menu');
         }
 
         // MANAGE SUBMENU
@@ -401,10 +419,15 @@ class Admin extends CI_Controller {
             );
 
             $this->AModel->insertData('user_sub_menu', $Data);
-            $this->session->set_flashdata('SUCCESS','<div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
-            <i class="bi bi-check-circle me-1"></i> New submenu successfully added
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>');
+            $check_insert = $this->db->affected_rows();
+
+            if($check_insert > 0){
+                $this->session->set_flashdata('SUCCESS_AddSubMenu','New a submenu has been successfully added');
+            }
+            else{
+                $this->session->set_flashdata('FAILED_AddSubMenu','Failed to add a new submenu');
+            }
+        
             redirect('admin/manage_sub_menu');
         }
 
@@ -421,10 +444,15 @@ class Admin extends CI_Controller {
             );
 
             $this->AModel->updateData('user_sub_menu', $id, $Data);
-            $this->session->set_flashdata('EDIT','<div class="alert alert-warning alert-dismissible fade show" role="alert" style="width: 40%">
-            <i class="bi bi-check-circle me-1"></i> Submenu successfully updated
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-                </div>');
+            $check_insert = $this->db->affected_rows();
+
+            if($check_insert > 0){
+                $this->session->set_flashdata('SUCCESS_editSubMenu','Submenu has been successfully updated');
+            }
+            else{
+                $this->session->set_flashdata('FAILED_editSubMenu','Failed to update a submenu');
+            }
+
             redirect('admin/manage_sub_menu');
         }
 
@@ -434,11 +462,16 @@ class Admin extends CI_Controller {
             $id = $this->input->post('id');
         
             $this->AModel->deleteData('user_sub_menu', $id);
-            $this->session->set_flashdata('DELETED','<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 40%">
-            <i class="bi bi-check-circle me-1"></i> Submenu successfully deleted
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-            </div>');
-            header("Location: " . base_url('admin/manage_sub_menu'));
+            $check_insert = $this->db->affected_rows();
+
+            if($check_insert > 0){
+                $this->session->set_flashdata('SUCCESS_DeleteSubMenu','Submenu has been successfully deleted');
+            }
+            else{
+                $this->session->set_flashdata('FAILED_DeleteSubMenu','Failed to delete a submenu');
+            }
+
+            redirect('admin/manage_sub_menu');
         }
 
     public function manage_storage(){

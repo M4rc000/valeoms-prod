@@ -1,24 +1,34 @@
+<style>
+	.select2-container {
+		z-index: 9999;
+	}
 
+	.select2-selection {
+		padding-top: 4px !important;
+		height: 38px !important;
+		/* width: 367px !important; */
+	}
+</style>
 <section>
 	<div class="row">
 		<div class="col-lg-12">
 			<div class="card ml-5">
 				<div class="card-body table-responsive mt-2">
-					<?php if ($this->session->flashdata('SUCCESS') != '') { ?>
+					<?php if ($this->session->flashdata('SUCCESS')): ?>
 						<?= $this->session->flashdata('SUCCESS'); ?>
-					<?php } ?>
-					<?php if ($this->session->flashdata('DUPLICATES') != '') { ?>
+					<?php endif; ?>
+					<?php if ($this->session->flashdata('DUPLICATES')): ?>
 						<?= $this->session->flashdata('DUPLICATES'); ?>
-					<?php } ?>
-					<?php if ($this->session->flashdata('DELETED') != '') { ?>
+					<?php endif; ?>
+					<?php if ($this->session->flashdata('DELETED')): ?>
 						<?= $this->session->flashdata('DELETED'); ?>
-					<?php } ?>
-					<?php if ($this->session->flashdata('EDIT') != '') { ?>
+					<?php endif; ?>
+					<?php if ($this->session->flashdata('EDIT')): ?>
 						<?= $this->session->flashdata('EDIT'); ?>
-					<?php } ?>
-					<?php if ($this->session->flashdata('ERROR') != '') { ?>
+					<?php endif; ?>
+					<?php if ($this->session->flashdata('ERROR')): ?>
 						<?= $this->session->flashdata('ERROR'); ?>
-					<?php } ?>
+					<?php endif; ?>
 					<table class="table datatable table-bordered" width="100%">
 						<thead>
 							<tr>
@@ -32,30 +42,35 @@
 						</thead>
 						<tbody>
 							<?php $number = 0;
-							foreach ($production_request as $request) :
+							foreach ($production_request as $request):
 								$number++ ?>
 								<tr>
 									<td><?= $number; ?></td>
 									<td><?= $request['Id_request']; ?></td>
 									<td><?= $request['Production_plan']; ?></td>
-									<td>
-										<?= $request['Fg_Desc']; ?>
-									</td>
+									<td><?= $request['Fg_Desc']; ?></td>
 									<td><?= $request['Material_need']; ?></td>
 									<td>
-                                    <?php  if($request['status_request'] == 'NEW'){ ?>
-                                    <button class="btn btn-success" data-bs-toggle="modal" onclick="getDetailRequest(<?= $request['id']; ?>, '<?= $request['Production_plan']; ?>')" data-bs-target="#detailModal1<?= $request['id']; ?>" >
-                                    Approve
-                                    </button>
-                                    <?php } else if($request['status_request'] == 'APPROVED'){ ?>
-                                    <button type="button" class="btn btn-secondary" disabled>Approved</button>
-                                    <button type="button" class="btn btn-warning" onclick="printReq('<?= $request['Production_plan']; ?>')"><i class="bi bi-printer"></i> Print</button>
-                                    <?php } else { ?>
-                                        <button type="button" class="btn btn-danger" disabled>Rejected</button>
-                                        <button type="button" class="btn btn-warning" onclick="printReq('<?= $request['Production_plan']; ?>')"><i class="bi bi-printer"></i> View</button>
-                                    <?php } ?>
-
-                                    </td>
+										<?php if ($request['status_request'] == 'NEW'): ?>
+											<button class="btn btn-success" data-bs-toggle="modal"
+												onclick="getDetailRequest(<?= $request['id']; ?>, '<?= $request['Production_plan']; ?>')"
+												data-bs-target="#detailModal1<?= $request['id']; ?>">
+												Approve
+											</button>
+										<?php elseif ($request['status_request'] == 'APPROVED'): ?>
+											<button type="button" class="btn btn-secondary" disabled>Approved</button>
+											<button type="button" class="btn btn-warning"
+												onclick="printReq('<?= $request['Production_plan']; ?>')">
+												<i class="bi bi-printer"></i> Print
+											</button>
+										<?php else: ?>
+											<button type="button" class="btn btn-danger" disabled>Rejected</button>
+											<button type="button" class="btn btn-warning"
+												onclick="printReq('<?= $request['Production_plan']; ?>')">
+												<i class="bi bi-printer"></i> View
+											</button>
+										<?php endif; ?>
+									</td>
 								</tr>
 							<?php endforeach; ?>
 						</tbody>
@@ -64,222 +79,470 @@
 					<div class="row mt-5">
 						<div class="col-md-10"></div>
 						<div class="col-md">
-							<form action="<?=base_url('warehouse/clearData')?>" method="post">
-								
+							<form action="<?= base_url('warehouse/clearData') ?>" method="post">
+								<!-- Clear Data Form Content -->
 							</form>
 						</div>
 					</div>
-                </div>
 				</div>
 			</div>
 		</div>
 	</div>
 </section>
+
 <!-- DETAIL MODAL-->
 <?php foreach ($production_request as $request): ?>
-<div class="modal fade" id="detailModal1<?= $request['id']; ?>" tabindex="-1" style="display: none;">
-    <div class="modal-dialog modal-lg">
-        <div class="modal-content" style="width: 1000px!important;">
-            <div class="modal-header">
-                <h5 class="modal-title">Detail Production Request</h5>
-                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                    onclick="closeModal()"></button>
-            </div>
-            <div class="modal-body">
-            <div class="row">
-                    <label for="productId" class="col-sm-4 col-form-label"><b>Product ID</b></label>
-                    <div class="col-sm-3">
-                        <input type="text" class="form-control" value="<?= $request['Production_plan'];?>"  name="productId" id="productId<?= $request['id']; ?>" readonly>
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <label for="productDescription" class="col-sm-4 col-form-label"><b>Product Description</b></label>
-                    <div class="col-sm-6">
-                        <input type="text" class="form-control" value="<?= $request['Fg_Desc'];?>" id="productDescription<?= $request['id']; ?>" name="productDescription" value="${productDescription}" readonly>
-                    </div>
-                </div>
-                <div class="row mt-2">
-                    <label for="qty" class="col-sm-4 col-form-label"><b>Qty Production Planning</b></label>
-                    <div class="col-sm-2">
-                        <input type="number" class="form-control" value="<?= $request['Material_need'];?>" id="qty" name ="qty" min="1" readonly>
-                    </div>
-                </div>
-                <table class="table datatable table-bordered" >
-                    <thead>
-                        <tr>
-                            <th style="width: 5%;">#</th>
-                            <th style="width: 15%;">ID Material</th>
-                            <th style="width: 30%;">Material Desc</th>
-                            <th style="width: 10%;">Material Need</th>
-                            <th style="width: 10%;">Materail Request </th>
-                            <th style="width: 15%;">Sloc</th>
-                            <th style="width: 15%;">No Box</th>
-                        </tr>
-                    </thead>
-                    <tbody id="detailTable<?= $request['id']; ?>" >
-                      
-                    </tbody>
-                </table>
-                <div class="modal-footer">
-                <?php if($request['status_request'] == 'NEW') {?>
-                    <button type="button" class="btn btn-danger" onclick="rejectRequest('<?= $request['Production_plan'] ?>')">Reject</button>
-                    <button type="button" class="btn btn-success" onclick="approveRequest('<?= $request['Production_plan'] ?>')">Approve</button>
-                <?php } ?>
-                </div>
-            </div>
-        </div>
-    </div>
-</div>
-    <?php endforeach; ?>
+	<div class="modal fade" id="detailModal1<?= $request['id']; ?>" tabindex="-1">
+		<div class="modal-dialog modal-lg">
+			<div class="modal-content" style="width: 1000px!important;">
+				<div class="modal-header">
+					<h5 class="modal-title">Detail Production Request</h5>
+					<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+				</div>
+				<div class="modal-body">
+					<div class="row">
+						<label for="productId" class="col-sm-4 col-form-label"><b>Product ID</b></label>
+						<div class="col-sm-3">
+							<input type="text" class="form-control" value="<?= $request['Production_plan']; ?>"
+								name="productId" id="productId<?= $request['id']; ?>" readonly>
+						</div>
+					</div>
+					<table class="table datatable table-bordered">
+						<thead>
+							<tr>
+								<th style="width: 5%;">#</th>
+								<th style="width: 15%;">ID Material</th>
+								<th style="width: 30%;">Material Desc</th>
+								<th style="width: 10%;">Material Need</th>
+								<th style="width: 10%;">Materail Request </th>
+								<th style="width: 15%;">Sloc</th>
+								<th style="width: 15%;">No Box</th>
+							</tr>
+						</thead>
+						<tbody id="detailTable<?= $request['id']; ?>">
+
+						</tbody>
+					</table>
+					<div class="modal-footer">
+						<?php if ($request['status_request'] == 'NEW') { ?>
+							<button type="button" class="btn btn-danger"
+								onclick="rejectRequest('<?= $request['Production_plan'] ?>')">Reject</button>
+							<button type="button" class="btn btn-success"
+								onclick="approveRequest('<?= $request['Production_plan'] ?>')">Approve</button>
+						<?php } ?>
+					</div>
+				</div>
+			</div>
+		</div>
+	</div>
+<?php endforeach; ?>
+
 
 <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
 <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
 
 
 <script>
-$(document).ready(function() {
-});
+	$(document).ready(function () { });
 
-    function closeModal(id) {
-        $('#detailModal' + id).modal('hide');
-        $('#detailModal' + id + ' tbody').empty();
-    }
+	function closeModal(id) {
+		$('#detailModal' + id).modal('hide');
+		$('#detailModal' + id + ' tbody').empty();
+	}
 
-    function getDetailRequest(id, product_plan) {
-        $.ajax({
-            url: '<?php echo base_url('warehouse/get_detail_request'); ?>',
-            type: 'POST',
-            data: {
-                Production_plan: product_plan,
-            },
-            success: function(res) {
-                var data = JSON.parse(res);
-                $('#detailModal1' + id + ' tbody').empty();
-                if (data.status && data.dt.length > 0) {
-                    $('#detailModal1' + id).modal('show');
-                    var dt = data.dt;
-                    for (var i = 0; i < dt.length; i++) {
-                        var row = '<tr>' +
-                            '<td style="text-align: left;">' + (i + 1) + '</td>' +
-                            '<td style="text-align: left;">' + dt[i].Id_material + '</td>' +
-                            '<td style="text-align: left;">' + dt[i].Material_desc + '</td>' +
-                            '<td style="text-align: left;">' + dt[i].Material_need + '</td>' +
-                            '<td style="text-align: left;">' + dt[i].Qty + '</td>' +
-                            '<td style="text-align: left;">' + dt[i].sloc_name + '</td>' +
-                            '<td style="text-align: left;">' + dt[i].no_box + '</td>' +
-                            '</tr>';
-                        $('#detailModal1' + id + ' tbody').append(row);
-                    }
-                } else {
-                    Swal.fire({
-                        icon: 'error',
-                        title: 'Data Incomplete!',
-                        text: 'Please edit the request data to complete the information for this request.'
-                    }).then(function() {
-                        window.location.reload();
-                    });
-                }
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An error occurred while processing your request.'
-                });
-            }
-        });
+	// function getDetailRequest(id, product_plan) {
+	//     $.ajax({
+	//         url: '<?php echo base_url('warehouse/get_detail_request'); ?>',
+	//         type: 'POST',
+	//         data: {
+	//             Production_plan: product_plan,
+	//         },
+	//         success: function(res) {
+	//             var data = JSON.parse(res);
+	//             $('#detailModal1' + id + ' tbody').empty();
+	//             if (data.status && data.dt.length > 0) {
+	//                 $('#detailModal1' + id).modal('show');
+	//                 var dt = data.dt;
+	//                 for (var i = 0; i < dt.length; i++) {
+	//                     var row = '<tr>' +
+	//                         '<td style="text-align: left;">' + (i + 1) + '</td>' +
+	//                         '<td style="text-align: left;">' + dt[i].Id_material + '</td>' +
+	//                         '<td style="text-align: left;">' + dt[i].Material_desc + '</td>' +
+	//                         '<td style="text-align: left;">' + dt[i].Material_need + '</td>' +
+	//                         '<td style="text-align: left;">' + dt[i].Qty + '</td>' +
+	//                         '<td style="text-align: left;">' +
+	//                         '<select class="form-control" name="sloc_name[]">' +
+	//                         '<option value="">-- Pilih Sloc --</option>' +
+	//                         '<option value="Option 1">Option 1</option>' +
+	//                         '<option value="Option 2">Option 2</option>' +
+	//                         '<option value="Option 3">Option 3</option>' +
+	//                         '</select>' +
+	//                         '</td>' +
+	//                         '<td style="text-align: left;">' +
+	//                         '<select class="form-control" name="no_box[]">' +
+	//                         '<option value="">-- Pilih No Box --</option>' +
+	//                         '<option value="Box 1">Box 1</option>' +
+	//                         '<option value="Box 2">Box 2</option>' +
+	//                         '<option value="Box 3">Box 3</option>' +
+	//                         '</select>' +
+	//                         '</td>' +
+	//                         '</tr>';
+	//                     $('#detailModal1' + id + ' tbody').append(row);
+	//                 }
+	//             } else {
+	//                 Swal.fire({
+	//                     icon: 'error',
+	//                     title: 'Data Incomplete!',
+	//                     text: 'Please edit the request data to complete the information for this request.'
+	//                 }).then(function() {
+	//                     window.location.reload();
+	//                 });
+	//             }
+	//         },
+	//         error: function(xhr, ajaxOptions, thrownError) {
+	//             Swal.fire({
+	//                 icon: 'error',
+	//                 title: 'Error',
+	//                 text: 'An error occurred while processing your request.'
+	//             });
+	//         }
+	//     });
 
-    }
+	// }
 
-    function approveRequest(production_plan){
-        Swal.fire({
-            title: "Are you sure?",
-            text: "You want to approve this production request?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "Approve"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '<?php echo base_url('warehouse/approveProductionRequest'); ?>',
-                    type: 'POST',
-                    data: {
-                        production_plan: production_plan,
-                    },
-                    success: function(res) {
-                        var data = JSON.parse(res);
-                        if (data.status) {
-                            window.open('<?php echo base_url().$this->router->fetch_class(); ?>/print_request/'+ production_plan, '_blank' );
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error!',
-                            });
-                        }
-                    },
-                    error: function(xhr, ajaxOptions, thrownError) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'An error occurred while processing your request.'
-                        });
-                    }
-                });
-            }
-        });
-    }
-    function rejectRequest(production_plan){
-        Swal.fire({
-            title: "Are you sure?",
-            text: "You want to reject this production request?",
-            icon: "warning",
-            showCancelButton: true,
-            confirmButtonColor: "#3085d6",
-            cancelButtonColor: "#d33",
-            confirmButtonText: "yes"
-        }).then((result) => {
-            if (result.isConfirmed) {
-                $.ajax({
-                    url: '<?php echo base_url('warehouse/rejectProductionRequest'); ?>',
-                    type: 'POST',
-                    data: {
-                        production_plan: production_plan,
-                    },
-                    success: function(res) {
-                        var data = JSON.parse(res);
-                        if (data.status) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success!',
-                                text: 'Production Request Has Been Rejected.'
-                            }).then((result) => {
-                                if (result.isConfirmed || result.isDismissed) {
-                                    location.reload(); 
-                                }
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error!',
-                            });
-                        }
-                    },
-                    error: function(xhr, ajaxOptions, thrownError) {
-                        Swal.fire({
-                            icon: 'error',
-                            title: 'Error',
-                            text: 'An error occurred while processing your request.'
-                        });
-                    }
-                });
-            }
-        });
-    }
+	// function approveRequest(production_plan) {
+	//     Swal.fire({
+	//         title: "Are you sure?",
+	//         text: "You want to approve this production request?",
+	//         icon: "warning",
+	//         showCancelButton: true,
+	//         confirmButtonColor: "#3085d6",
+	//         cancelButtonColor: "#d33",
+	//         confirmButtonText: "Approve"
+	//     }).then((result) => {
+	//         if (result.isConfirmed) {
+	//             $.ajax({
+	//                 url: '<?php echo base_url('warehouse/approveProductionRequest'); ?>',
+	//                 type: 'POST',
+	//                 data: {
+	//                     production_plan: production_plan,
+	//                 },
+	//                 success: function(res) {
+	//                     var data = JSON.parse(res);
+	//                     if (data.status) {
+	//                         window.open(
+	//                             '<?php echo base_url() . $this->router->fetch_class(); ?>/print_request/' +
+	//                             production_plan, '_blank');
+	//                     } else {
+	//                         Swal.fire({
+	//                             icon: 'error',
+	//                             title: 'Error!',
+	//                         });
+	//                     }
+	//                 },
+	//                 error: function(xhr, ajaxOptions, thrownError) {
+	//                     Swal.fire({
+	//                         icon: 'error',
+	//                         title: 'Error',
+	//                         text: 'An error occurred while processing your request.'
+	//                     });
+	//                 }
+	//             });
+	//         }
+	//     });
+	// }
+	var dataItems = [];
 
-    function printReq(production_plan){
-        window.open('<?php echo base_url().$this->router->fetch_class(); ?>/print_request/'+ production_plan, '_blank' );
-    }
+	function getDetailRequest(id, product_plan) {
+		$.ajax({
+			url: '<?php echo base_url('warehouse/get_detail_request'); ?>',
+			type: 'POST',
+			data: {
+				Production_plan: product_plan,
+			},
+			success: function (res) {
+				var data = JSON.parse(res);
+				$('#detailModal1' + id + ' tbody').empty();
+				if (data.status && data.dt.length > 0) {
+					$('#detailModal1' + id).modal('show');
+					var dt = data.dt;
+					for (var i = 0; i < dt.length; i++) {
+						var row = '<tr>' +
+							'<td style="text-align: left;">' + (i + 1) + '</td>' +
+							'<td style="text-align: left;">' + dt[i].Id_material + '</td>' +
+							'<td style="text-align: left;">' + dt[i].Material_desc + '</td>' +
+							'<td style="text-align: left;">' + dt[i].Material_need + '</td>' +
+							'<td style="text-align: left;">' + dt[i].Qty + '</td>' +
+							'<td style="text-align: left;">' +
+							'<select class="form-control sloc-select" name="sloc_name[]">' +
+							'<option value="">-- Pilih Sloc --</option>' +
+							'</select>' +
+							'</td>' +
+							'<td style="text-align: left;">' +
+							'<select class="form-control id-box-select" name="id_box[]">' +
+							'<option value="">-- Pilih ID Box --</option>' +
+							'</select>' +
+							'</td>' +
+							'</tr>';
+						$('#detailModal1' + id + ' tbody').append(row);
 
+						// inisialisasi Select2 setelah menambahkan baris
+						$('.sloc-select').eq(i).select2({
+							placeholder: "-- Pilih Sloc --",
+							width: "100%"
+						});
+
+						$('.id-box-select').eq(i).select2({
+							placeholder: "-- Pilih ID Box --",
+							width: "100%"
+						});
+
+						// Initialize dataItems for this row
+						dataItems[i] = {
+							Id_material: dt[i].Id_material,
+							sloc_id: '',
+							id_box: ''
+						};
+
+						// handle sloc-select change
+						$('.sloc-select').eq(i).on('change', function () {
+							var selectedIndex = $(this).closest('tr').index();
+							var selectedSlocId = $(this).val();
+
+							// reset ID Box select
+							$('.id-box-select').eq(selectedIndex).html(
+								'<option value="">-- Pilih ID Box --</option>');
+							$('.id-box-select').eq(selectedIndex).select2({
+								placeholder: "-- Pilih ID Box --",
+								width: "100%"
+							});
+
+							// update dataItems
+							dataItems[selectedIndex].sloc_id = selectedSlocId;
+
+							fetchIdBoxOptions(dt[selectedIndex].Id_material, selectedSlocId,
+								selectedIndex);
+						});
+
+						$('.id-box-select').eq(i).on('change', function () {
+							var selectedIndex = $(this).closest('tr').index();
+							var selectedIdBox = $(this).val();
+
+							dataItems[selectedIndex].id_box = selectedIdBox;
+						});
+
+						fetchSlocOptions(dt[i].Id_material, id, i);
+					}
+				} else {
+					Swal.fire({
+						icon: 'error',
+						title: 'Data Incomplete!',
+						text: 'Please edit the request data to complete the information for this request.'
+					}).then(function () {
+						window.location.reload();
+					});
+				}
+			},
+			error: function (xhr, ajaxOptions, thrownError) {
+				Swal.fire({
+					icon: 'error',
+					title: 'Error',
+					text: 'An error occurred while processing your request.'
+				});
+			}
+		});
+	}
+
+	// Fungsi untuk mengambil dan mengisi pilihan sloc
+	function fetchSlocOptions(idMaterial, modalId, index) {
+		$.ajax({
+			url: '<?php echo base_url('warehouse/get_sloc_options'); ?>',
+			type: 'POST',
+			data: {
+				id_material: idMaterial
+			},
+			success: function (response) {
+				var options = '<option value="">-- Pilih Sloc --</option>';
+				var data = JSON.parse(response);
+				if (data.length > 0) {
+					for (var j = 0; j < data.length; j++) {
+						options += '<option value="' + data[j].sloc_id + '">' + data[j].sloc_name + '</option>';
+					}
+				}
+				$('.sloc-select').eq(index).html(options);
+				// Setelah mengisi opsi, update Select2
+				$('.sloc-select').eq(index).select2({
+					placeholder: "-- Pilih Sloc --",
+					width: "100%",
+				});
+			},
+			error: function (xhr, ajaxOptions, thrownError) {
+				Swal.fire({
+					icon: 'error',
+					title: 'Error',
+					text: 'An error occurred while fetching sloc options.'
+				});
+			}
+		});
+	}
+
+	// Fungsi untuk mengambil dan mengisi pilihan id_box
+	function fetchIdBoxOptions(idMaterial, slocId, index) {
+		$.ajax({
+			url: '<?php echo base_url('warehouse/get_id_box_options'); ?>',
+			type: 'POST',
+			data: {
+				id_material: idMaterial,
+				sloc_id: slocId
+			},
+			success: function (response) {
+				var options = '<option value="">-- Pilih ID Box --</option>';
+				var data = JSON.parse(response);
+				if (data.length > 0) {
+					for (var j = 0; j < data.length; j++) {
+						options += '<option value="' + data[j].id_box + '">' + data[j].no_box + '</option>';
+					}
+				}
+				$('.id-box-select').eq(index).html(options);
+				$('.id-box-select').eq(index).select2({
+					placeholder: "-- Pilih ID Box --",
+					width: "100%",
+				});
+			},
+			error: function (xhr, ajaxOptions, thrownError) {
+				Swal.fire({
+					icon: 'error',
+					title: 'Error',
+					text: 'An error occurred while fetching id box options.'
+				});
+			}
+		});
+	}
+
+	function fetchIdBoxOptions(idMaterial, slocId, index) {
+		$.ajax({
+			url: '<?php echo base_url('warehouse/get_id_box_options'); ?>',
+			type: 'POST',
+			data: {
+				id_material: idMaterial,
+				sloc_id: slocId
+			},
+			success: function (response) {
+				var options = '<option value="">-- Pilih ID Box --</option>';
+				var data = JSON.parse(response);
+				if (data.length > 0) {
+					for (var j = 0; j < data.length; j++) {
+						options += '<option value="' + data[j].id_box + '">' + data[j].no_box + '</option>';
+					}
+				}
+				$('.id-box-select').eq(index).html(options);
+				$('.id-box-select').eq(index).select2({
+					placeholder: "-- Pilih ID Box --",
+					width: "100%",
+				});
+			},
+			error: function (xhr, ajaxOptions, thrownError) {
+				Swal.fire({
+					icon: 'error',
+					title: 'Error',
+					text: 'An error occurred while fetching id box options.'
+				});
+			}
+		});
+	}
+
+	function approveRequest(production_plan) {
+		Swal.fire({
+			title: "Are you sure?",
+			text: "You want to approve this production request?",
+			icon: "warning",
+			showCancelButton: true,
+			confirmButtonColor: "#3085d6",
+			cancelButtonColor: "#d33",
+			confirmButtonText: "Approve"
+		}).then((result) => {
+			if (result.isConfirmed) {
+				$.ajax({
+					url: '<?php echo base_url('warehouse/approveProductionRequest'); ?>',
+					type: 'POST',
+					data: {
+						production_plan: production_plan,
+						data_items: dataItems
+					},
+					success: function (res) {
+						var data = JSON.parse(res);
+						if (data.status) {
+							window.open(
+								'<?php echo base_url() . $this->router->fetch_class(); ?>/print_request/' +
+								production_plan, '_blank');
+						} else {
+							Swal.fire({
+								icon: 'error',
+								title: 'Error!',
+							});
+						}
+					},
+					error: function (xhr, ajaxOptions, thrownError) {
+						Swal.fire({
+							icon: 'error',
+							title: 'Error',
+							text: 'An error occurred while processing your request.'
+						});
+					}
+				});
+			}
+		});
+	}
+
+	function rejectRequest(production_plan) {
+		Swal.fire({
+			title: "Are you sure?",
+			text: "You want to reject this production request?",
+			icon: "warning",
+			showCancelButton: true,
+			confirmButtonColor: "#3085d6",
+			cancelButtonColor: "#d33",
+			confirmButtonText: "yes"
+		}).then((result) => {
+			if (result.isConfirmed) {
+				$.ajax({
+					url: '<?php echo base_url('warehouse/rejectProductionRequest'); ?>',
+					type: 'POST',
+					data: {
+						production_plan: production_plan,
+					},
+					success: function (res) {
+						var data = JSON.parse(res);
+						if (data.status) {
+							Swal.fire({
+								icon: 'success',
+								title: 'Success!',
+								text: 'Production Request Has Been Rejected.'
+							}).then((result) => {
+								if (result.isConfirmed || result.isDismissed) {
+									location.reload();
+								}
+							});
+						} else {
+							Swal.fire({
+								icon: 'error',
+								title: 'Error!',
+							});
+						}
+					},
+					error: function (xhr, ajaxOptions, thrownError) {
+						Swal.fire({
+							icon: 'error',
+							title: 'Error',
+							text: 'An error occurred while processing your request.'
+						});
+					}
+				});
+			}
+		});
+	}
+
+	function printReq(production_plan) {
+		window.open('<?php echo base_url() . $this->router->fetch_class(); ?>/print_request/' + production_plan, '_blank');
+	}
 </script>
