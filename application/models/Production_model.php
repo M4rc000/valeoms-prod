@@ -1,26 +1,22 @@
 <?php
-defined('BASEPATH') or exit('No direct script access allowed');
+defined('BASEPATH') OR exit('No direct script access allowed');
 
-class Production_model extends CI_Model
-{
-	public function getMaterialDesc($materialID)
-	{
-		$this->db->select('Material_desc');
-		$this->db->where('Id_material', $materialID);
-		$this->db->where('is_active', 1);
-		$this->db->limit(1);
-		$query = $this->db->get('material_list');
-		return $query->result_array();
-	}
+class Production_model extends CI_Model {
+    public function getMaterialDesc($materialID) {
+        $this->db->select('Material_desc');
+        $this->db->where('Id_material', $materialID);
+        $this->db->where('is_active', 1);
+        $this->db->limit(1);
+        $query = $this->db->get('material_list');
+        return $query->result_array();
+    }
 
-	public function getProductionPlans()
-	{
-		return $this->db->query("SELECT * FROM production_plan WHERE status = 'NEW'");
-	}
-
-	public function getProductionPlanById($production_plan)
-	{
-		return $this->db->query("SELECT 
+    public function getProductionPlans(){
+        return $this->db->query("SELECT * FROM production_plan WHERE status = 'NEW'");
+    }
+    
+    public function getProductionPlanById($production_plan){
+        return $this->db->query("SELECT 
                 ppd.id, 
                 ppd.Production_plan, 
                 ppd.Id_material, 
@@ -38,292 +34,279 @@ class Production_model extends CI_Model
                 pr.Production_plan_detail_id = ppd.id
             WHERE 
                 ppd.Production_plan = '$production_plan'");
-	}
+    }
 
-	public function updateData($table, $id, $Data)
-	{
-		$this->db->where('id', $id);
-		$this->db->update($table, $Data);
-	}
+    public function updateData($table, $id, $Data){
+        $this->db->where('id',$id);  
+        $this->db->update($table, $Data);
+    }
 
-	public function updateDataKanban($table, $id, $Data)
-	{
-		$this->db->where('id_kanban_box', $id);
-		$this->db->update($table, $Data);
-	}
+    public function updateDataKanban($table, $id, $Data){
+        $this->db->where('id_kanban_box',$id);  
+        $this->db->update($table, $Data);
+    }
+    
+    public function insertData($table,$Data){
+        return $this->db->insert($table,$Data);
+    }
+    
+    public function getKanbanList(){
+        return $this->db->get('kanban_box')->result_array();
+    }
 
-	public function insertData($table, $Data)
-	{
-		return $this->db->insert($table, $Data);
-	}
+    public function getLastKanbanID() {
+        $this->db->select('id_kanban_box');
+        $this->db->from('kanban_box');
+        $this->db->order_by('id_kanban_box', 'DESC');
+        $this->db->limit(1);
+        
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0) {
+            // Return the last ID
+            $lastKanbanID = $query->row()->id_kanban_box;
+            $prefix = substr($lastKanbanID, 0, 3); // Assuming 'KBA' is always the prefix
+            $numericPart = substr($lastKanbanID, 3);
+        
+            // Increment the numeric part
+            $incrementedNumericPart = (int)$numericPart + 1;
+        
+            // If the numeric part reaches 10000000, reset to 1 and increment the prefix
+            if ($incrementedNumericPart >= 10000000) {
+                $incrementedNumericPart = 1;
+                
+                // Increment the last character of the prefix
+                $lastChar = substr($prefix, -1);
+                $secondChar = substr($prefix, -2, 1);
+                $firstChar = substr($prefix, -3, 1);
+                
+                // Increment the last character, if it is 'Z', reset to 'A' and increment the second last character
+                if ($lastChar === 'Z') {
+                    $lastChar = 'A';
+                    $secondChar++;
+        
+                    // If the second character is 'Z', reset to 'A' and increment the first character
+                    if ($secondChar === 'Z' + 1) {
+                        $secondChar = 'A';
+                        $firstChar++;
+                    }
+                } else {
+                    $lastChar++;
+                }
+                
+                // Combine characters to form the new prefix
+                $prefix = $firstChar . $secondChar . $lastChar;
+            }
+        
+            // Format the incremented numeric part
+            $formattedNumericPart = str_pad($incrementedNumericPart, strlen($numericPart), '0', STR_PAD_LEFT);
+        
+            // Return the next Kanban ID
+            return $prefix . $formattedNumericPart;
+        } else {
+            // Handle the case when the table is empty
+            return 'KBA0000001';
+        }        
+    }
+    
+    public function getLastIdReturn() {
+        $this->db->select('id_return');
+        $this->db->from('return_warehouse');
+        $this->db->order_by('id_return', 'DESC');
+        $this->db->limit(1);
+        
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0) {
+            // Return the last ID
+            $lastReturnID = $query->row()->id_return;
+            $prefix = substr($lastReturnID, 0, 3); // Assuming 'RTA' is always the prefix
+            $numericPart = substr($lastReturnID, 3);
+        
+            // Increment the numeric part
+            $incrementedNumericPart = (int)$numericPart + 1;
+        
+            // If the numeric part reaches 10000000, reset to 1 and increment the prefix
+            if ($incrementedNumericPart >= 10000000) {
+                $incrementedNumericPart = 1;
+                
+                // Increment the last character of the prefix
+                $lastChar = substr($prefix, -1);
+                $secondChar = substr($prefix, -2, 1);
+                $firstChar = substr($prefix, -3, 1);
+                
+                // Increment the last character, if it is 'Z', reset to 'A' and increment the second last character
+                if ($lastChar === 'Z') {
+                    $lastChar = 'A';
+                    $secondChar++;
+        
+                    // If the second character is 'Z', reset to 'A' and increment the first character
+                    if ($secondChar === 'Z' + 1) {
+                        $secondChar = 'A';
+                        $firstChar++;
+                    }
+                } else {
+                    $lastChar++;
+                }
+                
+                // Combine characters to form the new prefix
+                $prefix = $firstChar . $secondChar . $lastChar;
+            }
+        
+            // Format the incremented numeric part
+            $formattedNumericPart = str_pad($incrementedNumericPart, strlen($numericPart), '0', STR_PAD_LEFT);
+        
+            // Return the next Kanban ID
+            return $prefix . $formattedNumericPart;
+        } else {
+            // Handle the case when the table is empty
+            return 'RTA0000001';
+        }        
+    }
 
-	public function getKanbanList()
-	{
-		return $this->db->get('kanban_box')->result_array();
-	}
+    public function getMaterialList(){
+        return $this->db->query("SELECT * FROM material_list WHERE is_active = 1")->result_array();
+    }
 
-	public function getLastKanbanID()
-	{
-		$this->db->select('id_kanban_box');
-		$this->db->from('kanban_box');
-		$this->db->order_by('id_kanban_box', 'DESC');
-		$this->db->limit(1);
+    public function getAllBoms(){
+        $this->db->distinct();
+        $this->db->select('Id_fg');
+        $this->db->where('is_active', 1); 
+        return $this->db->get('bom')->result_array(); 
+    }
 
-		$query = $this->db->get();
+    public function getAllBox(){
+        $this->db->distinct();
+        $this->db->select('no_box');
+        return $this->db->get('box')->result_array(); 
+    }
 
-		if ($query->num_rows() > 0) {
-			// Return the last ID
-			$lastKanbanID = $query->row()->id_kanban_box;
-			$prefix = substr($lastKanbanID, 0, 3); // Assuming 'KBA' is always the prefix
-			$numericPart = substr($lastKanbanID, 3);
+    public function getLastProductionPlan() {
+        $this->db->select('production_plan');
+        $this->db->from('production_plan');
+        $this->db->order_by('production_plan', 'DESC');
+        $this->db->limit(1);
+        
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0) {
+            // Get the last Production Plan
+            $lastProductionPlan = $query->row()->production_plan; // Adjusted to match the case of the column
+            $prefix = substr($lastProductionPlan, 0, 3);
+            $numericPart = substr($lastProductionPlan, 3);
+        
+            // Increment the numeric part
+            $incrementedNumericPart = (int)$numericPart + 1;
+        
+            // If the numeric part reaches 10000000, reset to 1 and increment the prefix
+            if ($incrementedNumericPart >= 10000000) {
+                $incrementedNumericPart = 1;
+                
+                // Increment the last character of the prefix
+                $lastChar = substr($prefix, -1);
+                $secondChar = substr($prefix, -2, 1);
+                $firstChar = substr($prefix, -3, 1);
+                
+                // Increment the last character, if it is 'Z', reset to 'A' and increment the second last character
+                if ($lastChar === 'Z') {
+                    $lastChar = 'A';
+                    if ($secondChar === 'Z') {
+                        $secondChar = 'A';
+                        if ($firstChar === 'Z') {
+                            $firstChar = 'A';
+                        } else {
+                            $firstChar++;
+                        }
+                    } else {
+                        $secondChar++;
+                    }
+                } else {
+                    $lastChar++;
+                }
+                
+                // Combine characters to form the new prefix
+                $prefix = $firstChar . $secondChar . $lastChar;
+            }
+        
+            // Format the incremented numeric part
+            $formattedNumericPart = str_pad($incrementedNumericPart, strlen($numericPart), '0', STR_PAD_LEFT);
+        
+            // Return the next Production Plan ID
+            return $prefix . $formattedNumericPart;
+        } else {
+            // Handle the case when the table is empty
+            return 'PPA0000001';
+        }        
+    }     
 
-			// Increment the numeric part
-			$incrementedNumericPart = (int) $numericPart + 1;
+    public function getLastReqNo() {
+        // Select the last request number from production_request table
+        $this->db->select('Id_request');
+        $this->db->from('production_request');
+        $this->db->order_by('Id_request', 'DESC');
+        $this->db->limit(1);
+        
+        $query = $this->db->get();
+        
+        if ($query->num_rows() > 0) {
+            $lastReqNo = $query->row()->Id_request;
 
-			// If the numeric part reaches 10000000, reset to 1 and increment the prefix
-			if ($incrementedNumericPart >= 10000000) {
-				$incrementedNumericPart = 1;
+            // Extract prefix and numeric part from the last request number
+            $prefix = substr($lastReqNo, 0, 3);
+            $numericPart = substr($lastReqNo, 3);
 
-				// Increment the last character of the prefix
-				$lastChar = substr($prefix, -1);
-				$secondChar = substr($prefix, -2, 1);
-				$firstChar = substr($prefix, -3, 1);
+            // Increment numeric part based on rules
+            $incrementedNumericPart = (int)$numericPart + 1;
 
-				// Increment the last character, if it is 'Z', reset to 'A' and increment the second last character
-				if ($lastChar === 'Z') {
-					$lastChar = 'A';
-					$secondChar++;
+            // Determine the next prefix if numeric part exceeds 999999
+            if ($incrementedNumericPart > 999999) {
+                $prefix = $this->getNextPrefix($prefix);
+                $incrementedNumericPart = 1; // Reset numeric part
+            }
 
-					// If the second character is 'Z', reset to 'A' and increment the first character
-					if ($secondChar === 'Z' + 1) {
-						$secondChar = 'A';
-						$firstChar++;
-					}
-				} else {
-					$lastChar++;
-				}
+            // Format numeric part to 6 digits
+            $formattedNumericPart = str_pad($incrementedNumericPart, 6, '0', STR_PAD_LEFT);
 
-				// Combine characters to form the new prefix
-				$prefix = $firstChar . $secondChar . $lastChar;
-			}
+            // Construct and return the next request number
+            return $prefix . $formattedNumericPart;
+        } else {
+            // Handle case when table is empty
+            return 'PRA000001'; // Default starting request number
+        }
+    }
 
-			// Format the incremented numeric part
-			$formattedNumericPart = str_pad($incrementedNumericPart, strlen($numericPart), '0', STR_PAD_LEFT);
+    private function getNextPrefix($currentPrefix) {
+        // Extract characters from the current prefix
+        $firstChar = $currentPrefix[0];
+        $secondChar = $currentPrefix[1];
+        $thirdChar = $currentPrefix[2];
 
-			// Return the next Kanban ID
-			return $prefix . $formattedNumericPart;
-		} else {
-			// Handle the case when the table is empty
-			return 'KBA0000001';
-		}
-	}
+        // Increment the characters based on the rules A-Z
+        if ($thirdChar === 'Z') {
+            $thirdChar = 'A';
+            if ($secondChar === 'Z') {
+                $secondChar = 'A';
+                if ($firstChar === 'Z') {
+                    $firstChar = 'A';
+                } else {
+                    $firstChar++;
+                }
+            } else {
+                $secondChar++;
+            }
+        } else {
+            $thirdChar++;
+        }
 
-	public function getLastIdReturn()
-	{
-		$this->db->select('id_return');
-		$this->db->from('return_warehouse');
-		$this->db->order_by('id_return', 'DESC');
-		$this->db->limit(1);
+        // Return the next prefix
+        return $firstChar . $secondChar . $thirdChar;
+    }
 
-		$query = $this->db->get();
+    public function getsloc($weight) {
+        return $this->db->query("SELECT * FROM `storage` WHERE $weight BETWEEN min_loads AND max_loads AND Rack IN ('A', 'B', 'C', 'D', 'E', 'F', 'Gangway A-B', 'Gangway C-D', 'Gangway E-F')")->result_array();
+    }
 
-		if ($query->num_rows() > 0) {
-			// Return the last ID
-			$lastReturnID = $query->row()->id_return;
-			$prefix = substr($lastReturnID, 0, 3); // Assuming 'RTA' is always the prefix
-			$numericPart = substr($lastReturnID, 3);
-
-			// Increment the numeric part
-			$incrementedNumericPart = (int) $numericPart + 1;
-
-			// If the numeric part reaches 10000000, reset to 1 and increment the prefix
-			if ($incrementedNumericPart >= 10000000) {
-				$incrementedNumericPart = 1;
-
-				// Increment the last character of the prefix
-				$lastChar = substr($prefix, -1);
-				$secondChar = substr($prefix, -2, 1);
-				$firstChar = substr($prefix, -3, 1);
-
-				// Increment the last character, if it is 'Z', reset to 'A' and increment the second last character
-				if ($lastChar === 'Z') {
-					$lastChar = 'A';
-					$secondChar++;
-
-					// If the second character is 'Z', reset to 'A' and increment the first character
-					if ($secondChar === 'Z' + 1) {
-						$secondChar = 'A';
-						$firstChar++;
-					}
-				} else {
-					$lastChar++;
-				}
-
-				// Combine characters to form the new prefix
-				$prefix = $firstChar . $secondChar . $lastChar;
-			}
-
-			// Format the incremented numeric part
-			$formattedNumericPart = str_pad($incrementedNumericPart, strlen($numericPart), '0', STR_PAD_LEFT);
-
-			// Return the next Kanban ID
-			return $prefix . $formattedNumericPart;
-		} else {
-			// Handle the case when the table is empty
-			return 'RTA0000001';
-		}
-	}
-
-	public function getMaterialList()
-	{
-		return $this->db->query("SELECT * FROM material_list WHERE is_active = 1")->result_array();
-	}
-
-	public function getAllBoms()
-	{
-		$this->db->distinct();
-		$this->db->select('Id_fg');
-		$this->db->where('is_active', 1);
-		return $this->db->get('bom')->result_array();
-	}
-
-	public function getAllBox()
-	{
-		$this->db->distinct();
-		$this->db->select('no_box');
-		return $this->db->get('box')->result_array();
-	}
-
-	public function getLastProductionPlan()
-	{
-		$this->db->select('production_plan');
-		$this->db->from('production_plan');
-		$this->db->order_by('production_plan', 'DESC');
-		$this->db->limit(1);
-
-		$query = $this->db->get();
-
-		if ($query->num_rows() > 0) {
-			// Get the last Production Plan
-			$lastProductionPlan = $query->row()->production_plan; // Adjusted to match the case of the column
-			$prefix = substr($lastProductionPlan, 0, 3);
-			$numericPart = substr($lastProductionPlan, 3);
-
-			// Increment the numeric part
-			$incrementedNumericPart = (int) $numericPart + 1;
-
-			// If the numeric part reaches 10000000, reset to 1 and increment the prefix
-			if ($incrementedNumericPart >= 10000000) {
-				$incrementedNumericPart = 1;
-
-				// Increment the last character of the prefix
-				$lastChar = substr($prefix, -1);
-				$secondChar = substr($prefix, -2, 1);
-				$firstChar = substr($prefix, -3, 1);
-
-				// Increment the last character, if it is 'Z', reset to 'A' and increment the second last character
-				if ($lastChar === 'Z') {
-					$lastChar = 'A';
-					if ($secondChar === 'Z') {
-						$secondChar = 'A';
-						if ($firstChar === 'Z') {
-							$firstChar = 'A';
-						} else {
-							$firstChar++;
-						}
-					} else {
-						$secondChar++;
-					}
-				} else {
-					$lastChar++;
-				}
-
-				// Combine characters to form the new prefix
-				$prefix = $firstChar . $secondChar . $lastChar;
-			}
-
-			// Format the incremented numeric part
-			$formattedNumericPart = str_pad($incrementedNumericPart, strlen($numericPart), '0', STR_PAD_LEFT);
-
-			// Return the next Production Plan ID
-			return $prefix . $formattedNumericPart;
-		} else {
-			// Handle the case when the table is empty
-			return 'PPA0000001';
-		}
-	}
-
-	public function getLastReqNo()
-	{
-		// Select the last request number from production_request table
-		$this->db->select('Id_request');
-		$this->db->from('production_request');
-		$this->db->order_by('Id_request', 'DESC');
-		$this->db->limit(1);
-
-		$query = $this->db->get();
-
-		if ($query->num_rows() > 0) {
-			$lastReqNo = $query->row()->Id_request;
-
-			// Extract prefix and numeric part from the last request number
-			$prefix = substr($lastReqNo, 0, 3);
-			$numericPart = substr($lastReqNo, 3);
-
-			// Increment numeric part based on rules
-			$incrementedNumericPart = (int) $numericPart + 1;
-
-			// Determine the next prefix if numeric part exceeds 999999
-			if ($incrementedNumericPart > 999999) {
-				$prefix = $this->getNextPrefix($prefix);
-				$incrementedNumericPart = 1; // Reset numeric part
-			}
-
-			// Format numeric part to 6 digits
-			$formattedNumericPart = str_pad($incrementedNumericPart, 6, '0', STR_PAD_LEFT);
-
-			// Construct and return the next request number
-			return $prefix . $formattedNumericPart;
-		} else {
-			// Handle case when table is empty
-			return 'PRA000001'; // Default starting request number
-		}
-	}
-
-	private function getNextPrefix($currentPrefix)
-	{
-		// Extract characters from the current prefix
-		$firstChar = $currentPrefix[0];
-		$secondChar = $currentPrefix[1];
-		$thirdChar = $currentPrefix[2];
-
-		// Increment the characters based on the rules A-Z
-		if ($thirdChar === 'Z') {
-			$thirdChar = 'A';
-			if ($secondChar === 'Z') {
-				$secondChar = 'A';
-				if ($firstChar === 'Z') {
-					$firstChar = 'A';
-				} else {
-					$firstChar++;
-				}
-			} else {
-				$secondChar++;
-			}
-		} else {
-			$thirdChar++;
-		}
-
-		// Return the next prefix
-		return $firstChar . $secondChar . $thirdChar;
-	}
-
-	public function getsloc($weight)
-	{
-		return $this->db->query("SELECT * FROM `storage` WHERE $weight BETWEEN min_loads AND max_loads AND Rack IN ('A', 'B', 'C', 'D', 'E', 'F', 'Gangway A-B', 'Gangway C-D', 'Gangway E-F')")->result_array();
-	}
-
-	public function generateFormattedBoxNumber()
+    public function generateFormattedBoxNumber()
 	{
 		$last_box = $this->db->order_by('id_box', 'DESC')->get('box')->row();
 
@@ -347,19 +330,17 @@ class Production_model extends CI_Model
 		return $formatted_box_number;
 	}
 
-	public function getRequest($production_plan, $Production_plan_detail_id)
-	{
-		$this->db->where('Production_plan', $production_plan);
-		$this->db->where('Production_plan_detail_id', $Production_plan_detail_id);
-		$query = $this->db->get('production_request');
-		return $query->row_array();
-	}
+    public function getRequest($production_plan, $Production_plan_detail_id) {
+        $this->db->where('Production_plan', $production_plan);
+        $this->db->where('Production_plan_detail_id', $Production_plan_detail_id);
+        $query = $this->db->get('production_request');
+        return $query->row_array(); 
+    }
 
-	public function updateDataPP($table, $data, $conditions)
-	{
-		foreach ($conditions as $key => $value) {
-			$this->db->where($key, $value);
-		}
-		return $this->db->update($table, $data);
-	}
+    public function updateDataPP($table, $data, $conditions) {
+        foreach ($conditions as $key => $value) {
+            $this->db->where($key, $value);
+        }
+        return $this->db->update($table, $data);
+    }
 }

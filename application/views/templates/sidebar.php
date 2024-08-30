@@ -49,7 +49,7 @@
       <nav>
         <ol class="breadcrumb">
           <li class="breadcrumb-item">
-            <a><?=ucfirst(strtolower(explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'))[2]));?></a>
+            <a><?=ucfirst(strtolower(explode('/', trim(parse_url($_SERVER['REQUEST_URI'], PHP_URL_PATH), '/'))[1]));?></a>
           </li>
           <li class="breadcrumb-item active"><?=$title;?></li>
         </ol>

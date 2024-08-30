@@ -91,7 +91,7 @@
 						</table>
 						<div class="row mb-5 mt-2">
 							<label class="col-sm-2 col-form-label">
-								<b>Total Weight (kg)</b>
+								<b>Total weight (kg)</b>
 							</label>
 							<div class="col-sm-3">
 								<input type="text" class="form-control" id="total_weight" onblur="getSloc()">
@@ -110,50 +110,35 @@
 								</select>
 							</div>
 						</div>
-						<div class="row mb-5 mt-2">
-							<label class="col-sm-2 col-form-label">
-								<b>Box Type</b>
-							</label>
-							<div class="form-check">
-								<input class="form-check-input" id="box_type" type="radio" name="box_type"
-									id="box_type_high" value="HIGH" required>
-								<label class="form-check-label" for="box_type_high">HIGH</label>
+						<div class="row mt-2" style="text-align: right; margin-right: 5px;">
+							<div class="col-md-10"></div>
+							<div class="col-md">
+								<button class="btn btn-primary" onclick="getBarcode()" id="approveBtn">
+									Approve
+								</button>
 							</div>
-							<div class="form-check">
-								<input class="form-check-input" type="radio" name="box_type" id="box_type_medium"
-									value="MEDIUM" required>
-								<label class="form-check-label" for="box_type_medium">MEDIUM</label>
+						</div>
+						<div class="row mt-2 mb-3">
+							<div class="col-md" style="margin-left: 12px;">
+								<b>Barcode</b>
 							</div>
-
-							<div class="row mt-2" style="text-align: right; margin-right: 5px;">
-								<div class="col-md-10"></div>
-								<div class="col-md">
-									<button class="btn btn-primary" onclick="getBarcode()" id="approveBtn">
-										Approve
-									</button>
-								</div>
-							</div>
-							<div class="row mt-2 mb-3">
-								<div class="col-md" style="margin-left: 12px;">
-									<b>Barcode</b>
-								</div>
-							</div>
-							<div class="col-md ms-5 mt-5">
-								<div id="qrcode"></div>
-								<div id="barcode-info" class="mt-3"></div>
-							</div>
-							<div class="row mt-5">
-								<div class="col-md-10"></div>
-								<div class="col-md">
-									<form action="<?= base_url('warehouse/clearData') ?>" method="post">
-										<!-- Kosong -->
-									</form>
-								</div>
+						</div>
+						<div class="col-md ms-5 mt-5">
+							<div id="qrcode"></div>
+							<div id="barcode-info" class="mt-3"></div>
+						</div>
+						<div class="row mt-5">
+							<div class="col-md-10"></div>
+							<div class="col-md">
+								<form action="<?= base_url('warehouse/clearData') ?>" method="post">
+									<!-- Kosong -->
+								</form>
 							</div>
 						</div>
 					</div>
 				</div>
 			</div>
+		</div>
 	</section>
 
 	<script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
@@ -324,7 +309,7 @@
 		function getBarcode() {
 			var slocSelect = $('#sloc_select').val();
 			var total_weight = $('#total_weight').val();
-			var box_type = $('input[name="box_type"]:checked').val();
+
 			if (slocSelect && total_weight) {
 				Swal.fire({
 					title: "Are you sure?",
@@ -557,7 +542,6 @@
 										value="<?= $material['qty']; ?>" required>
 								</div>
 							</div>
-
 						</div>
 						<div class="modal-footer">
 							<button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
