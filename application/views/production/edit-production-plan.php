@@ -8,6 +8,16 @@
     }
 ?>
 
+<style>
+    .edit-material-request:hover{
+        cursor: pointer;
+    }
+
+    .hover:hover{
+        cursor: pointer;
+    }
+</style>
+
 <section>
     <div class="card">
         <div class="card-body">
@@ -31,7 +41,10 @@
                                 <th scope="col" rowspan="2" class="text-center">Material Need</th>
                                 <th scope="col" rowspan="2" class="text-center">Qty</th>
                                 <th scope="col" rowspan="2" class="text-center">Uom</th>
-                                <th scope="col" rowspan="2" class="text-center">Status</th>
+                                <th scope="col" rowspan="2" class="text-center">
+                                    Status 
+                                    <input type="checkbox" class="form-check-input" id="check-all" style="width: 18px; height: 18px">
+                                </th>
                                 <th scope="col" rowspan="2" class="text-center">Action</th>
                             </tr>
                         </thead>
@@ -53,10 +66,10 @@
                                         <?=$pp['status'] == 1 ? 'checked':''; ?>>
                                 </td>
                                 <td class="text-center">
-                                    <a href="#" class="edit-material-request" data-bs-toggle="modal"
+                                    <span class="edit-material-request" data-bs-toggle="modal"
                                         data-bs-target="#editMaterialRequest<?=$pp['id'];?>">
                                         <span class="badge bg-warning"><i class="bx bx-pencil"></i></span>
-                                    </a>
+                                    </span>
                                 </td>
                             </tr>
                             <?php endforeach; ?>
@@ -70,9 +83,9 @@
                 <span><strong>Status: </strong> <span id="status-count">0/0</span></span>
             </div>
             <div class="col-12 text-end">
-                <a href="<?=base_url('production/');?>" class="w-20">
+                <span class="w-20 hover">
                     <button class="btn btn-success" id="button-save">Save</button>
-                </a>
+                </span>
             </div>
         </div>
     </div>
@@ -147,10 +160,8 @@
             var totalCheckboxes = $('.checkbox-material').length;
             var checkedCheckboxes = $('.checkbox-material:checked').length;
             
-            // Update the status text dynamically
             $('#status-count').text(checkedCheckboxes + '/' + totalCheckboxes);
             
-            // Enable or disable the button based on whether all checkboxes are checked
             if (totalCheckboxes === checkedCheckboxes) {
                 $('#button-save').prop('disabled', false);
             } else {
@@ -158,6 +169,11 @@
             }
         }
 
+        $('#check-all').change(function() {
+            var isChecked = $(this).is(':checked');
+
+            $('.checkbox-material').prop('checked', isChecked).trigger('change');
+        });
 
         $('.edit-material-request').on('click', function(event) {
             event.preventDefault();
@@ -165,11 +181,12 @@
             var materialId = row.find('td:eq(2)').text(); 
 
             $.ajax({
-                url: '<?=base_url('production/getSlocStorage');?>', 
+                url: '<?=base_url('production/getSlocStorage');?>',
                 method: 'POST',
                 data: { materialId },
                 success: function(res) {
                     var result = JSON.parse(res);
+                    // console.log(res);
                     var stock_on_hand = 0;
                     
                     for (var i = 0; i < result.length; i++) {
@@ -207,7 +224,7 @@
                             icon: "error"
                         });
                     }
-                    updateButtonState(); // Update the save button state
+                    updateButtonState();
                 },
                 error: function(xhr, status, error) {
                     console.error('Error updating status:', error);
@@ -216,10 +233,72 @@
         });
 
         updateButtonState();
+
+        function showConfirmation(event, action) {
+            event.preventDefault(); // Prevent the default action
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "You have unsaved changes, do you want to leave this page?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes, leave',
+                cancelButtonText: 'No, stay',
+                reverseButtons: false
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    // Proceed with the action
+                    if (typeof action === 'function') {
+                        action();
+                    } else if (typeof action === 'string') {
+                        window.location.href = action; // Redirect to the specified URL
+                    } else {
+                        event.target.submit(); // For form submission
+                    }
+                }
+            });
+        }
+
+        // Handle link clicks
+        $('a').on('click', function(event) {
+            var url = $(this).attr('href');
+            showConfirmation(event, url);
+        });
+
+        // Handle specific button clicks for redirection
+        $('#button-save').on('click', function() {
+            // Remove the 'beforeunload' event listener
+            window.removeEventListener('beforeunload', handleBeforeUnload);
+
+            Swal.fire({
+                title: 'Are you sure?',
+                text: "Do you want to save this record?",
+                icon: 'warning',
+                showCancelButton: true,
+                confirmButtonText: 'Yes',
+                cancelButtonText: 'Cancel',
+                reverseButtons: true
+            }).then((result) => {
+                if (result.isConfirmed) {
+                    window.location.href = '<?=base_url('production/')?>'; 
+                } else {
+                    // Re-add the 'beforeunload' event listener if the user cancels
+                    window.addEventListener('beforeunload', handleBeforeUnload);
+                }
+            });
+        });
+
+
+        // HANDLE BUTTON PREVIOUS AND FORWARD PRESS
+        function handleBeforeUnload(event) {
+            event.preventDefault();
+            event.returnValue = ''; // For modern browsers
+            return ''; // For older browsers
+        }
+
+        window.addEventListener('beforeunload', handleBeforeUnload);
     });
 </script>
-
-
 
 
 <!-- SWEET ALERT -->

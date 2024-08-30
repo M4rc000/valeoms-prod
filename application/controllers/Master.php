@@ -149,222 +149,240 @@ class Master extends CI_Controller {
         $this->load->view('templates/footer');
 	}
 
-    // ADD BOM MATERIAL
-        // SEARCH PRODUCT DESCRIPTION AUTOMATICALLY
-        function getProductDesc(){
-            $productId = htmlspecialchars($this->input->post('productId'));
-            $result = $this->db->query("SELECT Fg_desc FROM bom WHERE Id_fg = '$productId' AND is_active = 1")->result_array();
+        // ADD BOM MATERIAL
+            // SEARCH PRODUCT DESCRIPTION AUTOMATICALLY
+            function getProductDesc(){
+                $productId = htmlspecialchars($this->input->post('productId'));
+                $result = $this->db->query("SELECT Fg_desc FROM bom WHERE Id_fg = '$productId' AND is_active = 1")->result_array();
+            
+                echo json_encode($result);
+            }
+            
+            function getMaterialDesc(){
+                $materialID = htmlspecialchars($this->input->post('materialID'));
+                $result = $this->db->query("SELECT Material_desc, Material_type, Uom FROM material_list WHERE Id_material = '$materialID' AND is_active = 1")->result_array();
+            
+                echo json_encode($result);
+            }
         
-            echo json_encode($result);
-        }
-        
-        function getMaterialDesc(){
-            $materialID = htmlspecialchars($this->input->post('materialID'));
-            $result = $this->db->query("SELECT Material_desc, Material_type, Uom FROM material_list WHERE Id_material = '$materialID' AND is_active = 1")->result_array();
-        
-            echo json_encode($result);
-        }
-    
-    function AddMaterialBom(){
-        $Data = array(
-            'Id_fg' => $this->input->post('product_id'),
-            'Fg_desc' => $this->input->post('fg_desc'),
-            'is_active' => 1,
-            'Id_material' => $this->input->post('material_id'),
-            'Material_desc' => $this->input->post('material_desc'),
-            'Material_type' => $this->input->post('material_type'),
-            'Uom' => $this->input->post('uom'),
-            'Qty' => floatval($this->input->post('qty')),
-            'Crtdt' => date('Y-d-m H:i'),
-            'Crtby' => $this->input->post('user'),
-            'Upddt' => date('Y-d-m H:i'),
-            'Updby' => $this->input->post('user')
-        );
+        function AddMaterialBom(){
+            $Data = array(
+                'Id_fg' => $this->input->post('product_id'),
+                'Fg_desc' => $this->input->post('fg_desc'),
+                'is_active' => 1,
+                'Id_material' => $this->input->post('material_id'),
+                'Material_desc' => $this->input->post('material_desc'),
+                'Material_type' => $this->input->post('material_type'),
+                'Uom' => $this->input->post('uom'),
+                'Qty' => floatval($this->input->post('qty')),
+                'Crtdt' => date('Y-d-m H:i'),
+                'Crtby' => $this->input->post('user'),
+                'Upddt' => date('Y-d-m H:i'),
+                'Updby' => $this->input->post('user')
+            );
 
-        $this->MModel->insertData('bom', $Data);
-        $check_insert = $this->db->affected_rows();
+            $this->MModel->insertData('bom', $Data);
+            $check_insert = $this->db->affected_rows();
 
-        if($check_insert > 0){
-            $this->session->set_flashdata('success_AddMaterialBom', 'Material Bom has been successfully added');
-        }
-        else{
-            $this->session->set_flashdata('failed_AddMaterialBom', 'Failed to add Material Bom');
-        }
+            if($check_insert > 0){
+                $this->session->set_flashdata('success_AddMaterialBom', 'Material Bom has been successfully added');
+            }
+            else{
+                $this->session->set_flashdata('failed_AddMaterialBom', 'Failed to add Material Bom');
+            }
 
-        redirect('master/bom');
-    }
-
-    // ADD NEW BOM
-    function addNewBom(){
-        $materials = $this->input->post('materials');
-        $id_fg = $this->input->post('products_id');
-
-        // CHECK IF BOM ALREADY EXIST
-        $Bom = $this->db->query("SELECT Id_fg FROM BOM WHERE Id_fg = '$id_fg' and is_active = 1")->result_array();
-        $check_bom = count($Bom);
-        if($check_bom > 0){
-            $this->session->set_flashdata('duplicate_add_new_bom', $id_fg);
             redirect('master/bom');
         }
 
-        $insert_bom = 0;
-        foreach ($materials as $material) {
-            $DataBOM = [
-                'Id_material' => $material['material_id'],
-                'Material_desc' => $material['material_desc'],
-                'Material_type' => $material['material_type'],
-                'Qty' => floatval($material['qty']),
-                'Uom' => $material['uom'],
-                'Id_fg' => $this->input->post('products_id'),
-                'Fg_desc' => $this->input->post('product_desc'),
-                'is_active' => 1,
-                'Crtdt' => date('Y-d-m H:i:s'),
-                'Crtby' => $this->input->post('user'),
-                'Upddt' => date('Y-d-m H:i:s'),
-                'Updby' => $this->input->post('user')
-            ];
-       
-            $this->MModel->insertData('bom', $DataBOM);
-            $check_insert = $this->db->affected_rows();
-            if($check_insert > 0){
-                $insert_bom += 1;
+        // ADD NEW BOM
+        function addNewBom(){
+            $materials = $this->input->post('materials');
+            $id_fg = $this->input->post('products_id');
+
+            // CHECK IF BOM ALREADY EXIST
+            $Bom = $this->db->query("SELECT Id_fg FROM BOM WHERE Id_fg = '$id_fg' and is_active = 1")->result_array();
+            $check_bom = count($Bom);
+            if($check_bom > 0){
+                $this->session->set_flashdata('duplicate_add_new_bom', $id_fg);
+                redirect('master/bom');
             }
-        }
 
-        if($insert_bom > 0){
-            $this->session->set_flashdata('success_add_new_bom', $id_fg);
-        }
-        else{
-            $this->session->set_flashdata('failed_add_new_bom', $id_fg);
-        }
+            $insert_bom = 0;
+            foreach ($materials as $material) {
+                $DataBOM = [
+                    'Id_material' => $material['material_id'],
+                    'Material_desc' => $material['material_desc'],
+                    'Material_type' => $material['material_type'],
+                    'Qty' => floatval($material['qty']),
+                    'Uom' => $material['uom'],
+                    'Id_fg' => $this->input->post('products_id'),
+                    'Fg_desc' => $this->input->post('product_desc'),
+                    'is_active' => 1,
+                    'Crtdt' => date('Y-d-m H:i:s'),
+                    'Crtby' => $this->input->post('user'),
+                    'Upddt' => date('Y-d-m H:i:s'),
+                    'Updby' => $this->input->post('user')
+                ];
+        
+                $this->MModel->insertData('bom', $DataBOM);
+                $check_insert = $this->db->affected_rows();
+                if($check_insert > 0){
+                    $insert_bom += 1;
+                }
+            }
 
-        redirect('master/bom');
-    }
+            if($insert_bom > 0){
+                $this->session->set_flashdata('success_add_new_bom', $id_fg);
+            }
+            else{
+                $this->session->set_flashdata('failed_add_new_bom', $id_fg);
+            }
 
-    
-    // READ BOM
-    function getBomList(){
-        $Id_product = htmlspecialchars($this->input->post('Id_product'));
-        if($Id_product){
-            $result = $this->db->query("SELECT * FROM bom WHERE Id_fg = '$Id_product' AND is_active = 1")->result_array();
-        }
-        else{
-            $result = $this->db->query("SELECT * FROM bom WHERE is_active = 1")->result_array();
-        }
-       
-        echo json_encode($result);
-    }    
-    
-    function getAllBom(){
-        // Load the model
-        $this->load->model('Bom_model');
-
-        // Read DataTables parameters
-        $start = $this->input->post('start');
-        $length = $this->input->post('length');
-        $draw = $this->input->post('draw');
-        $search = $this->input->post('search')['value'];
-
-        // Fetch the data
-        $data = $this->Bom_model->getBomData($start, $length, $search);
-
-        // Total records, before filtering
-        $totalRecords = $this->Bom_model->getTotalRecords();
-
-        // Total records, after filtering
-        $totalFilteredRecords = $this->Bom_model->getTotalFilteredRecords($search);
-
-        // Prepare the response in DataTables format
-        $response = array(
-            "draw" => intval($draw),
-            "recordsTotal" => $totalRecords,
-            "recordsFiltered" => $totalFilteredRecords,
-            "data" => $data
-        );
-
-        // Send the response in JSON format
-        echo json_encode($response);
-    }
- 
-
-    // UPDATE Material BOM
-    function EditBomMaterial() {
-        $id = $this->input->post('id');
-        $materialID = $this->input->post('material_id');
-        $Data = array(
-            'Id_fg' => $this->input->post('id_fg'),
-            'Id_material' => $this->input->post('material_id'),
-            'Material_desc' => $this->input->post('material_desc'),
-            'Material_type' => $this->input->post('material_type'),
-            'Uom' => $this->input->post('uom'),
-            'Qty' => $this->input->post('qty'),
-            'Upddt' => date('Y-m-d H:i:s'), // Adjusted date format
-            'Updby' => $this->input->post('user')
-        );
-    
-        $this->db->where('Id_bom', $id);  
-        $this->db->update('bom', $Data);
-        $check_update = $this->db->affected_rows();
-    
-        if ($check_update > 0) {
-            $this->session->set_flashdata('success_EditBomMaterial', 'Material ' . $materialID . ' has been successfully updated');
-        } else {
-            $this->session->set_flashdata('failed_EditBomMaterial', 'Material ' . $materialID . ' failed to update');
+            redirect('master/bom');
         }
     
-        redirect('master/bom');
-    } 
+        // READ BOM
+        function getBomList(){
+            $Id_product = htmlspecialchars($this->input->post('Id_product'));
+            if($Id_product){
+                $result = $this->db->query("SELECT * FROM bom WHERE Id_fg = '$Id_product' AND is_active = 1")->result_array();
+            }
+            else{
+                $result = $this->db->query("SELECT * FROM bom WHERE is_active = 1")->result_array();
+            }
+        
+            echo json_encode($result);
+        }    
+        
+        function getAllBom(){
+            // Load the model
+            $this->load->model('Bom_model');
 
+            // Read DataTables parameters
+            $start = $this->input->post('start');
+            $length = $this->input->post('length');
+            $draw = $this->input->post('draw');
+            $search = $this->input->post('search')['value'];
 
-    // DELETE Material BOM
-    function deleteMaterialBom(){
-        $id = $this->input->post('id');
+            // Fetch the data
+            $data = $this->Bom_model->getBomData($start, $length, $search);
 
-        $Data = [
-            'is_active' => 0,
-            'Upddt' => date('Y-d-m H:i'),
-            'Updby' => $this->input->post('user')
-        ];
+            // Total records, before filtering
+            $totalRecords = $this->Bom_model->getTotalRecords();
 
+            // Total records, after filtering
+            $totalFilteredRecords = $this->Bom_model->getTotalFilteredRecords($search);
 
-        $this->db->where('Id_bom',$id);  
-        $this->db->update('bom', $Data);
-        $this->session->set_flashdata('DELETED',
-        '
-        <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
-        <i class="bi bi-check-circle me-1"></i> BOM\'s Material successfully deleted
-            <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
-        </div>
-        ');
+            // Prepare the response in DataTables format
+            $response = array(
+                "draw" => intval($draw),
+                "recordsTotal" => $totalRecords,
+                "recordsFiltered" => $totalFilteredRecords,
+                "data" => $data
+            );
 
-        redirect('master/bom');
-    }
-
-    function deleteMultipleMaterialBom(){
-        $data = $this->input->post('selectedItems');
+            // Send the response in JSON format
+            echo json_encode($response);
+        }
     
-        $DeleteDataBom = 0; 
-    
-        foreach ($data as $dt) {
-            $DataBOM = [
+
+        // UPDATE Material BOM
+        function EditBomMaterial() {
+            $id = $this->input->post('id');
+            $materialID = $this->input->post('material_id');
+            $Data = array(
+                'Id_fg' => $this->input->post('id_fg'),
+                'Id_material' => $this->input->post('material_id'),
+                'Material_desc' => $this->input->post('material_desc'),
+                'Material_type' => $this->input->post('material_type'),
+                'Uom' => $this->input->post('uom'),
+                'Qty' => $this->input->post('qty'),
+                'Upddt' => date('Y-m-d H:i:s'), // Adjusted date format
+                'Updby' => $this->input->post('user')
+            );
+        
+            $this->db->where('Id_bom', $id);  
+            $this->db->update('bom', $Data);
+            $check_update = $this->db->affected_rows();
+        
+            if ($check_update > 0) {
+                $this->session->set_flashdata('success_EditBomMaterial', 'Material ' . $materialID . ' has been successfully updated');
+            } else {
+                $this->session->set_flashdata('failed_EditBomMaterial', 'Material ' . $materialID . ' failed to update');
+            }
+        
+            redirect('master/bom');
+        } 
+
+
+        // DELETE Material BOM
+        function deleteMaterialBom(){
+            $id = $this->input->post('id');
+
+            $Data = [
                 'is_active' => 0,
-                'Upddt' => date('Y-m-d H:i'),
+                'Upddt' => date('Y-d-m H:i'),
                 'Updby' => $this->input->post('user')
             ];
-            
-            // Ensure that 'id' is correctly passed and processed
-            $this->MModel->updateMultipleDataBom('bom', $dt['id'], $DataBOM);
-            $check_delete = $this->db->affected_rows();
-            
-            if ($check_delete > 0) {
-                $DeleteDataBom += 1;
+
+
+            $this->db->where('Id_bom',$id);  
+            $this->db->update('bom', $Data);
+            $this->session->set_flashdata('DELETED',
+            '
+            <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
+            <i class="bi bi-check-circle me-1"></i> BOM\'s Material successfully deleted
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+            ');
+
+            redirect('master/bom');
+        }
+
+        function deleteMultipleMaterialBom(){
+            $data = $this->input->post('selectedItems');
+        
+            $DeleteDataBom = 0; 
+        
+            foreach ($data as $dt) {
+                $DataBOM = [
+                    'is_active' => 0,
+                    'Upddt' => date('Y-m-d H:i'),
+                    'Updby' => $this->input->post('user')
+                ];
+                
+                // Ensure that 'id' is correctly passed and processed
+                $this->MModel->updateMultipleDataBom('bom', $dt['id'], $DataBOM);
+                $check_delete = $this->db->affected_rows();
+                
+                if ($check_delete > 0) {
+                    $DeleteDataBom += 1;
+                }
             }
+        
+            // Determine the result based on the number of successful deletions
+            $result = $DeleteDataBom > 0 ? 1 : 0;
+        
+            echo json_encode($result);
         }
     
-        // Determine the result based on the number of successful deletions
-        $result = $DeleteDataBom > 0 ? 1 : 0;
-    
-        echo json_encode($result);
+    public function export_bom()
+    {
+        $data['title'] = 'Export BOM';
+
+        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+        
+        $this->load->view('templates/header_export', $data);
+        $this->load->view('templates/navbar');   
+        $this->load->view('templates/sidebar');   
+        $this->load->view('master/export-bom', $data);
+        $this->load->view('templates/footer_export');
     }
-    
+
+    public function get_bom_data() {
+        $data = $this->MModel->getBom();
+
+        echo json_encode($data);
+    }
 }

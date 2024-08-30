@@ -11,45 +11,45 @@
 
 <section style="font-family: Nunito;">
 	<div class="row">
-		<div class="col-lg-12">
-			<div class="card" style="height: 2500px;">
+		<div class="col-12">
+			<div class="card" style="min-height: 2500px;">
 				<div class="card-body">
 					<div class="row mt-3">
-						<div class="col-md">
+						<div class="col-12">
 							<!-- Default Tabs -->
 							<ul class="nav nav-tabs d-flex" id="myTabjustified" role="tablist">
 								<li class="nav-item flex-fill" role="presentation">
-									<button class="nav-link w-100 active" id="home-tab" data-bs-toggle="tab"
-										data-bs-target="#home-justified" type="button" role="tab" aria-controls="home"
-										aria-selected="true"><i class="bi bi-file-earmark-ruled-fill me-3"
-											style="color: #012970"></i>
-										FG</button>
+									<button class="nav-link w-100 active" id="home-tab" data-bs-toggle="tab" data-bs-target="#home-justified" type="button" role="tab" aria-controls="home" aria-selected="true">
+										<i class="bi bi-file-earmark-ruled-fill me-2" style="color: #012970"></i> FG
+									</button>
 								</li>
 								<li class="nav-item flex-fill" role="presentation">
-									<button class="nav-link w-100" id="profile-tab" data-bs-toggle="tab"
-										data-bs-target="#profile-justified" type="button" role="tab"
-										aria-controls="profile" aria-selected="false"><i
-											class="bi bi-file-earmark-plus-fill me-2" style="color: #012970"></i> New
-										Product FG</button>
+									<button class="nav-link w-100" id="profile-tab" data-bs-toggle="tab" data-bs-target="#profile-justified" type="button" role="tab" aria-controls="profile" aria-selected="false">
+										<i class="bi bi-file-earmark-plus-fill me-2" style="color: #012970"></i> New Product FG
+									</button>
 								</li>
 							</ul>
 							<div class="tab-content pt-2" id="myTabjustifiedContent">
-								<div class="tab-pane fade show active" id="home-justified" role="tabpanel"
-									aria-labelledby="home-tab">
-									<div class="row mt-4 mb-2 ">
-										<div class="col-md">
-											<div class="col-md-2">
-												<button class="btn btn-primary" data-bs-toggle="modal"
-													data-bs-target="#addMaterialBOM"><i
-														class="bi bi-journal-plus mx-1 me-2"></i> BOM</button>
+								<div class="tab-pane fade show active" id="home-justified" role="tabpanel" aria-labelledby="home-tab">
+									<div class="row mt-4 mb-2">
+										<div class="col-12">
+											<div class="row">
+												<div class="col-4 col-md-2 mb-3">
+													<button class="btn btn-primary w-100" data-bs-toggle="modal" data-bs-target="#addMaterialBOM">
+														<i class="bi bi-journal-plus me-2"></i> BOM
+													</button>
+												</div>
+												<div class="col-4 col-md-2 mb-3">
+													<a href="<?=base_url('master/export_bom');?>"><button class="btn btn-success w-100">
+														<i class="bi bi-download me-2"></i>BOM
+													</button></a>
+												</div>
 											</div>
 										</div>
 									</div>
 									<div class="row justify-content-center mt-4 me-0 ms-0 mb-5">
 										<div class="col-12 col-md-2 mb-3 mb-md-0">
-											<label for="id_product" class="col-form-label">
-												<b>Finnish Good ID</b>
-											</label>
+											<label for="id_product" class="col-form-label"><b>Finnish Good ID</b></label>
 										</div>
 										<div class="col-12 col-md-5 mb-3 mb-md-0">
 											<select class="form-select" id="id_product" name="id_product" required>
@@ -68,57 +68,54 @@
 										<div id="data"></div>
 									</div>
 								</div>
-								<div class="tab-pane fade" id="profile-justified" role="tabpanel"
-									aria-labelledby="profile-tab">
-               	                 	<?= form_open_multipart('master/addNewBom'); ?>
-										<!-- GET USER -->
-										<input type="text" name="user" id="user" value="<?=$name['username'];?>" hidden>
-										<div class="row mt-4 mb-4 mx-2">
-											<div class="col-12 col-md-6 mb-3 mb-md-0">
-												<label for="products_id" class="form-label"><b>Product ID</b></label>
-												<input type="text" class="form-control" id="products_id" name="products_id" required>
-											</div>
-											<div class="col-12 col-md-6">
-												<label for="product_desc" class="form-label"><b>Product Description</b></label>
-												<input type="text" class="form-control" id="product_desc" name="product_desc" required>
+								<div class="tab-pane fade" id="profile-justified" role="tabpanel" aria-labelledby="profile-tab">
+									<?= form_open_multipart('master/addNewBom'); ?>
+									<!-- GET USER -->
+									<input type="text" name="user" id="user" value="<?=$name['username'];?>" hidden>
+									<div class="row mt-4 mb-4 mx-2">
+										<div class="col-12 col-md-6 mb-3">
+											<label for="products_id" class="form-label"><b>Product ID</b></label>
+											<input type="text" class="form-control" id="products_id" name="products_id" required>
+										</div>
+										<div class="col-12 col-md-6">
+											<label for="product_desc" class="form-label"><b>Product Description</b></label>
+											<input type="text" class="form-control" id="product_desc" name="product_desc" required>
+										</div>
+									</div>
+									<hr>
+									<div class="row mb-3 mx-2">
+										<div class="col-12 col-md-3">
+											<button type="button" class="btn btn-primary w-100" id="add-row-btn">
+												<i class="bi bi-plus-circle"></i>
+											</button>
+										</div>
+									</div>
+									<div class="row mt-3 mx-2">
+										<div class="col-12">
+											<div class="table-responsive">
+												<table id="bomTable" class="table table-bordered">
+													<thead>
+														<tr>
+															<th class="text-center">#</th>
+															<th class="text-center">Material Part No</th>
+															<th class="text-center">Material Part Description</th>
+															<th class="text-center">Material Type</th>
+															<th class="text-center">Qty</th>
+															<th class="text-center">Uom</th>
+															<th class="text-center">Action</th>
+														</tr>
+													</thead>
+													<tbody id="table-body"></tbody>
+												</table>
 											</div>
 										</div>
-										<hr>
-										<div class="row mb-3 mx-2">
-											<div class="col-md-3">
-												<button type="button" class="btn btn-primary" id="add-row-btn">
-													<i class="bi bi-plus-circle"></i>
-												</button>
-											</div>
+									</div>
+									<div class="row mt-3 mx-2">
+										<div class="col-12 text-end">
+											<button type="submit" class="btn btn-success">Submit</button>
 										</div>
-										<div class="row mt-3 mx-2">
-											<div class="col-md">
-													<div class="table-responsive">
-														<table id="bomTable" class="table table-bordered">
-															<thead>
-																<tr>
-																	<th class="text-center">#</th>
-																	<th class="text-center">Material Part No</th>
-																	<th class="text-center">Material Part Description</th>
-																	<th class="text-center">Material Type</th>
-																	<th class="text-center">Qty</th>
-																	<th class="text-center">Uom</th>
-																	<th class="text-center">Action</th>
-																</tr>
-															</thead>
-															<tbody id="table-body"></tbody>
-														</table>
-													</div>
-											</div>
-										</div>
-										<div class="row mt-3 mx-2">
-											<div class="col-md text-end">
-												<button type="submit" class="btn btn-success">
-													Submit
-												</button>
-											</div>
-										</div>
-                                	</form>                        
+									</div>
+									</form>
 								</div>
 							</div><!-- End Default Tabs -->
 						</div>
@@ -128,6 +125,7 @@
 		</div>
 	</div>
 </section>
+
 
 
 <!-- ADD Material MODAL -->

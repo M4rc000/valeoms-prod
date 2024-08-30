@@ -1,95 +1,109 @@
-<?php 
-    $grouped_storage = array();
-
-    // Group data by material_desc
-    foreach ($list_storage as $storage) {
-        if (!isset($grouped_storage[$storage['material_desc']])) {
-            $grouped_storage[$storage['material_desc']] = $storage;
-        } else {
-            $grouped_storage[$storage['material_desc']]['total_qty'] += $storage['total_qty'];
-        }
-    }
-?>
-<link rel="stylesheet" href="<?=base_url('assets');?>/vendor/datatables/datatables.css">
-<link rel="stylesheet" href="<?=base_url('assets');?>/vendor/datatables/buttons.dataTables.css">
 <section>
-	<div class="card">
-		<div class="card-body">
+    <div class="card">
+        <div class="card-body">
             <div class="row">
                 <div class="col-md mt-4">
                     <table class="table table-bordered display" id="tbl-storage">
                         <thead>
                             <tr>
-                                <th class="text-center">#</th>
-                                <th class="text-center">Material Part No</th>
-                                <th class="text-center">Material Part Name</th>
-                                <th class="text-center">Qty Total</th>
+                                <th>ID</th>
+                                <th>Product ID</th>
+                                <th>Material Description</th>
+                                <th>Total Quantity</th>
+                                <th>Box Details</th>
                             </tr>
                         </thead>
-                        <tbody>
-                            <?php
-                                $number = 0;
-                                foreach ($grouped_storage as $material => $storage):
-                                    $number++;
-                            ?>
-                            <tr>
-                                <td class="text-center"><?= $number; ?></td>
-                                <td class="text-center"><?= $storage['product_id']; ?></td>
-                                <td class="text-center"><?= $storage['material_desc']; ?></td>
-                                <td class="text-center"><?= $storage['total_qty']; ?></td>
-                            </tr>
-                            <?php endforeach; ?>
+                        <tbody id="table-body">
                         </tbody>
                     </table>
                 </div>
             </div>
-		</div>
-	</div>
+        </div>
+    </div>
 </section>
 
-<script src="<?=base_url('assets/');?>/vendor/datatables/dataTables.buttons.js"></script>
-<script src="<?=base_url('assets/');?>/vendor/datatables/buttons.dataTables.js"></script>
-<script src="<?=base_url('assets/');?>/vendor/datatables/jszip.min.js"></script>
-<script src="<?=base_url('assets/');?>/vendor/datatables/pdfmake.min.js"></script>
-<script src="<?=base_url('assets/');?>/vendor/datatables/vfs_fonts.js"></script>
-<script src="<?=base_url('assets/');?>/vendor/datatables/buttons.html5.min.js"></script>
-<script src="<?=base_url('assets/');?>/vendor/datatables/buttons.print.min.js"></script>
+<!-- SPINNER LOADING -->
+<div class="spinner-container" id="spinner-container">
+    <div class="spinner-grow text-success" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <div class="spinner-grow text-success" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+    <div class="spinner-grow text-success" role="status">
+        <span class="visually-hidden">Loading...</span>
+    </div>
+</div>
+
+<script src="<?=base_url('assets');?>/vendor/datatables/exports/js/dataTables.js"></script>
+<script src="<?=base_url('assets');?>/vendor/datatables/exports/js/dataTables.buttons.js"></script>
+<script src="<?=base_url('assets');?>/vendor/datatables/exports/js/buttons.dataTables.js"></script>
+<script src="<?=base_url('assets');?>/vendor/datatables/exports/js/jszip.min.js"></script>
+<script src="<?=base_url('assets');?>/vendor/datatables/exports/js/buttons.html5.min.js"></script>
+<script src="<?=base_url('assets');?>/vendor/datatables/exports/js/buttons.print.min.js"></script>
+
 <script>
-    new DataTable('#tbl-storage', {
-        "pageLength": -1,
-        layout: {
-            topStart: {
-                buttons: [
-                    {
-                        text: '<i class="bx bx-table"></i> Excel',
-                        extend: 'excel',
-                        title: ''
-                    },
-                    {
-                        text: '<i class="bx bxs-file-pdf"></i> Pdf',
-                        title: '',
-                        extend: 'pdf',
-                        customize: function (doc) {
-                            // Set the title at the top of the PDF
-                            doc.content.splice(0, 0, {
-                                text: 'List Storage',
-                                style: 'header'
-                            });
+    $(document).ready(function() {
+        $('#spinner-container').show();
 
-                            // Define styles for the header
-                            doc.styles.header = {
-                                fontSize: 16,
-                                bold: true,
-                                alignment: 'center',
-                                margin: [0, 20, 0, 10] // margin: [left, top, right, bottom]
-                            };
+        $.ajax({
+            url: "<?= base_url('warehouse/get_data_show_list_storage'); ?>",
+            method: "GET",
+            dataType: "json",
+            success: function(data) {
+                // Hide spinner when the data is successfully retrieved
+                $('#spinner-container').hide();
 
-                            // Ensure title is centered on the page
-                            doc.pageMargins = [40, 60, 40, 40]; // [left, top, right, bottom]
+                // Append rows to the table body
+                let tableBody = $('#table-body');
+                let number = 1;
+
+                // console.log(data);
+
+                for (let i = 0; i < data.length; i++) {
+                    let boxQtyDetails = data[i].box_qty_details || ''; // Handle null or undefined
+                    let boxDetailsHtml = '';
+
+                    if (boxQtyDetails) {
+                        boxDetailsHtml = boxQtyDetails.split(',').map(boxQty => {
+                            let [id_box, qty] = boxQty.split(':');
+                            return `<div>ID Box: ${id_box}, Qty: ${qty}</div>`;
+                        }).join('');
+                    }
+
+                    let row = `
+                        <tr>
+                            <td>${number++}</td>
+                            <td>${data[i].product_id}</td>
+                            <td>${data[i].material_desc}</td>
+                            <td>${data[i].total_qty_sum}</td>
+                            <td>${boxDetailsHtml}</td>
+                        </tr>
+                    `;
+                    tableBody.append(row);
+                }
+
+                // Initialize DataTables
+                new DataTable('#tbl-storage', {
+                    "pageLength": 10,
+                    layout: {
+                        topStart: {
+                            buttons: [
+                                {
+                                    extend: 'excel',
+                                    text: '<i class="bx bx-table"></i> Excel',
+                                    title: 'List Storage WMS',
+                                    className: 'btn-custom-excel'
+                                }
+                            ]
                         }
-                    },
-                ]
+                    }
+                });
+            },
+            error: function() {
+                $('#spinner-container').hide();
+                alert('Failed to retrieve data.');
             }
-        }
+        });
     });
 </script>

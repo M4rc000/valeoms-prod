@@ -1,4 +1,10 @@
- <!-- ======= Header ======= -->
+<style>
+	.hover:hover{
+		cursor: pointer;
+	}
+</style>
+
+<!-- ======= Header ======= -->
  <header id="header" class="header fixed-top d-flex align-items-center">
 
 <div class="d-flex align-items-center justify-content-between">
@@ -13,7 +19,7 @@
   <ul class="d-flex align-items-center">
 	<li class="nav-item dropdown">
 
-	  <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
+	  <span class="nav-link nav-icon hover" data-bs-toggle="dropdown">
 		<i class="bi bi-bell"></i>
 		<span class="badge bg-primary badge-number">
 			<?php 
@@ -32,7 +38,7 @@
 				echo $queryCount[0]['notification_count'];
 			?>
 		</span>
-	  </a><!-- End Notification Icon -->
+	  </span><!-- End Notification Icon -->
 
 	  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications" style="width: 350px">
 	  	<li class="dropdown-header">
@@ -89,7 +95,7 @@
 
 	<li class="nav-item dropdown">
 
-	  <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
+	  <span class="nav-link nav-icon hover" data-bs-toggle="dropdown">
 		<i class="bi bi-calendar2"></i>
 		<span class="badge bg-primary badge-number">
 			<?php 
@@ -112,7 +118,7 @@
 				echo $queryCount[0]['notification_rw_count'];
 			?>
 		</span>
-	  </a><!-- End Notification Icon -->
+	  </span><!-- End Notification Icon -->
 
 	  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow notifications" style="width: 350px">
 	  	<li class="dropdown-header">
@@ -169,10 +175,10 @@
 
 	<li class="nav-item dropdown">
 
-	  <a class="nav-link nav-icon" href="#" data-bs-toggle="dropdown">
+	  <span class="nav-link nav-icon hover" data-bs-toggle="dropdown">
 		<i class="bi bi-chat-left-text"></i>
 		<span class="badge bg-success badge-number"></span>
-	  </a><!-- End Messages Icon -->
+	  </span><!-- End Messages Icon -->
 
 	  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow messages">
 		<!-- <li class="dropdown-header">
@@ -235,10 +241,10 @@
 
 	<li class="nav-item dropdown pe-4">
 
-	  <a class="nav-link nav-profile d-flex align-items-center pe-0" href="#" data-bs-toggle="dropdown">
+	  <span class="nav-link nav-profile d-flex align-items-center pe-0 hover" data-bs-toggle="dropdown">
 		<img src="<?=base_url('assets');?>/img/<?= $name['gender'] == 'Male' ? 'Man' : 'Woman';?>.png" alt="Profile" class="rounded-circle">
 		<span class="d-none d-md-block dropdown-toggle ps-2"><?=$this->session->userdata('username');?></span>
-	  </a><!-- End Profile Image Icon -->
+	  </span><!-- End Profile Image Icon -->
 
 	  <ul class="dropdown-menu dropdown-menu-end dropdown-menu-arrow profile">
 		<li class="dropdown-header">

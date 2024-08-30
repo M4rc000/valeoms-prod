@@ -8,6 +8,7 @@
 		height: 38px !important;
 	}
 </style>
+
 <section>
     <div class="row">
         <div class="card">
@@ -46,19 +47,13 @@
                                     <button type="submit" class="btn btn-success" id="get-req-PNo" onclick="getReqPNo()">Search</button>
                                 </div>
                             </div>
-                            <div class="row mt-1 mb-1">
-                                <div id="data-request-prod"></div>
-                            </div>              
-                            <div class="row mt-3 mb-1">
-                                <div id="data-box-prod"></div>
-                            </div>
                         </div>
                         <div class="tab-pane fade" id="profile-justified" role="tabpanel"
                             aria-labelledby="profile-tab">
                             <div class="row justify-content-center mt-3 gap-1">
-                                <label for="reqNo" class="col-sm-3 col-form-label text-end"><b>Request No</b></label>
+                                <label for="reqQNo" class="col-sm-3 col-form-label text-end"><b>Request No</b></label>
                                 <div class="col-sm-5">
-                                    <select id="reqNo" class="form-select">
+                                    <select id="reqQNo" class="form-select">
                                         <option selected>Choose Request No</option>
                                         <?php foreach($requestnoqual as $qr): ?>
                                             <option value="<?=$qr['Id_request'];?>"><?=$qr['Id_request'];?></option>
@@ -68,12 +63,6 @@
                                 <div class="col-sm-3">
                                     <button type="submit" class="btn btn-success" id="get-req-QNo" onclick="getReqQNo()">Search</button>
                                 </div>
-                            </div>
-                            <div class="row mt-1 mb-1">
-                                <div id="data-request"></div>
-                            </div>              
-                            <div class="row mt-3 mb-1">
-                                <div id="data-box"></div>
                             </div>
                         </div>
                     </div><!-- End Default Tabs -->
@@ -86,104 +75,119 @@
 <script>
     // WAREHOUSE
     function getReqPNo() {
-        var reqNo = $('#reqPNo').val();
-        $.ajax({
-            url: '<?= base_url('warehouse/getReqNoPR'); ?>',
-            type: 'post',
-            dataType: 'json',
-            data: {
-                reqNo
-            },
-            success: function(res) {
-                if (res) {
-                    $('#get-req-PNo').prop('disabled', true);
+        var request_no = $('#reqPNo').val().trim();
 
-                    console.log(res);
-                    var reqNo = res.Request_result[0].Id_request;
-                    var Id_fg = res.Request_result[0].Id_fg;
-                    var Fg_desc = res.Request_result[0].Fg_desc;
-                    var Qty_prod_plan = res.Request_result[0].Production_plan_qty;
+        // Check if request_no is empty or null
+        if (!request_no) { 
+            Swal.fire({
+                title: "Error",
+                html: "Request No is null or empty",
+                icon: "error"
+            });
+            return;
+        }
+
+        window.location.href = '<?=base_url('warehouse/kitting_production/')?>' + encodeURIComponent(request_no);
+
+
+        // var reqNo = $('#reqPNo').val();
+        // $.ajax({
+        //     url: '<?= base_url('warehouse/getReqNoPR'); ?>',
+        //     type: 'post',
+        //     dataType: 'json',
+        //     data: {
+        //         reqNo
+        //     },
+        //     success: function(res) {
+        //         if (res) {
+        //             $('#get-req-PNo').prop('disabled', true);
+
+        //             // console.log(res);
+        //             var reqNo = res.Request_result[0].Id_request;
+        //             var Id_fg = res.Request_result[0].Id_fg;
+        //             var Fg_desc = res.Request_result[0].Fg_desc;
+        //             var Qty_prod_plan = res.Request_result[0].Production_plan_qty;
                     
-                    var rowBox = '';
-                    for(var i = 0; i < res.Box_result.length; i++){
-                        rowBox+=
-                        `
-                            <div class="col-md-2 mt-2">
-                                <input class="form-control" value="${res.Box_result[i].no_box}" readonly></input>
-                            </div>
-                        `;
-                    }
+        //             var rowBox = '';
+        //             for(var i = 0; i < res.Box_result.length; i++){
+        //                 rowBox+=
+        //                 `
+        //                     <div class="col-md-2 mt-2" id="box-${res.Box_result[i].no_box}">
+        //                         <input class="form-control" value="${res.Box_result[i].no_box}" readonly></input>
+        //                     </div>
+        //                 `;
+        //             }
 
-                    var boxOptions = res.Box_result.map(function(box) {
-                        return `<option value="${box.no_box}">${box.no_box}</option>`;
-                    }).join('');
+        //             var boxOptions = res.Box_result.map(function(box) {
+        //                 return `<option value="${box.no_box}">${box.no_box}</option>`;
+        //             }).join('');
 
-                    var htmlContent = `
-                        <div class="row mt-4">
-                            <label for="req_nop" class="col-sm-3 col-form-label">Request No</label>
-                            <div class="col-sm-3">
-                                <input type="text" id="req_nop" class="form-control text-center" value="${reqNo}" readonly>
-                            </div>
-                        </div>
-                        <div class="row mt-2">
-                            <label for="Id_fg" class="col-sm-3 col-form-label">FG Part No</label>
-                            <div class="col-sm-3">
-                                <input type="text" id="Id_fg" class="form-control text-center" value="${Id_fg}" readonly>
-                            </div>
-                        </div>
-                        <div class="row mt-2">
-                            <label for="Fg_desc" class="col-sm-3 col-form-label">FG Part Name</label>
-                            <div class="col-sm-5">
-                                <input type="text" id="Fg_desc" class="form-control" value="${Fg_desc}" readonly>
-                            </div>
-                        </div>
-                        <div class="row mt-2 mb-4">
-                            <label for="qty_prod_plan" class="col-sm-3 col-form-label">Qty Production Planning</label>
-                            <div class="col-sm-2">
-                                <input type="text" id="qty_prod_plan" class="form-control text-center" value="${Qty_prod_plan}" readonly>
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="row mt-3">
-                            <div class="col-md">
-                                <span class="mb-4">
-                                    <strong>
-                                        List Box
-                                    </strong>
-                                </span>
-                                <div class="row mt-2">
-                                    ${rowBox}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row justify-content-center mt-4 gap-1">
-                            <label for="box_id" class="col-sm-3 col-form-label text-end"><b>Box ID</b></label>
-                            <div class="col-sm-5">
-                                <select id="box_id" class="form-select">
-                                    <option selected>Choose Box</option>
-                                    ${boxOptions}
-                                </select>
-                            </div>
-                            <div class="col-sm-3">
-                                <button type="submit" class="btn btn-success" onclick="getBoxP()">Search</button>
-                            </div>
-                        </div>
-                    `;
+        //             var htmlContent = `
+        //                 <div class="row mt-4">
+        //                     <label for="req_nop" class="col-sm-3 col-form-label">Request No</label>
+        //                     <div class="col-sm-3">
+        //                         <input type="text" id="req_nop" class="form-control text-center" value="${reqNo}" readonly>
+        //                     </div>
+        //                 </div>
+        //                 <div class="row mt-2">
+        //                     <label for="Id_fg" class="col-sm-3 col-form-label">FG Part No</label>
+        //                     <div class="col-sm-3">
+        //                         <input type="text" id="Id_fg" class="form-control text-center" value="${Id_fg}" readonly>
+        //                     </div>
+        //                 </div>
+        //                 <div class="row mt-2">
+        //                     <label for="Fg_desc" class="col-sm-3 col-form-label">FG Part Name</label>
+        //                     <div class="col-sm-5">
+        //                         <input type="text" id="Fg_desc" class="form-control" value="${Fg_desc}" readonly>
+        //                     </div>
+        //                 </div>
+        //                 <div class="row mt-2 mb-4">
+        //                     <label for="qty_prod_plan" class="col-sm-3 col-form-label">Qty Production Planning</label>
+        //                     <div class="col-sm-2">
+        //                         <input type="text" id="qty_prod_plan" class="form-control text-center" value="${Qty_prod_plan}" readonly>
+        //                     </div>
+        //                 </div>
+        //                 <hr>
+        //                 <div class="row mt-3">
+        //                     <div class="col-md">
+        //                         <span class="mb-4">
+        //                             <strong>
+        //                                 List Box
+        //                             </strong>
+        //                         </span>
+        //                         <div class="row mt-2">
+        //                             ${rowBox}
+        //                         </div>
+        //                     </div>
+        //                 </div>
+        //                 <div class="row justify-content-center mt-4 gap-1">
+        //                     <label for="box_id" class="col-sm-3 col-form-label text-end"><b>Box ID</b></label>
+        //                     <div class="col-sm-5">
+        //                         <select id="box_id" class="form-select">
+        //                             <option selected>Choose Box</option>
+        //                             ${boxOptions}
+        //                         </select>
+        //                     </div>
+        //                     <div class="col-sm-3">
+        //                         <button type="submit" class="btn btn-success" onclick="getBoxP()">Search</button>
+        //                     </div>
+        //                 </div>
+        //             `;
                     
-                    $('#reqPNo').prop('disabled', true);
-                    $('#get-req-PNo').prop('disabled', true);
-                    $('#data-request-prod').empty().append(htmlContent);
-                    $('#box_id').select2();
-                } else {
-                    // Handle case when BOX ID is not found
-                    $('#notif').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 40%"><i class="bi bi-x-circle me-1"></i> BOX ID not found<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
-                }
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                // Handle AJAX error
-                console.error(xhr.statusText);
-            }
-        });
+        //             $('#reqPNo').prop('disabled', true);
+        //             $('#get-req-PNo').prop('disabled', true);
+        //             $('#data-request-prod').empty().append(htmlContent);
+        //             $('#box_id').select2();
+        //         } else {
+        //             // Handle case when BOX ID is not found
+        //             $('#notif').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 40%"><i class="bi bi-x-circle me-1"></i> BOX ID not found<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+        //         }
+        //     },
+        //     error: function(xhr, ajaxOptions, thrownError) {
+        //         // Handle AJAX error
+        //         console.error(xhr.statusText);
+        //     }
+        // });
     }
 
     function getBoxP() {
@@ -316,8 +320,14 @@
                                     if(res){
                                         Swal.fire({
                                             title: "Success",
-                                            html: `Box <b>${res}</b> have been unpacked`,
+                                            html: `Box <b>${res}</b> has been unpacked`,
                                             icon: "success"
+                                        }).then((result) => {
+                                            if (result.isConfirmed) {
+                                                // Select and remove the specific box element by its unique ID
+                                                const element = $(`#box-${res}`);
+                                                element.remove();
+                                            }
                                         });
 
                                         $('#refresh-btn-prod').prop('disabled', false);
@@ -345,106 +355,124 @@
     // QUALITY
     // MENDAPATKAN MATERIAL REQUEST NO
     function getReqQNo() {
-        var reqNo = $('#reqNo').val();
-        $.ajax({
-            url: '<?= base_url('warehouse/getReqNoQR'); ?>',
-            type: 'post',
-            dataType: 'json',
-            data: {
-                reqNo
-            },
-            success: function(res) {
-                if (res) {
-                    console.log(res);
-                    var reqNo = res[0].Id_request;
-                    var Id_material = res[0].Id_material;
-                    var Material_desc = res[0].Material_desc;
-                    var Material_need = res[0].Material_need;
-                    var Uom = res[0].Uom;
-                    
-                    var rowBox = '';
-                    for(var i = 0; i < res.length; i++){
-                        rowBox+=
-                        `
-                            <div class="col-md-2">
-                                <input class="form-control" value="${res[i].no_box}" readonly></input>
-                            </div>
-                        `;
-                    }
+        var request_no = $('#reqQNo').val().trim();
 
-                    var boxOptions = res.map(function(box) {
-                        return `<option value="${box.no_box}">${box.no_box}</option>`;
-                    }).join('');
+        // Check if request_no is empty or null
+        if (!request_no) { 
+            Swal.fire({
+                title: "Error",
+                html: "Request No is null or empty",
+                icon: "error"
+            });
+            return;
+        }
 
-                    var htmlContent = `
-                        <div class="row mt-4">
-                            <label for="req_no" class="col-sm-3 col-form-label">Request No</label>
-                            <div class="col-sm-3">
-                                <input type="text" id="req_no" class="form-control text-center" value="${reqNo}" readonly>
-                            </div>
-                        </div>
-                        <div class="row mt-2">
-                            <label for="Id_material" class="col-sm-3 col-form-label">Material Part No</label>
-                            <div class="col-sm-3">
-                                <input type="text" id="Id_material" class="form-control text-center" value="${Id_material}" readonly>
-                            </div>
-                        </div>
-                        <div class="row mt-2">
-                            <label for="Material_desc" class="col-sm-3 col-form-label">Material Part Name</label>
-                            <div class="col-sm-3">
-                                <input type="text" id="Material_desc" class="form-control" value="${Material_desc}" readonly>
-                            </div>
-                        </div>
-                        <div class="row mt-2 mb-4">
-                            <label for="Material_need" class="col-sm-3 col-form-label">Material Need</label>
-                            <div class="col-sm-2">
-                                <input type="text" id="Material_need" class="form-control text-center" value="${Material_need}" readonly>
-                            </div>
-                            <div class="col-sm-2">
-                                <input type="text" id="Uom" class="form-control text-center" value="${Uom}" readonly>
-                            </div>
-                        </div>
-                        <hr>
-                        <div class="row mt-3">
-                            <div class="col-md">
-                                <span class="mb-4">
-                                    <strong>
-                                        List Box
-                                    </strong>
-                                </span>
-                                <div class="row mt-2">
-                                    ${rowBox}
-                                </div>
-                            </div>
-                        </div>
-                        <div class="row justify-content-center mt-3 gap-1">
-                            <label for="box_id-q" class="col-sm-3 col-form-label text-end"><b>Box ID</b></label>
-                            <div class="col-sm-5">
-                                <select id="box_id-q" class="form-select">
-                                    <option selected>Choose Box</option>
-                                    ${boxOptions}
-                                </select>
-                            </div>
-                            <div class="col-sm-3">
-                                <button type="button" class="btn btn-success" onclick="getBoxQ()">Search</button>
-                            </div>
-                        </div>
-                    `;
+        window.location.href = '<?=base_url('warehouse/kitting_quality/')?>' + encodeURIComponent(request_no);
+        
+        // var reqNo = $('#reqNo').val();
+        // $.ajax({
+        //     url: '<?= base_url('warehouse/getReqNoQR'); ?>',
+        //     type: 'post',
+        //     dataType: 'json',
+        //     data: {
+        //         reqNo
+        //     },
+        //     success: function(res) {
+        //         if (res) {
+        //             console.log(res);
+        //             var reqNo = res[0].Id_request;
+        //             var Id_material = res[0].Id_material;
+        //             var Material_desc = res[0].Material_desc;
+        //             var Material_need = res[0].Material_need;
+        //             var Uom = res[0].Uom;
+
+        //             // <div class="col-md-2">
+        //             //     <input class="form-control" value="${res[i].no_box}" readonly></input>
+        //             // </div>
                     
-                    $('#reqNo').prop('disabled', true);
-                    $('#get-req-QNo').prop('disabled', true);
-                    $('#data-request').empty().append(htmlContent);
-                    $('#box_id-q').select2();
-                } else {
-                    // Handle case when BOX ID is not found
-                    $('#notif').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 40%"><i class="bi bi-x-circle me-1"></i> BOX ID not found<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
-                }
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                // Handle AJAX error
-                console.error(xhr.statusText);
-            }
-        });
+        //             var rowBox = '';
+        //             for(var i = 0; i < res.length; i++){
+        //                 rowBox+=
+        //                 `
+        //                     <div class="col-md-2 mt-2" id="boxq-${res[i].no_box}">
+        //                         <input class="form-control" value="${res[i].no_box}" readonly></input>
+        //                     </div>
+        //                 `;
+        //             }
+
+        //             var boxOptions = res.map(function(box) {
+        //                 return `<option value="${box.no_box}">${box.no_box}</option>`;
+        //             }).join('');
+
+        //             var htmlContent = `
+        //                 <div class="row mt-4">
+        //                     <label for="req_no" class="col-sm-3 col-form-label">Request No</label>
+        //                     <div class="col-sm-3">
+        //                         <input type="text" id="req_no" class="form-control text-center" value="${reqNo}" readonly>
+        //                     </div>
+        //                 </div>
+        //                 <div class="row mt-2">
+        //                     <label for="Id_material" class="col-sm-3 col-form-label">Material Part No</label>
+        //                     <div class="col-sm-3">
+        //                         <input type="text" id="Id_material" class="form-control text-center" value="${Id_material}" readonly>
+        //                     </div>
+        //                 </div>
+        //                 <div class="row mt-2">
+        //                     <label for="Material_desc" class="col-sm-3 col-form-label">Material Part Name</label>
+        //                     <div class="col-sm-3">
+        //                         <input type="text" id="Material_desc" class="form-control" value="${Material_desc}" readonly>
+        //                     </div>
+        //                 </div>
+        //                 <div class="row mt-2 mb-4">
+        //                     <label for="Material_need" class="col-sm-3 col-form-label">Material Need</label>
+        //                     <div class="col-sm-2">
+        //                         <input type="text" id="Material_need" class="form-control text-center" value="${Material_need}" readonly>
+        //                     </div>
+        //                     <div class="col-sm-2">
+        //                         <input type="text" id="Uom" class="form-control text-center" value="${Uom}" readonly>
+        //                     </div>
+        //                 </div>
+        //                 <hr>
+        //                 <div class="row mt-3">
+        //                     <div class="col-md">
+        //                         <span class="mb-4">
+        //                             <strong>
+        //                                 List Box
+        //                             </strong>
+        //                         </span>
+        //                         <div class="row mt-2">
+        //                             ${rowBox}
+        //                         </div>
+        //                     </div>
+        //                 </div>
+        //                 <div class="row justify-content-center mt-3 gap-1">
+        //                     <label for="box_id-q" class="col-sm-3 col-form-label text-end"><b>Box ID</b></label>
+        //                     <div class="col-sm-5">
+        //                         <select id="box_id-q" class="form-select">
+        //                             <option selected>Choose Box</option>
+        //                             ${boxOptions}
+        //                         </select>
+        //                     </div>
+        //                     <div class="col-sm-3">
+        //                         <button type="button" class="btn btn-success" onclick="getBoxQ()">Search</button>
+        //                     </div>
+        //                 </div>
+        //             `;
+                    
+        //             $('#reqNo').prop('disabled', true);
+        //             $('#get-req-QNo').prop('disabled', true);
+        //             $('#data-request').empty().append(htmlContent);
+        //             $('#box_id-q').select2();
+        //         } else {
+        //             // Handle case when BOX ID is not found
+        //             $('#notif').html('<div class="alert alert-danger alert-dismissible fade show" role="alert" style="width: 40%"><i class="bi bi-x-circle me-1"></i> BOX ID not found<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button></div>');
+        //         }
+        //     },
+        //     error: function(xhr, ajaxOptions, thrownError) {
+        //         // Handle AJAX error
+        //         console.error(xhr.statusText);
+        //     }
+        // });
     }
 
     // MENDAPATKAN BOX 
@@ -577,10 +605,22 @@
                                 },
                                 success: function(res) {
                                     if(res){
+                                        // Swal.fire({
+                                        //     title: "Success",
+                                        //     html: `Box <b>${res}</b> have been unpacked`,
+                                        //     icon: "success"
+                                        // });
+
                                         Swal.fire({
                                             title: "Success",
-                                            html: `Box <b>${res}</b> have been unpacked`,
+                                            html: `Box <b>${res}</b> has been unpacked`,
                                             icon: "success"
+                                        }).then((result) => {
+                                            if (result.isConfirmed) {
+                                                // Select and remove the specific box element by its unique ID
+                                                const element = $(`#boxq-${res}`);
+                                                element.remove();
+                                            }
                                         });
 
                                         $('#refresh-btn').prop('disabled', false);
@@ -607,7 +647,7 @@
     }
     
     $(document).ready(function (){
-        $('#reqNo').select2({
+        $('#reqQNo').select2({
             'width': '100%'
         }); 
         
@@ -617,8 +657,7 @@
     });
 </script>
 
-
-<!-- DELETE MODAL -->
+<!-- REFRESH MODAL -->
 <div class="modal fade" id="refresh-page" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 	<div class="modal-dialog">
 		<div class="modal-content">
