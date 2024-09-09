@@ -2,7 +2,7 @@
     <div class="card">
         <div class="card-body">
             <div class="row">
-                <div class="col-md mt-4">   
+                <div class="col-md mt-4">
                     <div class="table-responsive">
                         <table class="table table-bordered display" id="tbl-storage">
                             <thead>
@@ -17,7 +17,7 @@
                             <tbody id="table-body">
                             </tbody>
                         </table>
-                    </div>
+                    </div>   
                 </div>
             </div>
         </div>

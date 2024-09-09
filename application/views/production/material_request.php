@@ -223,7 +223,9 @@
         $('#material_id').select2({
             width: '100%'
         });
-        $('#product_id').select2();
+        $('#product_id').select2({
+            dropdownParent: $('#base-search') 
+        });
     });
     
     let rowIndex = 1;

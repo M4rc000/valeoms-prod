@@ -3,22 +3,24 @@
         <div class="card-body">
             <div class="row mt-3">
                 <div class="col-md">
-                    <table class="table" id="tbl-data">
-                        <thead>
-                            <tr>
-                                <th class="text-center">#</th>
-                                <th class="text-center">Rack</th>
-                                <th class="text-center">SLoc</th>
-                                <th class="text-center">Current space</th>
-                                <th class="text-center">Max space</th>
-                                <th class="text-center">Status</th>
-                                <th class="text-center">Action</th>
-                            </tr>
-                        </thead>
-                        <tbody class="tbody-data">
-                            
-                        </tbody>
-                    </table>
+                    <div class="table-responsive">
+                        <table class="table" id="tbl-data">
+                            <thead>
+                                <tr>
+                                    <th class="text-center">#</th>
+                                    <th class="text-center">Rack</th>
+                                    <th class="text-center">SLoc</th>
+                                    <th class="text-center">Current space</th>
+                                    <th class="text-center">Max space</th>
+                                    <th class="text-center">Status</th>
+                                    <th class="text-center">Action</th>
+                                </tr>
+                            </thead>
+                            <tbody class="tbody-data">
+                                
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

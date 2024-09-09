@@ -351,7 +351,8 @@ function setPR(rowIndex, id_material) {
     var production_plan = $('#production_plan').val();
     var id_request = $('#id_request').val();
 
-    // Check if sloc, box, or qty_need values are empty
+    console.log(rowIndex);
+
     if (!slocValue) {
         Swal.fire({
             icon: 'error',
