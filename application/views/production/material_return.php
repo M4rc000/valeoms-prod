@@ -78,8 +78,11 @@
                                     <div class="row mt-3 mx-2">
                                         <div class="mt-3 mb-2" id="qrbarcode-hg"></div>
                                         <br>
-                                        <div class="mb-2" id="qrdesc-hg"></div>
-                                        <div class="mt-1" id="print-button-hg"></div>
+                                        <div class="mt-1">
+                                            <button class="btn btn-warning" id="print-button-hg" style="display: none">
+                                                <i class="bi bi-printer" style="color: white"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                                 <div class="mx-2 tab-pane fade" id="medium-rack" role="tabpanel" aria-labelledby="profile-tab">
@@ -134,8 +137,11 @@
                                     <div class="row mt-3 mx-2">
                                         <div class="mt-3 mb-2" id="qrbarcode-mg"></div>
                                         <br>
-                                        <div class="mb-2" id="qrdesc-mg"></div>
-                                        <div class="mt-1" id="print-button-mg"></div>
+                                        <div class="mt-1">
+                                            <button class="btn btn-warning" id="print-button-mg" style="display: none">
+                                                <i class="bi bi-printer" style="color: white"></i>
+                                            </button>
+                                        </div>
                                     </div>
                                 </div>
                             </div>
@@ -293,6 +299,16 @@
                 var qty = $(row).find('input[name="materials-hg[' + rowIndexHG + '][qty]"]').val();
                 var uom = $(row).find('input[name="materials-hg[' + rowIndexHG + '][uom]"]').val();
 
+                // Check if qty is empty or null
+                if (!qty || qty.trim() === '' || qty == null) {
+                    return Swal.fire({
+                        title: 'Error!',
+                        html: `<b>Quantity</b> cannot be empty for material <b>${material_desc}</b>`,
+                        icon: 'error',
+                        confirmButtonText: 'Close'
+                    });
+                }
+
                 materialData.push({
                     material_id: material_id,
                     material_desc: material_desc,
@@ -306,7 +322,7 @@
             if(materialData.length < 1 || weight.length < 1){
                 return Swal.fire({
                     title: 'Error!',
-                    html: `<b>Weight</b> or <b>Material</b> is empty`,
+                    html: `<b>Weight</b> or <b>Material</b> or <b>Qty</b> is empty`,
                     icon: 'error',
                     confirmButtonText: 'Close'
                 });
@@ -321,17 +337,62 @@
                     user
                 },
                 success: function(res) {
-                    if(res == '2'){
+                    if(res.status == '2'){
                         Swal.fire({
                             title: "Success",
-                            text: "Materials have been requested for return",
+                            html: `Box ${res.no_box} has been requested for return`,
                             icon: "success",
-                            // showDenyButton: true,
-                            confirmButtonText: "OK",
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.href = '<?=base_url('production/material_return');?>';
-                            }
+                        });
+
+                        
+                        $('#weight-hg').prop('disabled', 'true');
+                        $('#submit-hg').prop('disabled', 'true');
+                        $('#add-row-btn-hg').prop('disabled', 'true');
+                        $('#print-button-hg').css('display', 'block');
+                       
+                        var qrcode = new QRCode(document.getElementById("qrbarcode-hg"), {
+                            text: `${res.no_box}`,
+                            width: 150,
+                            height: 150,
+                            correctLevel: QRCode.CorrectLevel.H
+                        });
+
+                        function printBarcodeHigh() {
+                            var idBox = res.no_box;
+
+                            // Printing logic here...
+                            var logoUrl = '<?php echo base_url("assets/img/valeo.png"); ?>';
+                            var printWindow = window.open('', '', 'height=750,width=500');
+                            printWindow.document.write('<html><head><title>Print Barcode</title>');
+                            printWindow.document.write('<style>');
+                            printWindow.document.write('@page { size: 17cm 13cm; margin: 5px; }');
+                            printWindow.document.write('.print-section { display: flex; flex-direction: column; width: 14cm; height: 8cm; border: 1px solid black; box-sizing: border-box; }');
+                            printWindow.document.write('.row { display: flex; flex: 1; align-items: center; justify-content: space-between; border-bottom: 1px solid black; }');
+                            printWindow.document.write('.row:first-child { height: 3cm; padding: 0 2px; }');
+                            printWindow.document.write('.row:last-child { height: 5cm; align-items: center; justify-content: center; text-align: center; }');
+                            printWindow.document.write('.barcode, .valeo-logo { display: inline-block; text-align: center;}');
+                            printWindow.document.write('.barcode { width: 2cm; height: 2cm; margin-left: 2cm;}');
+                            printWindow.document.write('.valeo-logo { width: 5cm; height: 2cm; margin-right: 1cm; background-position: center; }');
+                            printWindow.document.write('.barcode-info { font-size: 2em; margin-top: 8px; text-align: center; width: 100%; margin-left: 15px; }');
+                            printWindow.document.write('#qrcode img { width: 90%; height: 90%; }');
+                            printWindow.document.write('</style>');
+                            printWindow.document.write('</head><body>');
+                            printWindow.document.write('<div class="print-section">');
+                            printWindow.document.write('<div class="row">');
+                            printWindow.document.write('<div class="barcode" id="qrcode">' + document.getElementById('qrbarcode-hg').innerHTML + '</div>');
+                            printWindow.document.write('<div class="valeo-logo"><img src="' + logoUrl + '" alt="Valeo Logo" style="width: 100%; height: 100%;"></div>');
+                            printWindow.document.write('</div>');
+                            printWindow.document.write('<div class="row">');
+                            printWindow.document.write('<div class="barcode-info" style="margin-top:40px;"><span>ID Box:</span><h1 style="font-size:2.5em; margin-top:-5;">' + idBox + '</h1></div>');
+                            printWindow.document.write('</div>');
+                            printWindow.document.write('</div>');
+                            printWindow.document.write('</body></html>');
+                            printWindow.document.close();
+                            printWindow.print();
+                        }
+
+                        $('#print-button-hg').on('click', function() {
+                            printBarcodeHigh();
                         });
                     }
                     else{
@@ -354,50 +415,6 @@
             });
         });
 
-        // $(document).on('click', '#print-hg', function(){
-        //     var no_box = $(this).data('box');
-        //     var logoUrl = '<?php echo base_url("assets/img/valeo.png"); ?>';
-        //     var printWindow = window.open('', '', 'height=750,width=500');
-        //     printWindow.document.write('<html><head><title>Print Barcode</title>');
-        //     printWindow.document.write('<style>');
-        //     printWindow.document.write('@page { size: 17cm 13cm; margin: 5px; }');
-        //     printWindow.document.write(
-        //         '.print-section { display: flex; flex-direction: column; width: 14cm; height: 8cm; border: 1px solid black; box-sizing: border-box; }'
-        //     );
-        //     printWindow.document.write(
-        //         '.row { display: flex; flex: 1; align-items: center; justify-content: space-between; border-bottom: 1px solid black; }'
-        //     );
-        //     printWindow.document.write('.row:first-child { height: 3cm; padding: 0 2px; }');
-        //     printWindow.document.write(
-        //         '.row:last-child { height:5cm; align-items: center; justify-content: center; text-align: center; }');
-        //     printWindow.document.write('.barcode, .valeo-logo { display: inline-block; text-align: center;}');
-        //     printWindow.document.write('.barcode { width: 2cm; height: 2cm; margin-left:2cm;}');
-        //     printWindow.document.write(
-        //         `.valeo-logo { width:5cm; height: 2cm;margin-right:1cm; background-position: center; }`
-        //     );
-        //     printWindow.document.write(
-        //         '.barcode-info { font-size: 2em; margin-top: 8px; text-align: center; width: 100%; margin-left:15px; }');
-        //     printWindow.document.write('#qrcode img { width: 90%; height: 90%; }');
-        //     printWindow.document.write('</style>');
-        //     printWindow.document.write('</head><body>');
-        //     printWindow.document.write('<div class="print-section">');
-        //     printWindow.document.write('<div class="row">');
-        //     printWindow.document.write('<div class="barcode" id="qrcode">' + document.getElementById('qrbarcode-hg').innerHTML +
-        //         '</div>');
-        //     printWindow.document.write('<div class="valeo-logo"><img src="' + logoUrl +
-        //         '" alt="Valeo Logo" style="width: 100%; height: 100%;"></div>');
-        //     printWindow.document.write('</div>');
-        //     printWindow.document.write('<div class="row">');
-        //     printWindow.document.write(
-        //         '<div class="barcode-info" style="margin-top:40px;"><span>ID Box:</span><h1 style="font-size:3em; margin-top:-5;">' +
-        //         no_box + '</h1></div>');
-        //     printWindow.document.write('</div>');
-        //     printWindow.document.write('</div>');
-        //     printWindow.document.write('</body></html>');
-        //     printWindow.document.close();
-        //     printWindow.print();
-        // });
-
 
 
         // MEDIUM RACK
@@ -414,7 +431,7 @@
                     materialID
                 },
                 success: function (res) {
-                    console.log(res);
+                    // console.log(res);
                     var materialDesc = res[0].Material_desc;
                     var materialType = res[0].Material_type;
                     var uom = res[0].Uom;
@@ -523,6 +540,16 @@
                 var qty = $(row).find('input[name="materials-mg[' + rowIndexMG + '][qty]"]').val();
                 var uom = $(row).find('input[name="materials-mg[' + rowIndexMG + '][uom]"]').val();
 
+                // Check if qty is empty or null
+                if (!qty || qty.trim() === '' || qty == null) {
+                    return Swal.fire({
+                        title: 'Error!',
+                        html: `<b>Quantity</b> cannot be empty for material <b>${material_desc}</b>`,
+                        icon: 'error',
+                        confirmButtonText: 'Close'
+                    });
+                }
+
                 materialData.push({
                     material_id: material_id,
                     material_desc: material_desc,
@@ -533,7 +560,14 @@
                 rowIndexMG++;
             });
 
-            console.log(materialData);
+            if(materialData.length < 1 || weight.length < 1){
+                return Swal.fire({
+                    title: 'Error!',
+                    html: `<b>Weight</b> or <b>Material</b> or <b>Qty</b> is empty`,
+                    icon: 'error',
+                    confirmButtonText: 'Close'
+                });
+            }
 
             $.ajax({
                 url: '<?= base_url('production/AddMediumRack'); ?>',
@@ -545,17 +579,61 @@
                     user
                 },
                 success: function(res) {
-                    if(res == '2'){
+                    if(res.status == '2'){
                         Swal.fire({
                             title: "Success",
-                            text: "Materials have been requested for return",
+                            html: `Box ${res.no_box} has been requested for return`,
                             icon: "success",
-                            // showDenyButton: true,
-                            confirmButtonText: "OK",
-                        }).then((result) => {
-                            if (result.isConfirmed) {
-                                window.location.href = '<?=base_url('production/material_return');?>';
-                            }
+                        });
+
+                        $('#weight-mg').prop('disabled', 'true');
+                        $('#submit-mg').prop('disabled', 'true');
+                        $('#add-row-btn-mg').prop('disabled', 'true');
+                        $('#print-button-mg').css('display', 'block');
+                       
+                        var qrcode = new QRCode(document.getElementById("qrbarcode-mg"), {
+                            text: `${res.no_box}`,
+                            width: 150,
+                            height: 150,
+                            correctLevel: QRCode.CorrectLevel.H
+                        });
+
+                        function printBarcodeMedium() {
+                            var idBox = res.no_box;
+
+                            // Printing logic here...
+                            var logoUrl = '<?php echo base_url("assets/img/valeo.png"); ?>';
+                            var printWindow = window.open('', '', 'height=750,width=500');
+                            printWindow.document.write('<html><head><title>Print Barcode</title>');
+                            printWindow.document.write('<style>');
+                            printWindow.document.write('@page { size: 17cm 13cm; margin: 5px; }');
+                            printWindow.document.write('.print-section { display: flex; flex-direction: column; width: 14cm; height: 8cm; border: 1px solid black; box-sizing: border-box; }');
+                            printWindow.document.write('.row { display: flex; flex: 1; align-items: center; justify-content: space-between; border-bottom: 1px solid black; }');
+                            printWindow.document.write('.row:first-child { height: 3cm; padding: 0 2px; }');
+                            printWindow.document.write('.row:last-child { height: 5cm; align-items: center; justify-content: center; text-align: center; }');
+                            printWindow.document.write('.barcode, .valeo-logo { display: inline-block; text-align: center;}');
+                            printWindow.document.write('.barcode { width: 2cm; height: 2cm; margin-left: 2cm;}');
+                            printWindow.document.write('.valeo-logo { width: 5cm; height: 2cm; margin-right: 1cm; background-position: center; }');
+                            printWindow.document.write('.barcode-info { font-size: 2em; margin-top: 8px; text-align: center; width: 100%; margin-left: 15px; }');
+                            printWindow.document.write('#qrcode img { width: 90%; height: 90%; }');
+                            printWindow.document.write('</style>');
+                            printWindow.document.write('</head><body>');
+                            printWindow.document.write('<div class="print-section">');
+                            printWindow.document.write('<div class="row">');
+                            printWindow.document.write('<div class="barcode" id="qrcode">' + document.getElementById('qrbarcode-hg').innerHTML + '</div>');
+                            printWindow.document.write('<div class="valeo-logo"><img src="' + logoUrl + '" alt="Valeo Logo" style="width: 100%; height: 100%;"></div>');
+                            printWindow.document.write('</div>');
+                            printWindow.document.write('<div class="row">');
+                            printWindow.document.write('<div class="barcode-info" style="margin-top:40px;"><span>ID Box:</span><h1 style="font-size:2.5em; margin-top:-5;">' + idBox + '</h1></div>');
+                            printWindow.document.write('</div>');
+                            printWindow.document.write('</div>');
+                            printWindow.document.write('</body></html>');
+                            printWindow.document.close();
+                            printWindow.print();
+                        }
+
+                        $('#print-button-mg').on('click', function() {
+                            printBarcodeMedium();
                         });
                     }
                     else{
@@ -584,6 +662,5 @@
                 }
             });
         });
-
     });
 </script>

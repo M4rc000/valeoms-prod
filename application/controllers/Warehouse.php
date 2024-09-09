@@ -809,30 +809,32 @@ class Warehouse extends CI_Controller
 		echo json_encode($data);
 	}
 
-	public function save_cycle_count()
-	{
+	public function save_cycle_count() {
 		$id_box_detail = $this->input->post('id_box_detail');
 		$qty = $this->input->post('qty');
-
+	
+		// Data to update
 		$dtupdate = [
 			'qty' => $qty,
-			'updated_at' => date('Y-m-d H:i:s'),
-			'updated_by' => $this->session->userdata('username'),
+			'updated_at' => date('Y-m-d H:i:s'),  // Set the current timestamp
+			'updated_by' => $this->session->userdata('username')  // Set the user who performed the update
 		];
+	
+		// Perform the update in the database
 		$this->db->where('id_box_detail', $id_box_detail);
 		$update = $this->db->update('receiving_material', $dtupdate);
-
+	
+		// Prepare the response data
 		if ($update) {
-			$data = [
-				'status' => true,
-			];
+			$data = ['status' => true];
 		} else {
-			$data = [
-				'status' => false,
-			];
+			$data = ['status' => false];
 		}
+	
+		// Send the JSON response
 		echo json_encode($data);
 	}
+	
 
 	public function getDataForEdit()
 	{
@@ -908,18 +910,20 @@ class Warehouse extends CI_Controller
 		$data['name'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
 
 		$Box_result = $this->db->query("SELECT 
-					DISTINCT pr.id_box, 
+					DISTINCT pra.id_box, 
 					b.no_box
 				FROM 
-					production_request pr
+					production_request_approve pra
 				LEFT JOIN 
 					box b 
-					ON pr.id_box = b.id_box
+					ON pra.id_box = b.id_box
 				WHERE 
-					pr.Id_request = '$reqNo'")->result_array();
+					pra.Id_request = '$reqNo'
+				AND 
+					pra.status_kitting = 1")->result_array();
+
 		$Request_result = $this->db->query("SELECT 
 					pr.Id_request, 
-					pr.id_box,
 					pr.Production_plan,
 					pp.Id_fg, 
 					pp.Fg_desc, 
@@ -1047,10 +1051,11 @@ class Warehouse extends CI_Controller
 					b.no_box = '$boxID'")->result_array();
 
 		$Quality_result = $this->db->query("SELECT 
-				pr.Id_request,
-				pr.Sloc,
-				pr.id_box, 
-				pr.Production_plan,
+				pra.Id_request,
+				pra.Sloc,
+				pra.id_box, 
+				pra.Qty, 
+				pra.Production_plan,
 				pp.Id_fg, 
 				pp.Fg_desc, 
 				pp.Production_plan_qty,
@@ -1059,15 +1064,17 @@ class Warehouse extends CI_Controller
 				ppd.Material_need, 
 				ppd.Uom
 			FROM 
-				production_request pr
+				production_request_approve pra
 			LEFT JOIN 
 				production_plan pp 
-				ON pr.Production_plan = pp.production_plan
+				ON pra.Production_plan = pp.production_plan
 			LEFT JOIN 
 				production_plan_detail ppd 
-				ON pr.Production_plan = ppd.production_plan
+				ON pra.Production_plan = ppd.production_plan
 			WHERE 
-				pr.Id_request = '$req_no'")->result_array();
+				pra.Id_request = '$req_no'
+			AND 
+				pra.status_kitting = 1")->result_array();
 
 
 		$result = [
@@ -1151,8 +1158,11 @@ class Warehouse extends CI_Controller
 	{
 		$checkedItems = $this->input->post('checkedItems');
 		$no_box = $this->input->post('fill');
+		$reqNo = $this->input->post('reqNo');
 
 		$list_storage = $this->db->query("SELECT * FROM `list_storage` WHERE id_box = '$no_box'")->result_array();
+
+		$check = 0;
 
 		// MENGURANGI JUMLAH UNPACK
 		foreach ($list_storage as $storageItem) {
@@ -1165,13 +1175,70 @@ class Warehouse extends CI_Controller
 
 					// Update the list_storage item in the database
 					$this->db->set('total_qty', $new_total_qty)->where('product_id', $storageItem['product_id'])->update('list_storage');
+					$check_insert = $this->db->affected_rows();		
+					if($check_insert > 0){
+						$check+=1;
+					}
 				}
 			}
 		}
 
-		$box = $this->db->query("SELECT * FROM `box` WHERE id_box = '$no_box'")->result_array();
+		if($check > 0){
+			$this->db->query("UPDATE `production_request_approve` SET status_kitting = 0 WHERE id_box = '$no_box'");
 
-		$result = $box[0]['no_box'];
+			$box = $this->db->query("SELECT * FROM `box` WHERE id_box = '$no_box'")->result_array();
+			$queryPR = $this->db->query("SELECT * FROM `production_request` WHERE Id_request = '$reqNo';")->result_array();
+			$Production_plan = $queryPR[0]['Production_plan'];
+			$queryPP = $this->db->query("SELECT * FROM `production_plan` WHERE Production_plan = '$Production_plan'")->result_array();
+			$Id_fg = $queryPP[0]['Id_fg'];
+			$Fg_desc = $queryPP[0]['Fg_desc'];
+
+			$result = [
+				'Id_fg' => $Id_fg,
+				'Fg_desc' => $Fg_desc,
+				'Id_material' => $checkedItems[0]['product_id'],
+				'Material_desc' => $checkedItems[0]['material_desc'],
+				'Id_request' => $reqNo,
+				'no_box' => $box[0]['no_box'],
+				'Production_plan' => $Production_plan
+			];
+		}
+		
+		echo json_encode($result);
+	}
+
+	function AddKanbanBox(){
+		$materialID = $this->input->post('materialID');
+		$materialDesc = $this->input->post('materialDesc');
+		$materialQty = $this->input->post('materialQty');
+		$production_plan = $this->input->post('proPlan');
+		$ProductID = $this->input->post('id_fg');
+		$kanban_id = $this->input->post('id_kanban');
+
+
+		$Data = array(
+			'id_kanban_box' => $kanban_id,
+			'Id_material' => $materialID,
+			'Material_desc' => $materialDesc,
+			'Material_qty' => $materialQty,
+			'Product_plan' => $production_plan,
+			'product_id' => $ProductID,
+			'Crtdt' => date('Y-m-d H:i'),
+			'Crtby' => $this->input->post('user'),
+			'Upddt' => date('Y-m-d H:i'),
+			'Updby' => $this->input->post('user')
+		);
+
+		// $this->session->set_flashdata('kanban_data', $Data);
+		$Result = $this->PModel->insertData('kanban_box', $Data);
+
+		if ($Result) {
+			// Success
+			$result = 'ADD';
+		} else {
+			// Failure
+			$result = 'ERROR';
+		}
 
 		echo json_encode($result);
 	}
@@ -1192,8 +1259,7 @@ class Warehouse extends CI_Controller
 		$this->load->view('templates/footer');
 	}
 
-	function approveReturnRequest($id)
-	{
+	function approveReturnRequest($id){
 		$data['title'] = 'Approve Return Request';
 
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
@@ -1213,106 +1279,109 @@ class Warehouse extends CI_Controller
 		$this->load->view('templates/footer');
 	}
 
-	function AddBox()
-	{
+	function AddBox(){
+		$no_box = $this->input->post('no_box');
 		$box_type = $this->input->post('box_type');
 		$id_return = $this->input->post('id_return');
 		$weight = $this->input->post('weight');
 		$sloc = $this->input->post('sloc');
 		$user = $this->input->post('user');
 		$tableData = $this->input->post('tableData');
-		$no_box = $this->WModel->getLastNoBox();
 
-		$DataBox = [
-			'no_box' => $no_box,
-			'weight' => $weight,
-			'sloc' => $sloc,
-			'box_type' => $box_type,
-			'crtby' => $user,
-			'crtdt' => date('Y-m-d H:i:s'),
-		];
-		$this->PModel->insertData('box', $DataBox);
-		$insert_box = $this->db->affected_rows();
+		// GET SLOC NAME
+		$querySloc = $this->db->query("SELECT SLoc FROM `storage` WHERE Id_storage = '$sloc'")->result_array();
+		$SLoc = $querySloc[0]['SLoc'];
+		
+		// CHECK IF NO BOX EXIST IN BOX TABLE
+		$queryBox = $this->db->query("SELECT * FROM `box` WHERE no_box = '$no_box'")->num_rows();
+		if($queryBox > 0){
+			$query = $this->db->query("SELECT * FROM `box` WHERE no_box = '$no_box'")->result_array();
+			$id_table_box = $query[0]['id_box'];
 
-		// JIKA BERHASIL INSERT TABLE BOX
-		if ($insert_box > 0) {
-
-			// GET DATA FOR ID BOX
-			$Box = $this->db->query("SELECT * FROM box WHERE no_box = '$no_box'")->result_array();
-			$id_box = intval($Box[0]['id_box']);
-
+			// INSERT TABLE `box_detail`
 			foreach ($tableData as $td) {
-				$insert_box_detail = 0;
 				$DataBoxDetail = [
-					'id_box' => $id_box,
+					'id_box' => $id_table_box,
 					'id_material' => $td['Id_material'],
 					'material_desc' => $td['Material_desc'],
 					'crtdt' => date('Y-m-d H:i:s'),
 					'crtby' => $user
 				];
 				$this->PModel->insertData('box_detail', $DataBoxDetail);
-				$check_insert_box_detail = $this->db->affected_rows();
-				if ($check_insert_box_detail > 0) {
-					$insert_box_detail += 1;
-				}
 			}
 
-			// JIKA BERHASIL INSERT TABLE BOX DETAIL
-			if ($insert_box_detail > 0) {
-				$insert_list_storage = 0;
-				foreach ($tableData as $td) {
-					$DataListStorage = [
-						'product_id' => $td['Id_material'],
-						'material_desc' => $td['Material_desc'],
-						'sloc' => $sloc,
-						'uom' => $td['Material_uom'],
-						'total_qty' => $td['Material_qty'],
-						'total_qty_real' => $td['Material_qty'],
-						'id_box' => $id_box,
-						'created_by' => $user,
-						'created_at' => date('Y-m-d H:i:s')
-					];
+			// INSERT TABLE `list_storage`
+			foreach ($tableData as $td) {
+				$DataListStorage = [
+					'product_id' => $td['Id_material'],
+					'material_desc' => $td['Material_desc'],
+					'sloc' => $sloc,
+					'uom' => $td['Material_uom'],
+					'total_qty' => $td['Material_qty'],
+					'total_qty_real' => $td['Material_qty'],
+					'id_box' => $id_table_box,
+					'created_by' => $user,
+					'created_at' => date('Y-m-d H:i:s')
+				];
 
-					$this->PModel->insertData('list_storage', $DataListStorage);
-					$check_insert_list_storage = $this->db->affected_rows();
-					if ($check_insert_list_storage > 0) {
-						$insert_list_storage += 1;
-					}
-				}
-
-				// JIKA BERHASIL INSERT TABLE LIST STORAGE
-				if ($insert_list_storage > 0) {
-					$result = 3;
-					$error = '';
-
-					$this->db->query("UPDATE return_warehouse SET status = 0 WHERE id_return = '$id_return'");
-				}
-				// JIKA GAGAL INSERT TABLE LIST STORAGE
-				else {
-					$result = 1;
-					$error = 'Failed insert data box';
-				}
-			}
-			// JIKA GAGAL INSERT TABLE BOX DETAIL
-			else {
-				$result = 2;
-				$error = 'Failed insert data box';
+				$this->PModel->insertData('list_storage', $DataListStorage);
 			}
 		}
-		// JIKA GAGAL INSERT TABLE BOX
-		else {
-			$result = 0;
-			$error = 'Failed insert data box';
+		// IF NO BOX DOESN'T EXIST
+		else{
+
+			// INSERT TABLE `box`
+			$DataBox = [
+                'no_box' => $no_box,
+                'weight' => $weight,
+                'box_type' => $box_type,
+                'crtby' => $user,
+                'crtdt' => date('Y-m-d H:i:s')
+            ];
+
+			$this->PModel->insertData('box', $DataBox);
+			$id_table_box = $this->db->insert_id();
+
+			// INSERT TABLE `box_detail`
+			foreach ($tableData as $td) {
+				$DataBoxDetail = [
+					'id_box' => $id_table_box,
+					'id_material' => $td['Id_material'],
+					'material_desc' => $td['Material_desc'],
+					'crtdt' => date('Y-m-d H:i:s'),
+					'crtby' => $user
+				];
+				$this->PModel->insertData('box_detail', $DataBoxDetail);
+			}
+
+			// INSERT TABLE `list_storage`
+			foreach ($tableData as $td) {
+				$DataListStorage = [
+					'product_id' => $td['Id_material'],
+					'material_desc' => $td['Material_desc'],
+					'sloc' => $sloc,
+					'uom' => $td['Material_uom'],
+					'total_qty' => $td['Material_qty'],
+					'total_qty_real' => $td['Material_qty'],
+					'id_box' => $id_table_box,
+					'created_by' => $user,
+					'created_at' => date('Y-m-d H:i:s')
+				];
+
+				$this->PModel->insertData('list_storage', $DataListStorage);
+			}
 		}
 
-		// $result = 3;
-		// $error = '';
-		// $no_box = 'CKA0000001';
+		$result = 3;
+		$error = '';
+
+		$this->db->query("UPDATE return_warehouse SET status = 0 WHERE id_return = '$id_return'");
 
 		$res = [
 			'result' => $result,
 			'error' => $error,
-			'box_id' => $no_box,
+			'no_box' => $no_box,
+			'sloc' => $SLoc,
 		];
 
 		echo json_encode($res);
@@ -1354,26 +1423,30 @@ class Warehouse extends CI_Controller
 		}
 	}
 	
-	function RejectReturnRequest()
-	{
-		$id_return = $this->input->post('idReturn');
+	function RejectReturnRequest(){
+		$id_return = $this->input->post('id_return');
+		$reject_description = $this->input->post('reject_description');
 
 		$DataReturnRequest = [
 			'status' => 0,
+			'reject_description' => htmlspecialchars($reject_description),
 			'Upddt' => date('Y-m-d H:i:s'),
 			'Updby' => $this->input->post('user')
 		];
 
+		// Update the return request in the database
 		$this->WModel->updatedataReturn('return_warehouse', $id_return, $DataReturnRequest);
 		$check_insert = $this->db->affected_rows();
 
+		// Set flashdata based on the success or failure of the update
 		if ($check_insert > 0) {
-			$result = 1;
+			$this->session->set_flashdata('SUCCESS_RejectReturnRequest', 'The rejection is successfully');
 		} else {
-			$result = 0;
+			$this->session->set_flashdata('FAILED_RejectReturnRequest', 'The rejection failed');
 		}
 
-		echo json_encode($result);
+		// Redirect to the return_request page
+		redirect('warehouse/return_request');
 	}
 
 	public function get_sloc_options() {

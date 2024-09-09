@@ -20,7 +20,6 @@ class Admin extends CI_Controller {
         $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
         
         $data['user'] = $this->AModel->getAllUsers();
-        $data['userDataChart'] = $this->AModel->getUsers();
 
         $this->load->view('templates/header', $data);
         $this->load->view('templates/navbar', $data);   
@@ -28,7 +27,7 @@ class Admin extends CI_Controller {
         $this->load->view('admin/index', $data);
         $this->load->view('templates/footer');
 	}
-    
+
     public function manage_user() {
         $data['title'] = 'Manage User';
 

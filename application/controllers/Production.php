@@ -22,6 +22,7 @@ class Production extends CI_Controller {
 
         $data['boms'] = $this->PModel->getAllBoms();
         $data['materials'] = $this->PModel->getMaterialList();
+        $data['request_history'] = $this->PModel->getProductionRequest();
 
         $this->load->view('templates/header', $data);
         $this->load->view('templates/navbar', $data);   
@@ -68,6 +69,7 @@ class Production extends CI_Controller {
             $productID = $this->input->post('productId');
             $productDesc = $this->input->post('productDescription');
             $product_plan_qty = $this->input->post('qty');
+            $production_plan_date = $this->input->post('production_plan_date');
             $user = $this->input->post('user');
          
             // Get the last production plan
@@ -81,7 +83,7 @@ class Production extends CI_Controller {
                 'Production_plan_qty' => $product_plan_qty,
                 'status' => 'NEW',
                 'Crtdt' => date('Y-m-d H:i'),
-                'Crtby' => $user,
+                'Crtby' => $production_plan_date,
                 'Upddt' => date('Y-m-d H:i'),
                 'Updby' => $user
             ];
@@ -101,7 +103,7 @@ class Production extends CI_Controller {
                     'Material_need' => $row['Qty'] * $product_plan_qty,
                     'Uom' => $row['Uom'],
                     'status' => 0, 
-                    'Crtdt' => date('Y-m-d H:i'),
+                    'Crtdt' => $production_plan_date,
                     'Crtby' => $user,
                     'Upddt' => date('Y-m-d H:i'),
                     'Updby' => $user
@@ -118,8 +120,6 @@ class Production extends CI_Controller {
                     'Id_material' => $row['Id_material'],
                     'Material_desc' => $row['Material_desc'],
                     'Qty' => $row['Qty'] * $product_plan_qty,
-                    'Sloc' => '',
-                    'id_box' => '',
                     'Production_plan' => $production_plan,
                     'Crtdt' => date('Y-m-d H:i:s'), 
                     'Crtby' => $user
@@ -127,11 +127,9 @@ class Production extends CI_Controller {
         
                 $this->PModel->insertData('production_request', $ProductionRequestData);
             }
-        
-            // Redirect to the production plan edit page
+
             redirect('production/edit_production_plan/' . $production_plan);
         }
-        
 
         public function editProductionPlan(){
             $production_plan = $this->input->post('production_plan');
@@ -166,8 +164,6 @@ class Production extends CI_Controller {
                     'Id_request' => $this->PModel->getLastReqNo(),
                     'Id_material' => $id_material,
                     'Material_desc' => $this->input->post('material_desc'),
-                    'Sloc' => '',
-                    'id_box' => '',
                     'Production_plan' => $production_plan,
                     'Crtdt' => date('Y-m-d H:i:s'), 
                     'Crtby' => $this->input->post('user')
@@ -247,8 +243,6 @@ class Production extends CI_Controller {
                 'Id_material' => $materialID,
                 'Material_desc' => $materialDesc,
                 'Qty' => $materialNeed,
-                'Sloc' => '',
-                'id_box' => '',
                 'Production_plan' => $production_plan,
                 'Crtdt' => date('Y-m-d H:i:s'), 
                 'Crtby' => $this->input->post('user')
@@ -354,9 +348,9 @@ class Production extends CI_Controller {
                 'Material_qty' => $this->input->post('qty'),
                 'Product_plan' => $production_plan,
                 'product_id' => $ProductID[0]['Id_fg'],
-                'crtdt' => date('Y-d-m H:i'),
+                'crtdt' => date('Y-m-d H:i'),
                 'crtby' => $this->input->post('user'),
-                'upddt' => date('Y-d-m H:i'),
+                'upddt' => date('Y-m-d H:i'),
                 'updby' => $this->input->post('user')
             );
 
@@ -501,9 +495,22 @@ class Production extends CI_Controller {
             $materialData = $this->input->post('materialData');
             $weight = $this->input->post('weight');
             $id_return = $this->PModel->getLastIdReturn();
-
+            
+            // GET LAST NO BOX
+            $no_box = $this->PModel->generateFormattedBoxNumber();
+            $DataBox = [
+                'no_box' => $no_box,
+                'weight' => $weight,
+                'box_type' => 'HIGH',
+                'crtby' => $user,
+                'crtdt' => date('Y-m-d H:i:s')
+            ];
+            
+            $this->PModel->insertData('box', $DataBox);
+            
             $DataReturnWarehouse = [
                 'id_return' => $id_return,
+                'no_box' => $no_box,
                 'box_type' => 'HIGH',
                 'box_weight' => $weight,
                 'status' => 1, // 1: PENDING, 0: APPROVED
@@ -512,6 +519,7 @@ class Production extends CI_Controller {
                 'Upddt' => date('Y-m-d H:i:s'),
                 'Updby' => $user
             ];
+
             $this->PModel->insertData('return_warehouse', $DataReturnWarehouse);
             $queryDataReturnWarehouse = $this->db->affected_rows();
 
@@ -526,7 +534,7 @@ class Production extends CI_Controller {
                         'Material_qty' => $md['material_qty'],
                         'Material_uom' => $md['material_uom'],
                         'Crtdt' => date('Y-m-d H:i:s'),
-                        'Crtdt' => $user,
+                        'Crtby' => $user,
                         'Upddt' => date('Y-m-d H:i:s'),
                         'Updby' => $user
                     ];
@@ -541,30 +549,49 @@ class Production extends CI_Controller {
 
                 // JIKA TABLE RETURN WAREHOUSE DETAIL BERHASIL DI INSERT
                 if($queryDataReturnWarehouseDetail > 0){
-                    $result = 2;
+                    $result = [
+                        'status' => 2,
+                        'no_box' => $no_box
+                    ];
                 }
                 // JIKA GAGAL INSERT TABLE RETURN WAREHOUSE DETAIL
                 else{
-                    $result = 1; 
+                    $result = [
+                        'status' => 1,
+                    ];
                 }
             }
             // JIKA GAGAL INSERT TABLE RETURN WAREHOUSE
             else{
-                $result = 0;
+                $result = [
+                    'status' => 0,
+                ];
             }
-
             
             echo json_encode($result);
         }
-    
+
         function AddMediumRack(){
             $user = $this->input->post('user');
             $materialData = $this->input->post('materialData');
             $weight = $this->input->post('weight');
             $id_return = $this->PModel->getLastIdReturn();
-
+            
+            // GET LAST NO BOX
+            $no_box = $this->PModel->generateFormattedBoxNumber();
+            $DataBox = [
+                'no_box' => $no_box,
+                'weight' => $weight,
+                'box_type' => 'MEDIUM',
+                'crtby' => $user,
+                'crtdt' => date('Y-m-d H:i:s')
+            ];
+            
+            $this->PModel->insertData('box', $DataBox);
+            
             $DataReturnWarehouse = [
                 'id_return' => $id_return,
+                'no_box' => $no_box,
                 'box_type' => 'MEDIUM',
                 'box_weight' => $weight,
                 'status' => 1, // 1: PENDING, 0: APPROVED
@@ -573,6 +600,7 @@ class Production extends CI_Controller {
                 'Upddt' => date('Y-m-d H:i:s'),
                 'Updby' => $user
             ];
+
             $this->PModel->insertData('return_warehouse', $DataReturnWarehouse);
             $queryDataReturnWarehouse = $this->db->affected_rows();
 
@@ -587,7 +615,7 @@ class Production extends CI_Controller {
                         'Material_qty' => $md['material_qty'],
                         'Material_uom' => $md['material_uom'],
                         'Crtdt' => date('Y-m-d H:i:s'),
-                        'Crtdt' => $user,
+                        'Crtby' => $user,
                         'Upddt' => date('Y-m-d H:i:s'),
                         'Updby' => $user
                     ];
@@ -602,18 +630,24 @@ class Production extends CI_Controller {
 
                 // JIKA TABLE RETURN WAREHOUSE DETAIL BERHASIL DI INSERT
                 if($queryDataReturnWarehouseDetail > 0){
-                    $result = 2;
+                    $result = [
+                        'status' => 2,
+                        'no_box' => $no_box
+                    ];
                 }
                 // JIKA GAGAL INSERT TABLE RETURN WAREHOUSE DETAIL
                 else{
-                    $result = 1; 
+                    $result = [
+                        'status' => 1,
+                    ];
                 }
             }
             // JIKA GAGAL INSERT TABLE RETURN WAREHOUSE
             else{
-                $result = 0;
+                $result = [
+                    'status' => 0,
+                ];
             }
-
             
             echo json_encode($result);
         }

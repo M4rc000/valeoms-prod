@@ -66,4 +66,26 @@ class User extends CI_Controller {
 
             echo json_encode($result);
         }
+    
+    public function home(){
+        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+        
+        $data['title'] = 'Home';
+        
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/navbar');   
+        $this->load->view('templates/sidebar');   
+        $this->load->view('user/home', $data);
+        $this->load->view('templates/footer');
+    }
 }
+
+
+
+
+
+
+
+
+

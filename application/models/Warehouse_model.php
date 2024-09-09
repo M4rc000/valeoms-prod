@@ -451,50 +451,56 @@ class Warehouse_model extends CI_Model
 	}
 
 	public function getDataReturnRequest()
-	{
-		return $this->db->query("SELECT 
-			rw.id,
-			rw.id_return,
-			rw.box_type,
-			rw.box_weight,
-			rw.status,
-			rwd.Id_material,
-			rwd.Material_desc,
-			rwd.Material_qty,
-			rwd.Material_uom,
-			rw.Crtdt
+    {
+        $query = "
+			SELECT 
+				rw.id,
+				rw.id_return,
+				rw.no_box,
+				rw.box_type,
+				rw.box_weight,
+				rw.status,
+				rwd.Id_material,
+				rwd.Material_desc,
+				rwd.Material_qty,
+				rwd.Material_uom,
+				rw.Crtdt
 			FROM 
 				return_warehouse rw
 			JOIN
-				return_warehouse_detail rwd
-				ON rwd.id_return = rw.id_return
+				return_warehouse_detail rwd ON rwd.id_return = rw.id_return
 			WHERE 
-				rw.status = 1")->result_array();
-	}
+				rw.status = 1
+		";
+        return $this->db->query($query)->result_array();
+    }
 
 	public function getDataReturnRequestById($id)
-	{
-		return $this->db->query("SELECT 
-			rw.id,
-			rw.id_return,
-			rw.box_type,
-			rw.box_weight,
-			rw.status,
-			rwd.Id_material,
-			rwd.Material_desc,
-			rwd.Material_qty,
-			rwd.Material_uom,
-			rw.Crtdt
+    {
+        $query = "
+			SELECT 
+				rw.id,
+				rw.id_return,
+				rw.no_box,
+				rw.box_type,
+				rw.box_weight,
+				rw.status,
+				rwd.Id_material,
+				rwd.Material_desc,
+				rwd.Material_qty,
+				rwd.Material_uom,
+				rw.Crtdt
 			FROM 
 				return_warehouse rw
 			JOIN
-				return_warehouse_detail rwd
-				ON rwd.id_return = rw.id_return
+				return_warehouse_detail rwd ON rwd.id_return = rw.id_return
 			WHERE 
 				rw.status = 1
 			AND
-				rw.id = '$id'")->result_array();
-	}
+				rw.id = ?
+		";
+        return $this->db->query($query, [$id])->result_array();
+    }
 
 	public function getLastNoBox()
 	{

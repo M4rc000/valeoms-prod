@@ -2,20 +2,22 @@
     <div class="card">
         <div class="card-body">
             <div class="row">
-                <div class="col-md mt-4">
-                    <table class="table table-bordered display" id="tbl-storage">
-                        <thead>
-                            <tr>
-                                <th>ID</th>
-                                <th>Product ID</th>
-                                <th>Material Description</th>
-                                <th>Total Quantity</th>
-                                <th>Box Details</th>
-                            </tr>
-                        </thead>
-                        <tbody id="table-body">
-                        </tbody>
-                    </table>
+                <div class="col-md mt-4">   
+                    <div class="table-responsive">
+                        <table class="table table-bordered display" id="tbl-storage">
+                            <thead>
+                                <tr>
+                                    <th>ID</th>
+                                    <th>Product ID</th>
+                                    <th>Material Description</th>
+                                    <th>Total Quantity</th>
+                                    <th>Box Details</th>
+                                </tr>
+                            </thead>
+                            <tbody id="table-body">
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </div>

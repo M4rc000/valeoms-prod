@@ -1,13 +1,13 @@
 <style>
-    .select2-container {
-		z-index: 9999;
-	}
+.select2-container {
+    z-index: 9999;
+}
 
-	.select2-selection {
-		padding-top: 4px !important;
-		height: 38px !important;
-        /* width: 367px !important; */
-	}
+.select2-selection {
+    padding-top: 4px !important;
+    height: 38px !important;
+    /* width: 367px !important; */
+}
 </style>
 <section>
     <div class="row">
@@ -65,15 +65,16 @@
                                 <td><?php echo $material['qty']; ?></td>
                                 <td><?php echo $material['uom']; ?></td>
                                 <td>
-                                    <!-- <button class="btn btn-success" data-bs-toggle="modal"
-										data-bs-target="#editModal<?= $material['id_box_detail']; ?>"
-										onclick="getDataForEdit(<?= $material['id_box_detail']; ?>)">
-									<i class="bx bxs-edit" style="color: white;"></i>
-								</button> -->
-                                    <button class="btn btn-danger ms-1" data-bs-toggle="modal"
-                                        onclick="deleteItem(<?= $material['id_box_detail']; ?>)">
-                                        <i class="bx bxs-trash"></i>
-                                    </button>
+                                
+    <button class="btn btn-success" data-bs-toggle="modal"
+        data-bs-target="#editModal<?= $material['id_box_detail']; ?>">
+        <i class="bx bxs-edit" style="color: white;"></i>
+    </button>
+    <button class="btn btn-danger ms-1" data-bs-toggle="modal"
+        onclick="deleteItem(<?= $material['id_box_detail']; ?>)">
+        <i class="bx bxs-trash"></i>
+    </button>
+
                                 </td>
                             </tr>
 
@@ -126,14 +127,15 @@
 <script src="<?=base_url('assets');?>/vendor/jquery/jquery.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 <script>
-$(document).ready(function (){
-    $('#addModal1').on('shown.bs.modal', function () {
+$(document).ready(function() {
+    $('#addModal1').on('shown.bs.modal', function() {
         $('#reference_number').select2({
             dropdownParent: $('#addModal1'),
             width: '100%'
         });
     });
 })
+
 function closeModal() {
     $('#reference_number').val("");
     $('#material').val("");
@@ -171,7 +173,7 @@ function refreshAll() {
     });
 }
 
-$(document).on('change', '#reference_number', function(){
+$(document).on('change', '#reference_number', function() {
     $('#material').val("");
     $('#uom').val("");
     $('#material_edit').val('');
@@ -318,9 +320,9 @@ function deleteItem(id) {
                     <div class="col-6">
                         <label for="reference_number" class="form-label">Material Part Number</label>
                         <select class="form-select" id="reference_number" name="reference_number">
-                                <option value="">Select Material Part No</option>
+                            <option value="">Select Material Part No</option>
                             <?php foreach($materials as $mtr):?>
-                                <option value="<?=$mtr['Id_material'];?>"><?=$mtr['Id_material'];?></option>
+                            <option value="<?=$mtr['Id_material'];?>"><?=$mtr['Id_material'];?></option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -351,8 +353,7 @@ function deleteItem(id) {
 </div>
 
 <?php foreach ($detail_box as $material): ?>
-<!-- EDIT MODAL -->
-<!-- <div class="modal fade" id="editModal<?= $material['id_box_detail']; ?>" tabindex="-1">
+<div class="modal fade" id="editModal<?= $material['id_box_detail']; ?>" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form id="editForm<?= $material['id_box_detail']; ?>"
@@ -369,12 +370,12 @@ function deleteItem(id) {
                             <label for="reference_number" class="form-label">Material Part Number</label>
                             <input type="text" class="form-control"
                                 id="reference_number<?= $material['id_box_detail']; ?>" name="reference_number"
-                                onblur="getMaterial()" required>
+                                onblur="getMaterial()" value="<?= $material['id_material']; ?>" required>
                         </div>
                         <div class="col-6 mb-3">
                             <label for="material" class="form-label">Material</label>
                             <input type="text" class="form-control" id="material<?= $material['id_box_detail']; ?>"
-                                name="material" required>
+                                name="material" value="<?= $material['material_desc']; ?>" required>
                             <input type="hidden" class="form-control" id="id_box" name="id_box" value="<?= $id_box ?>">
                             <input type="hidden" class="form-control" id="id_sloc" name="id_sloc"
                                 value="<?= $id_sloc ?>">
@@ -382,12 +383,12 @@ function deleteItem(id) {
                         <div class="col-6 mb-3">
                             <label for="uom" class="form-label">UOM</label>
                             <input type="text" class="form-control" id="uom<?= $material['id_box_detail']; ?>"
-                                name="uom" required>
+                                name="uom" value="<?= $material['uom']; ?>" required>
                         </div>
                         <div class="col-6 mb-3">
                             <label for="qty" class="form-label">Quantity</label>
                             <input type="number" class="form-control" id="qty<?= $material['id_box_detail']; ?>"
-                                name="qty" required>
+                                name="qty" value="<?= $material['qty']; ?>" required>
                         </div>
                     </div>
                 </div>
@@ -399,8 +400,9 @@ function deleteItem(id) {
             </form>
         </div>
     </div>
-</div> -->
+</div>
 <?php endforeach; ?>
+
 
 
 <script>

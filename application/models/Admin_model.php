@@ -147,4 +147,85 @@ class Admin_model extends CI_Model {
     public function getLastRoleId(){
         return $this->db->query("SELECT * FROM `user_role` ORDER BY `id` DESC LIMIT 1")->result_array();
     }
+
+    public function getBoxData($box_type, $year) {
+        // Initialize an array with 12 entries (one for each month) and set the count to 0.
+        $boxData = array_fill(0, 12, 0);
+
+        // Query to get the number of boxes by month for the given box_type and year.
+        $this->db->select('MONTH(Crtdt) as month, COUNT(*) as count');
+        $this->db->from('box');
+        $this->db->where('box_type', $box_type);
+        $this->db->where('YEAR(Crtdt)', $year);
+        $this->db->group_by('MONTH(Crtdt)');
+        $query = $this->db->get();
+
+        // Fetch the results and map them to the corresponding month in the boxData array.
+        foreach ($query->result() as $row) {
+            // Subtract 1 from the month because array indexes start at 0 (Jan = 0, Feb = 1, etc.).
+            $boxData[$row->month - 1] = (int) $row->count;
+        }
+
+        return $boxData;
+    }
+    
+    public function getKanbanData($year) {
+        // Initialize an array with 12 entries (one for each month) and set the count to 0.
+        $kanbanData = array_fill(0, 12, 0);
+
+        // Query to get the number of boxes by month for the given box_type and year.
+        $this->db->select('MONTH(Crtdt) as month, COUNT(*) as count');
+        $this->db->from('kanban_box');
+        $this->db->where('YEAR(Crtdt)', $year);
+        $this->db->group_by('MONTH(Crtdt)');
+        $query = $this->db->get();
+
+        // Fetch the results and map them to the corresponding month in the kanbanData array.
+        foreach ($query->result() as $row) {
+            // Subtract 1 from the month because array indexes start at 0 (Jan = 0, Feb = 1, etc.).
+            $kanbanData[$row->month - 1] = (int) $row->count;
+        }
+
+        return $kanbanData;
+    }
+
+    public function getProductionRequestData($year) {
+        // Initialize an array with 12 entries (one for each month) and set the count to 0.
+        $productionRequestData = array_fill(0, 12, 0);
+
+        // Query to get the number of boxes by month for the given box_type and year.
+        $this->db->select('MONTH(Crtdt) as month, COUNT(*) as count');
+        $this->db->from('production_request');
+        $this->db->where('YEAR(Crtdt)', $year);
+        $this->db->group_by('MONTH(Crtdt)');
+        $query = $this->db->get();
+
+        // Fetch the results and map them to the corresponding month in the productionRequestData array.
+        foreach ($query->result() as $row) {
+            // Subtract 1 from the month because array indexes start at 0 (Jan = 0, Feb = 1, etc.).
+            $productionRequestData[$row->month - 1] = (int) $row->count;
+        }
+
+        return $productionRequestData;
+    }
+
+    public function getQualityRequestData($year) {
+        // Initialize an array with 12 entries (one for each month) and set the count to 0.
+        $qualityRequestData = array_fill(0, 12, 0);
+
+        // Query to get the number of boxes by month for the given box_type and year.
+        $this->db->select('MONTH(Crtdt) as month, COUNT(*) as count');
+        $this->db->from('quality_request');
+        $this->db->where('YEAR(Crtdt)', $year);
+        $this->db->group_by('MONTH(Crtdt)');
+        $query = $this->db->get();
+
+        // Fetch the results and map them to the corresponding month in the qualityRequestData array.
+        foreach ($query->result() as $row) {
+            // Subtract 1 from the month because array indexes start at 0 (Jan = 0, Feb = 1, etc.).
+            $qualityRequestData[$row->month - 1] = (int) $row->count;
+        }
+
+        return $qualityRequestData;
+    }
 }

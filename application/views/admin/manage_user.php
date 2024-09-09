@@ -51,7 +51,7 @@
 										}									
 									?>
 									</td>
-									<td class="text-center"><?=$usr['is_active'] == 1 ? '<i class="bx bxs-check-circle ps-4" style="color: #012970"></i>' : '<i class="bx bxs-x-circle" style="color: #012970"></i>'; ?></td>
+									<td class="text-center"><?=$usr['is_active'] == 1 ? '<i class="bx bxs-check-circle ps-4" style="color: #012970"></i>' : '<i class="bx bxs-x-circle ps-4" style="color: #012970"></i>'; ?></td>
 									<td class="text-center"><?= date('d M Y H:i', strtotime($usr['date_joined'])); ?></td>
 									<td class="text-center"><?= $usr['Upddt'] != '' ? date('d M Y H:i', strtotime($usr['Upddt'])) : '-'; ?></td>
 									<td class="text-center">
@@ -280,9 +280,9 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
-                title: "Success",
+                title: "Error",
                 html: `<?=$this->session->flashdata('FAILED_AddUser');?>`,
-                icon: "success"
+                icon: "error"
             });
         });
     </script>

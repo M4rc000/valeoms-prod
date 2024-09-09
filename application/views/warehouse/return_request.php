@@ -3,7 +3,7 @@
 		<div class="card-body">
             <div class="row mt-3">
                 <?= form_open_multipart('warehouse/AddBoxMaterial'); ?>
-                <div class="row mt-5 mx-2">
+                <div class="row mt-3 mx-2">
                     <div class="col-md">
                         <div class="table-responsive">
                             <!-- GET USER -->
@@ -13,6 +13,7 @@
                                     <tr>
                                         <th class="text-center">#</th>
                                         <th class="text-center">Return ID</th>
+                                        <th class="text-center">Box No</th>
                                         <th class="text-center">Box Type</th>
                                         <th class="text-center">Box Weight</th>
                                         <th class="text-center">Status</th>
@@ -25,15 +26,16 @@
                                     <tr>
                                         <td class="text-center"><?=$number;?></td>
                                         <td class="text-center"><?=$rw['id_return'];?></td>
+                                        <td class="text-center"><?=$rw['no_box'];?></td>
                                         <td class="text-center"><?=$rw['box_type'];?></td>
                                         <td class="text-center"><?=$rw['box_weight'];?></td>
-                                        <td class="text-center" class="text-center"><?=$rw['status'] == 1 ? '<i class="bi bi-hourglass-split"></i>' : '<i class="bi bi-check-circle-fill" style="color: green"></i>'; ?></td>
-                                        <td class="text-center"><?= date('Y-m-d', strtotime($rw['Crtdt'])); ?></td>
+                                        <td class="text-center" class="text-center"><?=$rw['status'] == 1 ? '<i class="bi bi-hourglass-split text-center"></i>' : '<i class="bi bi-check-circle-fill text-center" style="color: green"></i>'; ?></td>
+                                        <td class="text-center"><?= date('d-M-Y', strtotime($rw['Crtdt'])); ?></td>
                                         <td class="text-center">
                                             <a href="<?= base_url('warehouse/approveReturnRequest/' . $rw['id']); ?>">
                                                 <span class="badge bg-success"><i class="bi bi-check-circle"></i></span>
                                             </a>
-                                            <a href="#" id="reject-request" data-idreturn="<?=$rw['id_return'];?>">
+                                            <a href="#" data-bs-toggle="modal" data-bs-target="#rejectModal<?=$rw['id_return'];?>">
                                                 <span class="badge bg-danger"><i class="bi bi-x-circle"></i></span>
                                             </a>
                                         </td>
@@ -50,55 +52,76 @@
 	</div>
 </section>
 
+<!-- REJECT MODAL -->
+<?php foreach($rwd as $rw): ?>
+    <div class="modal fade" id="rejectModal<?= $rw['id_return']; ?>" tabindex="-1">
+        <div class="modal-dialog modal-lg">
+            <div class="modal-content">
+                <?= form_open_multipart('warehouse/RejectReturnRequest'); ?>
+                    <div class="modal-header">
+                        <h5 class="modal-title">Reject Return Request</h5>
+                        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+                    </div>
+                    <div class="modal-body">
+                        <input type="text" class="form-control" id="user" name="user" value="<?= $name['username']; ?>" hidden> 
+                        <div class="row ps-2">
+                            <div class="col-4">
+                                <label for="id_return" class="form-label">Return ID</label>
+                                <input type="text" class="form-control" id="id_return" name="id_return" value="<?= $rw['id_return']; ?>" readonly>
+                            </div>
+                            <div class="col-4">
+                                <label for="no_box" class="form-label">Box No</label>
+                                <input type="text" class="form-control" id="no_box" name="no_box" value="<?= $rw['no_box']; ?>" readonly>
+                            </div>
+                            <div class="col-4">
+                                <label for="box_type" class="form-label">Box Type</label>
+                                <input type="text" class="form-control" id="box_type" name="box_type" value="<?= $rw['box_type']; ?>" readonly>
+                            </div>
+                            <div class="row mt-4 mb-3">
+                                <label for="reject_description" class="col-sm-2 col-form-label">Reject Description</label>
+                                <div class="col-sm-10">
+                                    <textarea class="form-control" id="reject_description" name="reject_description" style="height: 100px" required></textarea>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                    <div class="modal-footer">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                        <button type="submit" class="btn btn-primary">Save changes</button>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+<?php endforeach; ?>
 
 <script>
     $(document).ready(function (){
         $('#table-rwd').DataTable();
-
-        $('#reject-request').on('click', function(e) {
-            e.preventDefault();
-
-            var idReturn = $(this).data('idreturn');
-            var user = $('#user').val();
-
-            Swal.fire({
-                title: "Are you sure to reject ?",
-                html: `${idReturn}`,
-                icon: "warning",
-                showCancelButton: true,
-                confirmButtonColor: "#3085d6",
-                cancelButtonColor: "#d33",
-                confirmButtonText: "Reject"
-            }).then((result) => {
-                if (result.isConfirmed) {
-                    $.ajax({
-                        url: '<?=base_url('warehouse/RejectReturnRequest');?>',
-                        type: 'POST',
-                        data: { idReturn, user },
-                        success: function(res) {
-                            if (res == 1) {
-                                $('#reject-request').closest('tr').remove();
-                                
-                                Swal.fire({
-                                    title: "Success",
-                                    html: `Return ID ${idReturn} has been rejected`,
-                                    icon: "success"
-                                });
-                            } else {
-                                Swal.fire({
-                                    title: "Error",
-                                    html: `Failed to reject Return ID ${idReturn}`,
-                                    icon: "error"
-                                });
-                            }
-                        },
-                        error: function(xhr, status, error) {
-                            alert('An error occurred: ' + error);
-                        }
-                    });
-                }
-            });
-
-        });
     })
 </script>
+
+<!-- SWEET ALERT -->
+<?php if ($this->session->flashdata('SUCCESS_RejectReturnRequest')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Success",
+                text: "<?php echo $this->session->flashdata('SUCCESS_RejectReturnRequest'); ?>",
+                icon: "success"
+            });
+        });
+    </script>
+<?php endif; ?>
+
+<?php if ($this->session->flashdata('FAILED_RejectReturnRequest')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Failed",
+                text: "<?php echo $this->session->flashdata('FAILED_RejectReturnRequest'); ?>",
+                icon: "error"
+            });
+        });
+    </script>
+<?php endif; ?>

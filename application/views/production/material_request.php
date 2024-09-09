@@ -1,6 +1,6 @@
 <style>
     .select2-container {
-		z-index: 999;
+		z-index: 99;
 	}
 
 	.select2-selection {
@@ -31,6 +31,12 @@
                                     data-bs-target="#profile-justified" type="button" role="tab"
                                     aria-controls="profile" aria-selected="false"><i
                                         class="bi bi-file-earmark-plus-fill me-2" style="color: #012970"></i> Material</button>
+                            </li>
+                            <li class="nav-item flex-fill" role="presentation">
+                                <button class="nav-link w-100" id="profile-tab" data-bs-toggle="tab"
+                                    data-bs-target="#request-history" type="button" role="tab"
+                                    aria-controls="profile" aria-selected="false"><i
+                                        class="bx bxs-book-content me-2" style="color: #012970"></i> Request History</button>
                             </li>
                         </ul>
                         <div class="tab-content pt-2" id="myTabjustifiedContent">
@@ -90,6 +96,33 @@
                                 <hr class="mt-2 mb-3">
                                 <div class="row mt-2 mb-3 mx-3" id="data-desc"></div>
                             </div>
+                            <div class="tab-pane fade" id="request-history" role="tabpanel"
+                                aria-labelledby="profile-tab">
+                                <table class="table datatable" id="request-history">
+                                    <thead>
+                                        <tr>
+                                            <th>#</th>
+                                            <th>Production Plan No</th>
+                                            <th>Product FG ID</th>
+                                            <th>Product FG Description</th>
+                                            <th>Request Date</th>
+                                            <th>Reject Description</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody>
+                                        <?php $number=0; foreach($request_history as $rh): $number++?>
+                                        <tr>
+                                            <td><?=$number;?></td>
+                                            <td><?=$rh['Production_plan'];?></td>
+                                            <td><?=$rh['Id_fg'];?></td>
+                                            <td><?=$rh['Fg_desc'];?></td>
+                                            <td><?=$rh['Crtdt'];?></td>
+                                            <td><?=$rh['reject_description'];?></td>
+                                        </tr>
+                                        <?php endforeach; ?>
+                                    </tbody>
+                                </table>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -142,6 +175,12 @@
                         <form method="POST" action="<?=base_url('production/getProductData');?>">
                             <input type="text" id="user" name="user" value="<?=$name['username'];?>" hidden>
                             <div class="container mt-5">
+                                <div class="row mb-3">
+                                    <label for="production_plan_date" class="col-12 col-md-4 col-form-label text-md-end"><b>Production Planning Date</b></label>
+                                    <div class="col-12 col-md-3">
+                                        <input type="date" class="form-control" id="production_plan_date" name="production_plan_date" required>
+                                    </div>
+                                </div>
                                 <div class="row mb-3">
                                     <label for="productId" class="col-12 col-md-4 col-form-label text-md-end"><b>Product ID</b></label>
                                     <div class="col-12 col-md-3">
