@@ -15,14 +15,6 @@
             <!-- GET USER -->
             <input type="text" name="user" id="user" value="<?=$name['username'];?>" hidden>
             <div class="row mt-5 px-2">
-                <label for="no_box" class="col-sm-2 col-form-label">
-                    <b>Box No</b>
-                </label>
-                <div class="col-sm-10 col-md-2">
-                    <input type="text" name="no_box" id="no_box" class="form-control text-center" value="<?=$box['no_box'];?>" readonly>
-                </div>
-            </div>
-            <div class="row mt-1 mb-5 px-2">
                 <label for="box_type" class="col-sm-2 col-form-label">
                     <b>Box Type</b>
                 </label>
@@ -86,7 +78,7 @@
                 </div>
                 <div class="col-12 col-md mt-3 mt-md-0">
                     <button type="submit" class="btn btn-primary" id="submit-box">
-                        Save
+                        Approve
                     </button>
                 </div>
             </div>
@@ -120,7 +112,6 @@
     });
 
     $('#submit-box').on('click', function() {
-        var no_box = $('#no_box').val();
         var box_type = $('#box_type').val();
         var id_return = '<?=$id_return;?>';
         var weight = $('#total-weight').val();
@@ -170,7 +161,7 @@
             type: 'post',
             dataType: 'json',
             data: {
-                tableData, weight, sloc, user, box_type, id_return, no_box
+                tableData, weight, sloc, user, box_type, id_return
             },
             beforeSend: function(){
                 var spinner =
@@ -190,15 +181,137 @@
                 $('#preview-barcode').append(spinner);
             },
             success: function(res) {
+                $('#preview-barcode').empty();
+
+                // DISABLED SLOC AND APPROVE BUTTON
+                $('#submit-box').prop('disabled', true);
+                $('#sloc').prop('disabled', true);
+
+                document.addEventListener('keydown', function(e) {
+                    // F5 key
+                    if (e.key === 'F5') {
+                        e.preventDefault();
+                        alert('Page refresh is disabled.');
+                    }
+                    // Ctrl + R key combination
+                    if ((e.ctrlKey && e.key === 'r') || (e.metaKey && e.key === 'r')) {
+                        e.preventDefault();
+                        alert('Page refresh is disabled.');
+                    }
+                });
+
+
                 if(res.result == 3){
                     Swal.fire({
                         title: "Success",
-                        html: `Data Box has been approved, please put Box <b>${res.no_box}</b> in SLoc <b>${res.sloc}</b>`,
+                        text: 'Data Box has been approved',
                         icon: "success"
                     });
+
+                    if(box_type == 'HIGH'){
+                        $('#btn-print-hg').css('display', 'block');
+                    }
+                    else{
+                        $('#btn-print-md').css('display', 'block');
+                    }
+
+                    var qrcode = new QRCode(document.getElementById("preview-barcode"), {
+                        text: `${res.box_id}`,
+                        width: 150,
+                        height: 150,
+                        correctLevel: QRCode.CorrectLevel.H
+                    });
+
+                    $(document).on('click', '#btn-print-mg', function(){
+                    
+                    });
+                }
+                else{
+                    Swal.fire({
+                        title: "Error",
+                        text: `${res.error}`,
+                        icon: "error"
+                    });
+
+                    window.location.href = '<?=base_url('warehouse/return_request');?>';
                 }
 
-                window.location.href = '<?=base_url('warehouse/return_request');?>'
+                function printBarcodeHigh() {
+                    var idBox = res.box_id;
+
+                    // Printing logic here...
+                    var logoUrl = '<?php echo base_url("assets/img/valeo.png"); ?>';
+                    var printWindow = window.open('', '', 'height=750,width=500');
+                    printWindow.document.write('<html><head><title>Print Barcode</title>');
+                    printWindow.document.write('<style>');
+                    printWindow.document.write('@page { size: 17cm 13cm; margin: 5px; }');
+                    printWindow.document.write('.print-section { display: flex; flex-direction: column; width: 14cm; height: 8cm; border: 1px solid black; box-sizing: border-box; }');
+                    printWindow.document.write('.row { display: flex; flex: 1; align-items: center; justify-content: space-between; border-bottom: 1px solid black; }');
+                    printWindow.document.write('.row:first-child { height: 3cm; padding: 0 2px; }');
+                    printWindow.document.write('.row:last-child { height: 5cm; align-items: center; justify-content: center; text-align: center; }');
+                    printWindow.document.write('.barcode, .valeo-logo { display: inline-block; text-align: center;}');
+                    printWindow.document.write('.barcode { width: 2cm; height: 2cm; margin-left: 2cm;}');
+                    printWindow.document.write('.valeo-logo { width: 5cm; height: 2cm; margin-right: 1cm; background-position: center; }');
+                    printWindow.document.write('.barcode-info { font-size: 2em; margin-top: 8px; text-align: center; width: 100%; margin-left: 15px; }');
+                    printWindow.document.write('#qrcode img { width: 90%; height: 90%; }');
+                    printWindow.document.write('</style>');
+                    printWindow.document.write('</head><body>');
+                    printWindow.document.write('<div class="print-section">');
+                    printWindow.document.write('<div class="row">');
+                    printWindow.document.write('<div class="barcode" id="qrcode">' + document.getElementById('preview-barcode').innerHTML + '</div>');
+                    printWindow.document.write('<div class="valeo-logo"><img src="' + logoUrl + '" alt="Valeo Logo" style="width: 100%; height: 100%;"></div>');
+                    printWindow.document.write('</div>');
+                    printWindow.document.write('<div class="row">');
+                    printWindow.document.write('<div class="barcode-info" style="margin-top:40px;"><span>ID Box:</span><h1 style="font-size:2.5em; margin-top:-5;">' + idBox + '</h1></div>');
+                    printWindow.document.write('</div>');
+                    printWindow.document.write('</div>');
+                    printWindow.document.write('</body></html>');
+                    printWindow.document.close();
+                    printWindow.print();
+                }
+
+                $('#btn-print-hg').on('click', function() {
+                    printBarcodeHigh();
+                });
+
+                function printBarcodeMedium() {
+                    var idBox = res.box_id;
+
+                    // Printing logic here...
+                    var logoUrl = '<?php echo base_url("assets/img/valeo.png"); ?>';
+                    var printWindow = window.open('', '', 'height=750,width=500');
+                    printWindow.document.write('<html><head><title>Print Barcode</title>');
+                    printWindow.document.write('<style>');
+                    printWindow.document.write('@page { size: 17cm 13cm; margin: 5px; }');
+                    printWindow.document.write('.print-section { display: flex; flex-direction: column; width: 14cm; height: 8cm; border: 1px solid black; box-sizing: border-box; }');
+                    printWindow.document.write('.row { display: flex; flex: 1; align-items: center; justify-content: space-between; border-bottom: 1px solid black; }');
+                    printWindow.document.write('.row:first-child { height: 3cm; padding: 0 2px; }');
+                    printWindow.document.write('.row:last-child { height: 5cm; align-items: center; justify-content: center; text-align: center; }');
+                    printWindow.document.write('.barcode, .valeo-logo { display: inline-block; text-align: center;}');
+                    printWindow.document.write('.barcode { width: 2cm; height: 2cm; margin-left: 2cm;}');
+                    printWindow.document.write('.valeo-logo { width: 5cm; height: 2cm; margin-right: 1cm; background-position: center; }');
+                    printWindow.document.write('.barcode-info { font-size: 2em; margin-top: 8px; text-align: center; width: 100%; margin-left: 15px; }');
+                    printWindow.document.write('#qrcode img { width: 90%; height: 90%; }');
+                    printWindow.document.write('</style>');
+                    printWindow.document.write('</head><body>');
+                    printWindow.document.write('<div class="print-section">');
+                    printWindow.document.write('<div class="row">');
+                    printWindow.document.write('<div class="barcode" id="qrcode">' + document.getElementById('preview-barcode').innerHTML + '</div>');
+                    printWindow.document.write('<div class="valeo-logo"><img src="' + logoUrl + '" alt="Valeo Logo" style="width: 100%; height: 100%;"></div>');
+                    printWindow.document.write('</div>');
+                    printWindow.document.write('<div class="row">');
+                    printWindow.document.write('<div class="barcode-info" style="margin-top:40px;"><span>ID Box:</span><h1 style="font-size:2.5em; margin-top:-5;">' + idBox + '</h1></div>');
+                    printWindow.document.write('</div>');
+                    printWindow.document.write('</div>');
+                    printWindow.document.write('</body></html>');
+                    printWindow.document.close();
+                    printWindow.print();
+                }
+
+                $('#btn-print-md').on('click', function() {
+                    printBarcodeMedium();
+                });
+
             },
             error: function(xhr, ajaxOptions, thrownError) {
                 console.error(xhr.statusText);

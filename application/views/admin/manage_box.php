@@ -46,9 +46,9 @@
                         </table>
                     </div>
 
-                        <nav aria-label="Page navigation example">
-                            <?= $this->pagination->create_links(); ?>
-                        </nav>
+                    <nav aria-label="Page navigation example">
+                        <?= $this->pagination->create_links(); ?>
+                    </nav>
 
                     <button class="btn btn-info" onclick="printSelectedBarcodes('high')">Print Selected Barcodes (High
                         Rak)</button>
@@ -317,10 +317,10 @@ function generateBarcodeData(boxNumber, printSize) {
 
 <script src="<?=base_url('assets');?>/vendor/qr-code/qr-code.min.js"></script>
 <script>
-$(document).ready(function (){
+$(document).ready(function() {
     $('#tbl-box').DataTable({
-        "paging": false,          
-        "info": false,            
+        "paging": false,
+        "info": false,
     });
 });
 

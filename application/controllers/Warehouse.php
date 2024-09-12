@@ -11,8 +11,9 @@ class Warehouse extends CI_Controller
 		parent::__construct();
 		is_logged_in();
 		$this->load->library('form_validation');
-		$this->load->model('Warehouse_model', 'WModel');
+		$this->load->model('Warehouse_model');
 		$this->load->model('Admin_model', 'Amodel');
+		$this->load->model('Warehouse_model', 'WModel');
 		$this->load->model('Production_model', 'PModel');
 	}
 
@@ -22,6 +23,39 @@ class Warehouse extends CI_Controller
 			<i class=\"bi bi-check-circle me-1\"></i> $message
 			<button type=\"button\" class=\"btn-close\" data-bs-dismiss=\"alert\" aria-label=\"Close\"></button>
 			</div>");
+	}
+
+
+	public function AddReceivingMaterial()
+	{
+		$reference_number = $this->input->post('reference_number');
+		$uomname = $this->input->post('uom');
+		$material = $this->input->post('material');
+
+		$data = array(
+			'reference_number' => $reference_number,
+			'material_desc' => (empty($material) ? '' : $material),
+			'qty' => $this->input->post('qty'),
+			'uom' => (empty($uomname) ? '' : $uomname),
+			'receiving_date' => $this->input->post('receiving_date'),
+			'created_at' => date('Y-m-d H:i:s')
+		);
+
+		$this->Amodel->insertData('receiving_material_temp', $data);
+
+		$this->session->set_flashdata('SUCCESS', '<div class="alert alert-success alert-dismissible fade show mb-2" id="dismiss" role="alert" style="width: 40%">
+			<i class="bi bi-check-circle me-1"></i> New receiving material successfully added
+			<button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+			</div>');
+
+		redirect('Warehouse/');
+	}
+
+	public function production_request()
+	{
+		$data['production_request'] = $this->WModel->getProductionRequest();
+		$data['users'] = $this->WModel->getAllUsers();
+		$this->load_common_views('Production Request', 'warehouse/production_request', $data);
 	}
 
 	private function load_common_views($title, $view, $data = [])
@@ -35,27 +69,6 @@ class Warehouse extends CI_Controller
 		$this->load->view($view, $data);
 		$this->load->view('templates/footer');
 	}
-
-	public function AddReceivingMaterial()
-	{
-		$data = array(
-			'reference_number' => $this->input->post('reference_number', true),
-			'material_desc' => $this->input->post('material', true),
-			'qty' => $this->input->post('qty', true),
-			'uom' => $this->input->post('uom', true),
-			'receiving_date' => $this->input->post('receiving_date', true),
-			'created_at' => date('Y-m-d H:i:s')
-		);
-
-		if ($this->Amodel->insertData('receiving_material_temp', $data)) {
-			$this->set_flashdata('success', 'New receiving material successfully added');
-		} else {
-			$this->set_flashdata('danger', 'Failed to add receiving material');
-		}
-
-		redirect('Warehouse/');
-	}
-
 	public function approve_production_plan($production_plan)
 	{
 		$data['production_request'] = $this->WModel->getProductionRequestDetail($production_plan);
@@ -64,73 +77,67 @@ class Warehouse extends CI_Controller
 
 		$this->load_common_views('Approve Production Request', 'warehouse/approve_production_request', $data);
 	}
-
-	public function production_request()
+	public function get_detail_approve_pr()
 	{
-		$data['production_request'] = $this->WModel->getProductionRequest();
-		$data['users'] = $this->WModel->getAllUsers();
-		$this->load_common_views('Production Request', 'warehouse/production_request', $data);
+		$Production_plan_detail_id = $this->input->post('Production_plan_detail_id');
+		$query = "
+			SELECT a.*, b.Sloc as sloc_name, c.no_box as box_name, d.total_qty as qty_on_box
+			FROM production_request_approve a
+			LEFT JOIN storage b ON b.Id_storage = a.Sloc
+			LEFT JOIN box c ON c.id_box = a.id_box
+			LEFT JOIN list_storage d ON d.sloc = a.Sloc and d.id_box = a.id_box and d.product_id = a.Id_material
+			WHERE Production_plan_detail_id = ?
+		";
+		// Execute query with parameter binding
+		$data = $this->db->query($query, [$Production_plan_detail_id])->result_array();
+		echo json_encode($data);
+
 	}
 
-	public function sloc_availability()
-	{
-		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
-		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
-		$data['sloc_availability'] = $this->WModel->getSLocAvailability(); // Ensure this fetches data correctly
-
-		$data['title'] = 'SLoc Availability';
-
-		$this->load->view('templates/header', $data);
-		$this->load->view('templates/navbar', $data);
-		$this->load->view('templates/sidebar', $data);
-		$this->load->view('warehouse/sloc_availability', $data);
-		$this->load->view('templates/footer');
-	}
-
-	public function quality_request()
-	{
-		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
-		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
-		$data['quality_request'] = $this->WModel->getQualityRequest(); // Ensure this fetches data correctly
-
-		$data['title'] = 'Quality Request';
-
-		$this->load->view('templates/header', $data);
-		$this->load->view('templates/navbar', $data);
-		$this->load->view('templates/sidebar', $data);
-		$this->load->view('warehouse/quality_request', $data);
-		$this->load->view('templates/footer');
-	}
-
-
-
-	public function approveProductionRequest()
-	{
-		$production_plan = $this->input->post('production_plan', true);
-
-		$data_request = $this->db->query("SELECT * from production_request_approve where Production_plan = ?", [$production_plan])->result();
-		foreach ($data_request as $v) {
-			$this->db->query("UPDATE list_storage SET total_qty = total_qty - ? WHERE product_id = ? AND sloc = ? AND id_box = ?", array($v->Qty, $v->Id_material, $v->Sloc, $v->id_box));
-		}
-
-		$approved1 = $this->db->query("UPDATE production_request SET status = 1 WHERE Production_plan = ?", [$production_plan]);
-		$approved2 = $this->db->query("UPDATE production_plan SET status = 'APPROVED' WHERE Production_plan = ?", [$production_plan]);
-
-		$response = ($approved1 && $approved2) ? ['status' => true] : ['status' => false];
-		echo json_encode($response);
-	}
 
 	public function rejectProductionRequest()
 	{
-		$production_plan = $this->input->post('production_plan', true);
+		$production_plan = $this->input->post('production_plan');
 
-		$data_request = $this->db->query("SELECT * from production_request where Production_plan = ?", [$production_plan])->result();
+		$data_request = $this->db->query("SELECT * from production_request where Production_plan = '$production_plan'")->result();
+
 		foreach ($data_request as $v) {
-			$this->db->query("UPDATE list_storage SET total_qty_real = total_qty_real + ? WHERE product_id = ? AND sloc = ? AND id_box = ?", array($v->Qty, $v->Id_material, $v->Sloc, $v->id_box));
+			$id_material = $v->Id_material;
+			$sloc = $v->Sloc;
+			$id_box = $v->id_box;
+			$qty = $v->Qty;
+
+			// Update jumlah qty di list_storage
+			$this->db->query("UPDATE list_storage SET total_qty_real = total_qty_real + ? WHERE product_id = ? AND sloc = ? AND id_box = ?", array($qty, $id_material, $sloc, $id_box));
 		}
 
-		$rejected1 = $this->db->query("UPDATE production_request SET status = 'REJECTED', Sloc = 457 WHERE Production_plan = ?", [$production_plan]);
-		$rejected2 = $this->db->query("UPDATE production_plan SET status = 'REJECTED' WHERE Production_plan = ?", [$production_plan]);
+		$rejected1 = $this->db->query("UPDATE production_request SET status = 'REJECTED', Sloc = 457 WHERE Production_plan = '$production_plan'");
+		$rejected2 = $this->db->query("UPDATE production_plan SET status = 'REJECTED' WHERE Production_plan = '$production_plan'");
+
+		if ($rejected1 && $rejected2) {
+			echo json_encode(['status' => true]);
+		} else {
+			echo json_encode(['status' => false]);
+		}
+
+	}
+
+	public function rejectQualityRequest()
+	{
+		$id_request = $this->input->post('id_request', true);
+		$reject_description = $this->input->post('reject_description', true);
+
+		// $data_request = $this->db->query("SELECT * from production_rapproveequest where Quality_plan = ?", [$id_request])->result();
+		$data_request_approve = $this->WModel->getQualityRequestDetail($id_request);
+		if ($data_request_approve) {
+			foreach ($data_request_approve as $v) {
+				$this->db->query("UPDATE list_storage SET total_qty_real = total_qty_real + ? WHERE product_id = ? AND sloc = ? AND id_box = ?", array($v['qty_unpack'], $v['Id_material'], $v['sloc'], $v['id_box']));
+			}
+		}
+
+		// status  0 = not yet approved, status 1 = approved, status 3 = rejected.
+		$rejected1 = $this->db->query("UPDATE quality_request SET status = '3' WHERE id_request = ?", [$id_request]);
+		$rejected2 = $this->db->query("UPDATE quality_request SET reject_description = '$reject_description' WHERE id_request = ?", [$id_request]);
 
 		$response = ($rejected1 && $rejected2) ? ['status' => true] : ['status' => false];
 		echo json_encode($response);
@@ -139,35 +146,34 @@ class Warehouse extends CI_Controller
 	public function print_request($production_plan)
 	{
 		$time = date('dmY');
-		$data['header'] = $this->WModel->getProductionRequest2($production_plan);
-		$data['detail'] = $this->WModel->getProductionRequestDetailApprove($production_plan);
+		$data['header'] = $this->Warehouse_model->getProductionRequest2($production_plan);
+		$data['detail'] = $this->Warehouse_model->getProductionRequestDetail($production_plan);
 
 		$namafile = "Production-Request-" . $production_plan . '-' . $time;
-		$dompdf = new Dompdf(['enable_remote' => true]);
+		$dompdf = new Dompdf(array('enable_remote' => true));
 		$html = $this->load->view('warehouse/print_request', $data, true);
 
 		$dompdf->loadHtml($html);
-		$dompdf->setPaper('A4', 'portrait');
+		$dompdf->setPaper('A4', 'potrait');
 		$dompdf->render();
-		$dompdf->stream($namafile . ".pdf", ['Attachment' => 0]);
-	}
+		$dompdf->stream($namafile . ".pdf", array('Attachment' => 0));
 
-	public function print_quality_request($production_plan)
+	}
+	public function print_request_reject($production_plan)
 	{
 		$time = date('dmY');
-		$data['header'] = $this->WModel->getQualityRequest($production_plan);
-		$data['detail'] = $this->WModel->getQualityRequestApprove($production_plan);
+		$data['header'] = $this->WModel->getProductionRequest2($production_plan);
+		$data['detail'] = $this->WModel->getProductionRequestDetailReject($production_plan);
 
-		$namafile = "Quality-Request-" . $production_plan . '-' . $time;
+		$namafile = "Production-Request-" . $production_plan . '-' . $time;
 		$dompdf = new Dompdf(['enable_remote' => true]);
-		$html = $this->load->view('warehouse/print_quality_request', $data, true);
+		$html = $this->load->view('warehouse/print_request_reject', $data, true);
 
 		$dompdf->loadHtml($html);
 		$dompdf->setPaper('A4', 'portrait');
 		$dompdf->render();
 		$dompdf->stream($namafile . ".pdf", ['Attachment' => 0]);
 	}
-
 
 	public function addItemBox()
 	{
@@ -274,7 +280,6 @@ class Warehouse extends CI_Controller
 		$this->load->view('templates/sidebar', $data);
 		$this->load->view('warehouse/detail_receiving', $data);
 		$this->load->view('templates/footer');
-		$this->load->view('v_footer');
 	}
 
 	public function edit_box_view($id)
@@ -302,19 +307,52 @@ class Warehouse extends CI_Controller
 
 	public function get_box_details()
 	{
-		$id = $this->input->post('id_box');
-		$box = $this->Warehouse_model->getListBoxById($id);
-		$id_box = $id;
-		$no_box = $box->no_box;
-		$id_sloc = $box->sloc;
-		$detail = $this->Warehouse_model->getDetailBox($id);
+		try {
+			// Retrieve the 'id_box' sent via POST
+			$id_box = $this->input->post('id_box');
 
-		$data = [
-			'status' => 'success',
-			'detail' => $detail,
-		];
-		echo json_encode($data);
+			// Fetch the box details from the database
+			$box = $this->Warehouse_model->getListBoxById($id_box);
+
+			// Check if the box exists
+			if (!$box) {
+				// Return an error response if no box is found
+				echo json_encode(['status' => 'error', 'message' => 'Box not found']);
+				return;
+			}
+
+			// Retrieve the box details from the 'box_detail' table
+			$detail = $this->Warehouse_model->getDetailBox($id_box);
+
+			// Calculate total quantity from all detail entries
+			$total_qty = 0;
+			foreach ($detail as $item) {
+				$total_qty += $item['qty']; // Sum up all the 'qty' values
+			}
+
+			// Use the 'weight' column for total weight, assuming it's in the 'box' table
+			$total_weight = $box->weight;
+
+			// Create the JSON response data
+			$data = [
+				'status' => 'success',
+				'box' => $box,  // Include box object
+				'detail' => $detail,  // Include box detail
+				'sloc' => $box->sloc_name,  // Include the storage location name
+				'total_qty' => $total_qty,  // Send total quantity to the frontend
+				'total_weight' => $total_weight  // Send the total weight to the frontend
+			];
+
+			// Return the JSON-encoded response
+			echo json_encode($data);
+
+		} catch (Exception $e) {
+			// Catch any exceptions and return an error message in JSON format
+			echo json_encode(['status' => 'error', 'message' => $e->getMessage()]);
+		}
 	}
+
+
 
 	public function list_storage()
 	{
@@ -396,7 +434,6 @@ class Warehouse extends CI_Controller
 		$this->load->view('templates/footer');
 	}
 
-
 	public function cycle_count()
 	{
 		$data['title'] = 'Cycle Count';
@@ -417,7 +454,6 @@ class Warehouse extends CI_Controller
 	}
 
 
-
 	public function edit_box()
 	{
 		$id_box = $this->input->post('id_box');
@@ -428,7 +464,7 @@ class Warehouse extends CI_Controller
 		$this->Warehouse_model->updateBox($id_box, $weight, $sloc, $details);
 
 		$this->session->set_flashdata('SUCCESS', 'Box updated successfully!');
-		redirect('warehouse/list_box/0');
+		redirect('warehouse/manage_box');
 	}
 
 
@@ -614,7 +650,6 @@ class Warehouse extends CI_Controller
 	{
 		$total_weight = $this->input->post('total_weight');
 		$id_sloc = $this->input->post('id_sloc');
-		$box_type = $this->input->post('box_type'); // Ambil input box_type
 		$material = $this->db->query("SELECT * FROM receiving_material_temp")->result();
 
 		if (empty($material)) {
@@ -634,27 +669,27 @@ class Warehouse extends CI_Controller
 			return;
 		}
 
-		// Simpan header box
 		$header = [
 			'weight' => $total_weight,
 			'no_box' => $formatted_box_number,
 			'sloc' => $id_sloc,
-			'box_type' => $box_type,  // Pastikan box_type disertakan dalam header
 			'crtby' => $this->session->userdata('username'),
 			'crtdt' => date('Y-m-d H:i:s')
 		];
 
 		try {
-			$this->Amodel->insertData('box', $header);  // Simpan data ke tabel box
+			$this->Amodel->insertData('box', $header);
 		} catch (Exception $e) {
 			log_message('error', 'Error inserting box header: ' . $e->getMessage());
 			echo json_encode(['status' => false, 'msg' => 'Error inserting box header: ' . $e->getMessage()]);
 			return;
 		}
-		$id_box = $this->db->insert_id();  // Dapatkan ID dari box yang baru saja disimpan
+
+		$id_box = $this->db->insert_id();
+		$id_box_detail_array = array();
 
 		try {
-			foreach ($material as $v) {
+			foreach ($material as $key => $v) {
 				$data = [
 					'id_box' => $id_box,
 					'id_material' => $v->reference_number,
@@ -663,10 +698,13 @@ class Warehouse extends CI_Controller
 					'crtdt' => date('Y-m-d H:i:s')
 				];
 				$this->Amodel->insertData('box_detail', $data);
-				$id_box_detail = $this->db->insert_id();  // Dapatkan ID dari box_detail yang baru disimpan
+				$id_box_detail_array[] = $this->db->insert_id();
+			}
 
-				// Simpan ke table receiving_material
-				$receiving_data = [
+			foreach ($material as $key => $v) {
+				$id_box_detail = array_shift($id_box_detail_array);
+
+				$data = [
 					'id_box' => $id_box,
 					'id_box_detail' => $id_box_detail,
 					'reference_number' => $v->reference_number,
@@ -679,16 +717,14 @@ class Warehouse extends CI_Controller
 					'created_by' => $this->session->userdata('username'),
 					'created_at' => date('Y-m-d H:i:s')
 				];
-				$this->Amodel->insertData('receiving_material', $receiving_data);
+				$this->Amodel->insertData('receiving_material', $data);
 
-				// Update atau insert ke list_storage
-				$cek_storage = $this->db->query("SELECT total_qty FROM list_storage WHERE sloc = ?", [$id_sloc])->row();
-				if ($cek_storage) {
+				$cek_storage = $this->db->query("SELECT total_qty from list_storage where sloc = $id_sloc")->row();
+				if (!empty($cek_storage)) {
 					$qty = $cek_storage->total_qty + $v->qty;
 				} else {
 					$qty = $v->qty;
 				}
-
 				$list_storage = [
 					'id_box' => $id_box,
 					'product_id' => $v->reference_number,
@@ -716,23 +752,10 @@ class Warehouse extends CI_Controller
 		echo json_encode($data);
 	}
 
-
 	public function detail_receiving($box_id)
 	{
 		$this->load->model('Warehouse_model');
-
-		// Fetch receiving material data based on the box ID
-		$data['rec_material'] = $this->Warehouse_model->get_receiving_by_box_id($box_id);
-
-		// Fetch the list of storage locations (SLoc) from the model
-		$data['list_storage'] = $this->Warehouse_model->getStorageList();
-
-		// If no storage is found, set it as an empty array to avoid errors
-		if (!$data['list_storage']) {
-			$data['list_storage'] = [];
-		}
-
-		// Load the view with all required data
+		$data['receiving_material'] = $this->Warehouse_model->get_receiving_by_box_id($box_id);
 		$this->load->view('pages/detail_receiving', $data);
 	}
 
@@ -747,7 +770,6 @@ class Warehouse extends CI_Controller
 	}
 
 
-
 	public function list_box()
 	{
 		$this->load->library('pagination');
@@ -760,7 +782,7 @@ class Warehouse extends CI_Controller
 		$this->pagination->initialize($config);
 
 		$page = ($this->uri->segment(3) !== null) ? (int) $this->uri->segment(3) : 0;
-		$data['list_box'] = $this->WModel->getListBox($config['per_page'], $page);
+		$data['list_box'] = $this->Warehouse_model->getListBox($config['per_page'], $page);
 		$data['pagination'] = $this->pagination->create_links();
 
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
@@ -892,26 +914,50 @@ class Warehouse extends CI_Controller
 	{
 		$id_box_detail = $this->input->post('id_box_detail');
 		$qty = $this->input->post('qty');
+		$sloc = $this->input->post('sloc');
+		$weight = $this->input->post('total_weight');  // Retrieve weight (to update the box table)
 
+		// Update the `receiving_material` table
 		$dtupdate = [
 			'qty' => $qty,
+			's_loc' => $sloc,
 			'updated_at' => date('Y-m-d H:i:s'),
 			'updated_by' => $this->session->userdata('username'),
 		];
-		$this->db->where('id_box_detail', $id_box_detail);
-		$update = $this->db->update('receiving_material', $dtupdate);
 
-		if ($update) {
-			$data = [
-				'status' => true,
+		$this->db->where('id_box_detail', $id_box_detail);
+		$update_receiving = $this->db->update('receiving_material', $dtupdate);
+
+		// If the update to `receiving_material` is successful, update the `box` table
+		if ($update_receiving) {
+			$id_box = $this->db->select('id_box')
+				->where('id_box_detail', $id_box_detail)
+				->get('box_detail')
+				->row()
+				->id_box;
+
+			// Update the `box` table (only `weight` and `sloc`)
+			$box_update = [
+				'weight' => $weight,
+				'sloc' => $sloc // Update `sloc` as well if needed
 			];
+
+			$this->db->where('id_box', $id_box);
+			$update_box = $this->db->update('box', $box_update);
+
+			if ($update_box) {
+				$data = ['status' => true];
+			} else {
+				$data = ['status' => false, 'message' => 'Failed to update the box table.'];
+			}
 		} else {
-			$data = [
-				'status' => false,
-			];
+			$data = ['status' => false, 'message' => 'Failed to update receiving_material table.'];
 		}
+
 		echo json_encode($data);
 	}
+
+
 
 	public function getDataForEdit()
 	{
@@ -964,6 +1010,7 @@ class Warehouse extends CI_Controller
 	public function kitting()
 	{
 		$data['title'] = 'Kitting';
+		// is_allowed_submenu($data['title']);
 
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
 		$data['name'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
@@ -1162,6 +1209,21 @@ class Warehouse extends CI_Controller
 
 		echo json_encode($result);
 	}
+	public function quality_request()
+	{
+		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+		$data['quality_request'] = $this->WModel->getQualityRequest(); // Ensure this fetches data correctly
+
+		$data['title'] = 'Quality Request';
+
+		$this->load->view('templates/header', $data);
+		$this->load->view('templates/navbar', $data);
+		$this->load->view('templates/sidebar', $data);
+		$this->load->view('warehouse/quality_request', $data);
+		$this->load->view('templates/footer');
+	}
+
 
 	function getBox()
 	{
@@ -1338,7 +1400,8 @@ class Warehouse extends CI_Controller
 		$this->load->view('templates/footer');
 	}
 
-	function approveReturnRequest($id){
+	function approveReturnRequest($id)
+	{
 		$data['title'] = 'Approve Return Request';
 
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
@@ -1371,10 +1434,10 @@ class Warehouse extends CI_Controller
 		// GET SLOC NAME
 		$querySloc = $this->db->query("SELECT SLoc FROM `storage` WHERE Id_storage = '$sloc'")->result_array();
 		$SLoc = $querySloc[0]['SLoc'];
-		
+
 		// CHECK IF NO BOX EXIST IN BOX TABLE
 		$queryBox = $this->db->query("SELECT * FROM `box` WHERE no_box = '$no_box'")->num_rows();
-		if($queryBox > 0){
+		if ($queryBox > 0) {
 			$query = $this->db->query("SELECT * FROM `box` WHERE no_box = '$no_box'")->result_array();
 			$id_table_box = $query[0]['id_box'];
 
@@ -1408,16 +1471,16 @@ class Warehouse extends CI_Controller
 			}
 		}
 		// IF NO BOX DOESN'T EXIST
-		else{
+		else {
 
 			// INSERT TABLE `box`
 			$DataBox = [
-                'no_box' => $no_box,
-                'weight' => $weight,
-                'box_type' => $box_type,
-                'crtby' => $user,
-                'crtdt' => date('Y-m-d H:i:s')
-            ];
+				'no_box' => $no_box,
+				'weight' => $weight,
+				'box_type' => $box_type,
+				'crtby' => $user,
+				'crtdt' => date('Y-m-d H:i:s')
+			];
 
 			$this->PModel->insertData('box', $DataBox);
 			$id_table_box = $this->db->insert_id();
@@ -1467,7 +1530,9 @@ class Warehouse extends CI_Controller
 		echo json_encode($res);
 	}
 
-	function RejectReturnRequest(){
+
+	function RejectReturnRequest()
+	{
 		$id_return = $this->input->post('id_return');
 		$reject_description = $this->input->post('reject_description');
 
@@ -1493,42 +1558,44 @@ class Warehouse extends CI_Controller
 		redirect('warehouse/return_request');
 	}
 
+	// Existing function for fetching SLOC based on id_material, leaving this unchanged
 	public function get_sloc_options()
 	{
 		$id_material = $this->input->post('id_material');
 
 		$query = "
-			SELECT a.sloc as sloc_id, b.Sloc as sloc_name
-			FROM list_storage a
-			LEFT JOIN storage b ON b.Id_storage = a.sloc
-			WHERE a.product_id = ? AND a.sloc is not null GROUP BY a.sloc
-		";
+        SELECT a.sloc as sloc_id, b.Sloc as sloc_name
+        FROM list_storage a
+        LEFT JOIN storage b ON b.Id_storage = a.sloc
+        WHERE a.product_id = ? AND a.sloc is not null
+    ";
 		// Execute query with parameter binding
 		$data = $this->db->query($query, [$id_material])->result_array();
 
 		echo json_encode($data);
 	}
-
-	public function get_material_details_pr()
+	public function get_all_sloc_options()
 	{
-		$id_material = $this->input->post('id_material');
 		$query = "
-			SELECT *
-			FROM production_request 
-			LEFT JOIN storage b ON b.Id_storage = a.sloc
-			WHERE a.product_id = ? AND a.sloc is not null GROUP BY a.sloc
+			SELECT Id_storage as sloc_id, SLoc as sloc_name
+			FROM storage
+			WHERE space_now < space_max  -- Ensure sloc has available space
 		";
-		// Execute query with parameter binding
-		$data = $this->db->query($query, [$id_material])->result_array();
+		// Execute query
+		$data = $this->db->query($query)->result_array();
 
+		echo json_encode($data);
 	}
+
+
+
 	public function get_id_box_options()
 	{
 		$id_material = $this->input->post('id_material');
 		$sloc_id = $this->input->post('sloc_id');
 
 		$query = "
-			SELECT a.id_box, b.no_box, a.total_qty
+			SELECT a.id_box, b.no_box
 			FROM list_storage a
 			LEFT JOIN box b ON b.id_box = a.id_box
 			WHERE a.product_id = ? AND a.sloc = ?
@@ -1539,112 +1606,60 @@ class Warehouse extends CI_Controller
 		echo json_encode($data);
 	}
 
-	function save_production_request_detail()
+	public function sloc_availability()
 	{
-		$data = $this->input->post('materialSlocArray');
-		// print_r($data);die;
-		foreach ($data as $dt) {
-			$pr = [
-				'Production_plan_detail_id' => $dt['Production_plan_detail_id'],
-				'Id_request' => $dt['id_request'],
-				'Id_material' => $dt['id_material'],
-				'Material_desc' => $dt['material_desc'],
-				'Production_plan' => $dt['production_plan'],
-				'Qty' => $dt['qty_need'],
-				'Sloc' => $dt['sloc'],
-				'id_box' => $dt['box'],
-				'Crtby' => $this->session->userdata('username'),
-				'Crtdt' => date('Y-m-d H:i:s')
-			];
-			$save = $this->db->insert('production_request_approve', $pr);
-			if ($save) {
-				$update = $this->db->query("UPDATE production_request SET status = 1 WHERE Id_request = ?", array($dt['id_request']));
-			}
+		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+		$data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+		$data['sloc_availability'] = $this->WModel->getSLocAvailability(); // Ensure this fetches data correctly
+
+		$data['title'] = 'SLoc Availability';
+
+		$this->load->view('templates/header', $data);
+		$this->load->view('templates/navbar', $data);
+		$this->load->view('templates/sidebar', $data);
+		$this->load->view('warehouse/sloc_availability', $data);
+		$this->load->view('templates/footer');
+	}
+	public function approveProductionRequest()
+	{
+		$production_plan = $this->input->post('production_plan', true);
+
+		$data_request = $this->db->query("SELECT * from production_request_approve where Production_plan = ?", [$production_plan])->result();
+		foreach ($data_request as $v) {
+			$this->db->query("UPDATE list_storage SET total_qty = total_qty - ? WHERE product_id = ? AND sloc = ? AND id_box = ?", array($v->Qty, $v->Id_material, $v->Sloc, $v->id_box));
 		}
-		if ($save) {
-			echo json_encode(['status' => true]);
+
+		$approved1 = $this->db->query("UPDATE production_request SET status = 1 WHERE Production_plan = ?", [$production_plan]);
+		$approved2 = $this->db->query("UPDATE production_plan SET status = 'APPROVED' WHERE Production_plan = ?", [$production_plan]);
+
+		$response = ($approved1 && $approved2) ? ['status' => true] : ['status' => false];
+		echo json_encode($response);
+	}
+
+	public function editItemMaterial()
+	{
+		// Retrieve the posted data
+		$id_box_detail = $this->input->post('id_box_detail');
+		$qty = $this->input->post('qty');  // Capture the updated quantity
+
+		// Create the data array to update the material
+		$data = array(
+			'qty' => $qty,
+			'uptdt' => date('Y-m-d H:i:s')  // Optional: update timestamp if needed
+		);
+
+		// Perform the update in the database
+		$this->db->where('id_box_detail', $id_box_detail);
+		$this->db->update('box_detail', $data);
+
+		// Check if the update was successful
+		if ($this->db->affected_rows() >= 0) {
+			echo json_encode(['status' => 'success']);
 		} else {
-			echo json_encode(['status' => false]);
-
+			echo json_encode(['status' => 'error', 'message' => 'Failed to update material details.']);
 		}
-
 	}
 
-	public function get_detail_approve_pr()
-	{
-		$Production_plan_detail_id = $this->input->post('Production_plan_detail_id');
-		$query = "
-			SELECT a.*, b.Sloc as sloc_name, c.no_box as box_name, d.total_qty as qty_on_box
-			FROM production_request_approve a
-			LEFT JOIN storage b ON b.Id_storage = a.Sloc
-			LEFT JOIN box c ON c.id_box = a.id_box
-			LEFT JOIN list_storage d ON d.sloc = a.Sloc and d.id_box = a.id_box and d.product_id = a.Id_material
-			WHERE Production_plan_detail_id = ?
-		";
-		// Execute query with parameter binding
-		$data = $this->db->query($query, [$Production_plan_detail_id])->result_array();
-		echo json_encode($data);
 
-	}
-
-	public function get_count_status_pr()
-	{
-		$production_plan = $this->input->post('production_plan');
-		$query = "
-    SELECT count(*) as jml FROM production_request where Production_plan = ? and status = 0;
-    ";
-		// Execute query with parameter binding
-		$data = $this->db->query($query, [$production_plan])->row();
-
-		if ($data->jml == 0) {
-			echo json_encode(['status' => true]);
-		} else {
-			echo json_encode(['status' => false]);
-		}
-
-	}
-
-	public function manage_box() {
-        $data['title'] = 'Manage Box';
-    
-        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
-        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
-    
-        $config['base_url'] = base_url('admin/manage_box');
-        $config['total_rows'] = $this->AModel->countAllBoxes();
-        $config['per_page'] = 50;
-    
-        // Add these two lines for pagination styling (Bootstrap 4)
-        $config['full_tag_open'] = '<nav aria-label="Page navigation example"><ul class="pagination">';
-        $config['full_tag_close'] = '</ul></nav>';
-        $config['first_link'] = '&laquo;';
-        $config['first_tag_open'] = '<li class="page-item">';
-        $config['first_tag_close'] = '</li>';
-        $config['last_link'] = '&raquo;';
-        $config['last_tag_open'] = '<li class="page-item">';
-        $config['last_tag_close'] = '</li>';
-        $config['next_link'] = '&rsaquo;';
-        $config['next_tag_open'] = '<li class="page-item">';
-        $config['next_tag_close'] = '</li>';
-        $config['prev_link'] = '&lsaquo;';
-        $config['prev_tag_open'] = '<li class="page-item">';
-        $config['prev_tag_close'] = '</li>';
-        $config['cur_tag_open'] = '<li class="page-item active"><a class="page-link">';
-        $config['cur_tag_close'] = '</a></li>';
-        $config['num_tag_open'] = '<li class="page-item">';
-        $config['num_tag_close'] = '</li>';
-        $config['attributes'] = array('class' => 'page-link');
-    
-        $this->pagination->initialize($config);
-    
-        $data['start'] = $this->uri->segment(3, 0);
-        $data['list_box'] = $this->AModel->getBoxes($config['per_page'], $data['start']);
-    
-        $this->load->view('templates/header', $data);
-        $this->load->view('templates/navbar', $data);   
-        $this->load->view('templates/sidebar');   
-        $this->load->view('admin/manage_box', $data);
-        $this->load->view('templates/footer');
-    }
 }
 ?>
