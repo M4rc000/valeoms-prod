@@ -82,8 +82,9 @@ class Production extends CI_Controller {
                 'Fg_desc' => $productDesc,
                 'Production_plan_qty' => $product_plan_qty,
                 'status' => 'NEW',
+                'production_plan_date' => $production_plan_date,
                 'Crtdt' => date('Y-m-d H:i'),
-                'Crtby' => $production_plan_date,
+                'Crtby' => $user,
                 'Upddt' => date('Y-m-d H:i'),
                 'Updby' => $user
             ];
@@ -103,7 +104,7 @@ class Production extends CI_Controller {
                     'Material_need' => $row['Qty'] * $product_plan_qty,
                     'Uom' => $row['Uom'],
                     'status' => 0, 
-                    'Crtdt' => $production_plan_date,
+                    'Crtdt' => date('Y-m-d H:i'),
                     'Crtby' => $user,
                     'Upddt' => date('Y-m-d H:i'),
                     'Updby' => $user

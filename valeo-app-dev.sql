@@ -3,7 +3,7 @@
 -- https://www.phpmyadmin.net/
 --
 -- Host: 127.0.0.1
--- Generation Time: Sep 09, 2024 at 09:44 PM
+-- Generation Time: Sep 12, 2024 at 09:23 AM
 -- Server version: 10.4.32-MariaDB
 -- PHP Version: 8.1.25
 
@@ -9519,6 +9519,7 @@ CREATE TABLE `production_plan` (
   `Fg_desc` varchar(128) NOT NULL,
   `Production_plan_qty` int(11) NOT NULL,
   `status` enum('NEW','APPROVED','REJECTED') NOT NULL DEFAULT 'NEW',
+  `production_plan_date` varchar(128) NOT NULL,
   `Crtdt` varchar(128) DEFAULT NULL,
   `Crtby` varchar(128) DEFAULT NULL,
   `Upddt` varchar(128) DEFAULT NULL,
@@ -9529,11 +9530,8 @@ CREATE TABLE `production_plan` (
 -- Dumping data for table `production_plan`
 --
 
-INSERT INTO `production_plan` (`id`, `Production_plan`, `Id_fg`, `Fg_desc`, `Production_plan_qty`, `status`, `Crtdt`, `Crtby`, `Upddt`, `Updby`) VALUES
-(117, 'PPA0000001', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', 5, 'NEW', '2024-09-09 19:29', '2024-09-09', '2024-09-09 19:29', 'Prime'),
-(118, 'PPA0000002', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', 5, 'NEW', '2024-09-09 19:29', '2024-09-09', '2024-09-09 19:29', 'Prime'),
-(119, 'PPA0000003', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', 10, 'NEW', '2024-09-09 20:22', '2024-09-10', '2024-09-09 20:22', 'Prime'),
-(120, 'PPA0000004', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', 10, 'NEW', '2024-09-09 20:37', '2024-09-10', '2024-09-09 20:37', 'Prime');
+INSERT INTO `production_plan` (`id`, `Production_plan`, `Id_fg`, `Fg_desc`, `Production_plan_qty`, `status`, `production_plan_date`, `Crtdt`, `Crtby`, `Upddt`, `Updby`) VALUES
+(121, 'PPA0000001', 'S000A474322', 'S/T. GAMMA2 INA. 2M600.TSL12. 1.2Kw', 5, 'NEW', '2024-09-30', '2024-09-10 12:21', 'Prime', '2024-09-10 12:21', 'Prime');
 
 -- --------------------------------------------------------
 
@@ -9560,54 +9558,18 @@ CREATE TABLE `production_plan_detail` (
 --
 
 INSERT INTO `production_plan_detail` (`id`, `Production_plan`, `Id_material`, `Material_desc`, `Material_need`, `Uom`, `status`, `Crtdt`, `Crtby`, `Upddt`, `Updby`) VALUES
-(3836, 'PPA0000001', 'S0041221794', 'LEVER. TSL14', 5, 'PC', 0, '2024-09-09', 'Prime', '2024-09-09 19:29', 'Prime'),
-(3837, 'PPA0000001', 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', 10, 'PC', 0, '2024-09-09', 'Prime', '2024-09-09 19:29', 'Prime'),
-(3838, 'PPA0000001', 'S0561217579', 'LEVER REST. TSL12', 5, 'PC', 0, '2024-09-09', 'Prime', '2024-09-09 19:29', 'Prime'),
-(3839, 'PPA0000001', '1212347', 'SCREW M/SWITCH. ZnNi', 10, 'PC', 0, '2024-09-09', 'Prime', '2024-09-09 19:29', 'Prime'),
-(3840, 'PPA0000001', 'S9221217787', 'FLANGE NUT. RSML14', 5, 'PC', 0, '2024-09-09', 'Prime', '2024-09-09 19:29', 'Prime'),
-(3841, 'PPA0000001', 'S9311220298', 'ADJUST WASHER. TSL12', 5, 'PC', 0, '2024-09-09', 'Prime', '2024-09-09 19:29', 'Prime'),
-(3842, 'PPA0000001', 'K306127', 'LIQUID GREASE.CM-55', 13.925, 'G', 0, '2024-09-09', 'Prime', '2024-09-09 19:29', 'Prime'),
-(3843, 'PPA0000001', 'S2001215878', 'ARMARURE ASSY. TSL12', 5, 'PC', 0, '2024-09-09', 'Prime', '2024-09-09 19:29', 'Prime'),
-(3844, 'PPA0000001', 'S5001223287', 'C/REAR PART ASS\'Y.GAMMA2 N/ISG', 5, 'PC', 0, '2024-09-09', 'Prime', '2024-09-09 19:29', 'Prime'),
-(3845, 'PPA0000001', 'A466035', 'F/BRKT ASS\'Y. GAMMA2 INA.', 5, 'PC', 0, '2024-09-09', 'Prime', '2024-09-09 19:29', 'Prime'),
-(3846, 'PPA0000001', 'S4001215783', 'M/SWITCH ASS\'Y. GAMMA2 N/ISG', 5, 'PC', 0, '2024-09-09', 'Prime', '2024-09-09 19:29', 'Prime'),
-(3847, 'PPA0000001', 'A474429', 'N/PLATE. GAMMA2 INA. 2M600', 5, 'PC', 0, '2024-09-09', 'Prime', '2024-09-09 19:29', 'Prime'),
-(3848, 'PPA0000002', 'S0041221794', 'LEVER. TSL14', 5, 'PC', 1, '2024-09-09', 'Prime', '2024-09-09 19:30:01', 'Prime'),
-(3849, 'PPA0000002', 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', 10, 'PC', 1, '2024-09-09', 'Prime', '2024-09-09 19:30:01', 'Prime'),
-(3850, 'PPA0000002', 'S0561217579', 'LEVER REST. TSL12', 5, 'PC', 1, '2024-09-09', 'Prime', '2024-09-09 19:30:01', 'Prime'),
-(3851, 'PPA0000002', '1212347', 'SCREW M/SWITCH. ZnNi', 10, 'PC', 1, '2024-09-09', 'Prime', '2024-09-09 19:30:02', 'Prime'),
-(3852, 'PPA0000002', 'S9221217787', 'FLANGE NUT. RSML14', 5, 'PC', 1, '2024-09-09', 'Prime', '2024-09-09 19:30:02', 'Prime'),
-(3853, 'PPA0000002', 'S9311220298', 'ADJUST WASHER. TSL12', 5, 'PC', 1, '2024-09-09', 'Prime', '2024-09-09 19:30:02', 'Prime'),
-(3854, 'PPA0000002', 'K306127', 'LIQUID GREASE.CM-55', 13.925, 'G', 1, '2024-09-09', 'Prime', '2024-09-09 19:30:02', 'Prime'),
-(3855, 'PPA0000002', 'S2001215878', 'ARMARURE ASSY. TSL12', 5, 'PC', 1, '2024-09-09', 'Prime', '2024-09-09 19:30:02', 'Prime'),
-(3856, 'PPA0000002', 'S5001223287', 'C/REAR PART ASS\'Y.GAMMA2 N/ISG', 5, 'PC', 1, '2024-09-09', 'Prime', '2024-09-09 19:30:02', 'Prime'),
-(3857, 'PPA0000002', 'A466035', 'F/BRKT ASS\'Y. GAMMA2 INA.', 5, 'PC', 1, '2024-09-09', 'Prime', '2024-09-09 19:30:02', 'Prime'),
-(3858, 'PPA0000002', 'S4001215783', 'M/SWITCH ASS\'Y. GAMMA2 N/ISG', 5, 'PC', 1, '2024-09-09', 'Prime', '2024-09-09 19:30:02', 'Prime'),
-(3859, 'PPA0000002', 'A474429', 'N/PLATE. GAMMA2 INA. 2M600', 5, 'PC', 1, '2024-09-09', 'Prime', '2024-09-09 19:30:02', 'Prime'),
-(3860, 'PPA0000003', 'S0041221794', 'LEVER. TSL14', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:22:14', 'Prime'),
-(3861, 'PPA0000003', 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', 20, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:22:14', 'Prime'),
-(3862, 'PPA0000003', 'S0561217579', 'LEVER REST. TSL12', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:22:15', 'Prime'),
-(3863, 'PPA0000003', '1212347', 'SCREW M/SWITCH. ZnNi', 20, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:22:15', 'Prime'),
-(3864, 'PPA0000003', 'S9221217787', 'FLANGE NUT. RSML14', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:22:15', 'Prime'),
-(3865, 'PPA0000003', 'S9311220298', 'ADJUST WASHER. TSL12', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:22:15', 'Prime'),
-(3866, 'PPA0000003', 'K306127', 'LIQUID GREASE.CM-55', 27.85, 'G', 1, '2024-09-10', 'Prime', '2024-09-09 20:22:15', 'Prime'),
-(3867, 'PPA0000003', 'S2001215878', 'ARMARURE ASSY. TSL12', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:22:15', 'Prime'),
-(3868, 'PPA0000003', 'S5001223287', 'C/REAR PART ASS\'Y.GAMMA2 N/ISG', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:22:15', 'Prime'),
-(3869, 'PPA0000003', 'A466035', 'F/BRKT ASS\'Y. GAMMA2 INA.', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:22:15', 'Prime'),
-(3870, 'PPA0000003', 'S4001215783', 'M/SWITCH ASS\'Y. GAMMA2 N/ISG', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:22:15', 'Prime'),
-(3871, 'PPA0000003', 'A474429', 'N/PLATE. GAMMA2 INA. 2M600', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:22:15', 'Prime'),
-(3872, 'PPA0000004', 'S0041221794', 'LEVER. TSL14', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:37:17', 'Prime'),
-(3873, 'PPA0000004', 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', 20, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:37:17', 'Prime'),
-(3874, 'PPA0000004', 'S0561217579', 'LEVER REST. TSL12', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:37:17', 'Prime'),
-(3875, 'PPA0000004', '1212347', 'SCREW M/SWITCH. ZnNi', 20, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:37:17', 'Prime'),
-(3876, 'PPA0000004', 'S9221217787', 'FLANGE NUT. RSML14', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:37:18', 'Prime'),
-(3877, 'PPA0000004', 'S9311220298', 'ADJUST WASHER. TSL12', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:37:18', 'Prime'),
-(3878, 'PPA0000004', 'K306127', 'LIQUID GREASE.CM-55', 27.85, 'G', 1, '2024-09-10', 'Prime', '2024-09-09 20:37:18', 'Prime'),
-(3879, 'PPA0000004', 'S2001215878', 'ARMARURE ASSY. TSL12', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:37:18', 'Prime'),
-(3880, 'PPA0000004', 'S5001223287', 'C/REAR PART ASS\'Y.GAMMA2 N/ISG', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:37:18', 'Prime'),
-(3881, 'PPA0000004', 'A466035', 'F/BRKT ASS\'Y. GAMMA2 INA.', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:37:18', 'Prime'),
-(3882, 'PPA0000004', 'S4001215783', 'M/SWITCH ASS\'Y. GAMMA2 N/ISG', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:37:18', 'Prime'),
-(3883, 'PPA0000004', 'A474429', 'N/PLATE. GAMMA2 INA. 2M600', 10, 'PC', 1, '2024-09-10', 'Prime', '2024-09-09 20:37:18', 'Prime');
+(3884, 'PPA0000001', 'S0041221794', 'LEVER. TSL14', 5, 'PC', 1, '2024-09-10 12:21', 'Prime', '2024-09-10 12:21:06', 'Prime'),
+(3885, 'PPA0000001', 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', 10, 'PC', 1, '2024-09-10 12:21', 'Prime', '2024-09-10 12:21:06', 'Prime'),
+(3886, 'PPA0000001', 'S0561217579', 'LEVER REST. TSL12', 5, 'PC', 1, '2024-09-10 12:21', 'Prime', '2024-09-10 12:21:06', 'Prime'),
+(3887, 'PPA0000001', '1212347', 'SCREW M/SWITCH. ZnNi', 10, 'PC', 1, '2024-09-10 12:21', 'Prime', '2024-09-10 12:21:06', 'Prime'),
+(3888, 'PPA0000001', 'S9221217787', 'FLANGE NUT. RSML14', 5, 'PC', 1, '2024-09-10 12:21', 'Prime', '2024-09-10 12:21:06', 'Prime'),
+(3889, 'PPA0000001', 'S9311220298', 'ADJUST WASHER. TSL12', 5, 'PC', 1, '2024-09-10 12:21', 'Prime', '2024-09-10 12:21:06', 'Prime'),
+(3890, 'PPA0000001', 'K306127', 'LIQUID GREASE.CM-55', 13.925, 'G', 1, '2024-09-10 12:21', 'Prime', '2024-09-10 12:21:06', 'Prime'),
+(3891, 'PPA0000001', 'S2001215878', 'ARMARURE ASSY. TSL12', 5, 'PC', 1, '2024-09-10 12:21', 'Prime', '2024-09-10 12:21:06', 'Prime'),
+(3892, 'PPA0000001', 'S5001223287', 'C/REAR PART ASS\'Y.GAMMA2 N/ISG', 5, 'PC', 1, '2024-09-10 12:21', 'Prime', '2024-09-10 12:21:06', 'Prime'),
+(3893, 'PPA0000001', 'A466035', 'F/BRKT ASS\'Y. GAMMA2 INA.', 5, 'PC', 1, '2024-09-10 12:21', 'Prime', '2024-09-10 12:21:06', 'Prime'),
+(3894, 'PPA0000001', 'S4001215783', 'M/SWITCH ASS\'Y. GAMMA2 N/ISG', 5, 'PC', 1, '2024-09-10 12:21', 'Prime', '2024-09-10 12:21:06', 'Prime'),
+(3895, 'PPA0000001', 'A474429', 'N/PLATE. GAMMA2 INA. 2M600', 5, 'PC', 1, '2024-09-10 12:21', 'Prime', '2024-09-10 12:21:06', 'Prime');
 
 -- --------------------------------------------------------
 
@@ -9635,55 +9597,18 @@ CREATE TABLE `production_request` (
 --
 
 INSERT INTO `production_request` (`id`, `Production_plan_detail_id`, `Id_request`, `Production_plan`, `Id_material`, `Material_desc`, `Qty`, `status`, `Crtdt`, `Crtby`, `Upddt`, `Updby`) VALUES
-(1137, 3836, 'PRA000001', 'PPA0000001', 'S0041221794', 'LEVER. TSL14', 5, 1, '2024-09-09 19:29:04', 'Prime', '', ''),
-(1138, 3837, 'PRA000002', 'PPA0000001', 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', 10, 1, '2024-09-09 19:29:04', 'Prime', '', ''),
-(1139, 3838, 'PRA000003', 'PPA0000001', 'S0561217579', 'LEVER REST. TSL12', 5, 1, '2024-09-09 19:29:04', 'Prime', '', ''),
-(1140, 3839, 'PRA000004', 'PPA0000001', '1212347', 'SCREW M/SWITCH. ZnNi', 10, 1, '2024-09-09 19:29:04', 'Prime', '', ''),
-(1141, 3840, 'PRA000005', 'PPA0000001', 'S9221217787', 'FLANGE NUT. RSML14', 5, 1, '2024-09-09 19:29:04', 'Prime', '', ''),
-(1142, 3841, 'PRA000006', 'PPA0000001', 'S9311220298', 'ADJUST WASHER. TSL12', 5, 1, '2024-09-09 19:29:04', 'Prime', '', ''),
-(1143, 3842, 'PRA000007', 'PPA0000001', 'K306127', 'LIQUID GREASE.CM-55', 13.925, 1, '2024-09-09 19:29:04', 'Prime', '', ''),
-(1144, 3843, 'PRA000008', 'PPA0000001', 'S2001215878', 'ARMARURE ASSY. TSL12', 5, 1, '2024-09-09 19:29:04', 'Prime', '', ''),
-(1145, 3844, 'PRA000009', 'PPA0000001', 'S5001223287', 'C/REAR PART ASS\'Y.GAMMA2 N/ISG', 5, 1, '2024-09-09 19:29:04', 'Prime', '', ''),
-(1146, 3845, 'PRA000010', 'PPA0000001', 'A466035', 'F/BRKT ASS\'Y. GAMMA2 INA.', 5, 1, '2024-09-09 19:29:04', 'Prime', '', ''),
-(1147, 3846, 'PRA000011', 'PPA0000001', 'S4001215783', 'M/SWITCH ASS\'Y. GAMMA2 N/ISG', 5, 1, '2024-09-09 19:29:04', 'Prime', '', ''),
-(1148, 3847, 'PRA000012', 'PPA0000001', 'A474429', 'N/PLATE. GAMMA2 INA. 2M600', 5, 1, '2024-09-09 19:29:04', 'Prime', '', ''),
-(1149, 3848, 'PRA000013', 'PPA0000002', 'S0041221794', 'LEVER. TSL14', 5, 1, '2024-09-09 19:29:53', 'Prime', '', ''),
-(1150, 3849, 'PRA000014', 'PPA0000002', 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', 10, 1, '2024-09-09 19:29:53', 'Prime', '', ''),
-(1151, 3850, 'PRA000015', 'PPA0000002', 'S0561217579', 'LEVER REST. TSL12', 5, 1, '2024-09-09 19:29:53', 'Prime', '', ''),
-(1152, 3851, 'PRA000016', 'PPA0000002', '1212347', 'SCREW M/SWITCH. ZnNi', 10, 1, '2024-09-09 19:29:53', 'Prime', '', ''),
-(1153, 3852, 'PRA000017', 'PPA0000002', 'S9221217787', 'FLANGE NUT. RSML14', 5, 1, '2024-09-09 19:29:53', 'Prime', '', ''),
-(1154, 3853, 'PRA000018', 'PPA0000002', 'S9311220298', 'ADJUST WASHER. TSL12', 5, 1, '2024-09-09 19:29:53', 'Prime', '', ''),
-(1155, 3854, 'PRA000019', 'PPA0000002', 'K306127', 'LIQUID GREASE.CM-55', 13.925, 1, '2024-09-09 19:29:53', 'Prime', '', ''),
-(1156, 3855, 'PRA000020', 'PPA0000002', 'S2001215878', 'ARMARURE ASSY. TSL12', 5, 1, '2024-09-09 19:29:53', 'Prime', '', ''),
-(1157, 3856, 'PRA000021', 'PPA0000002', 'S5001223287', 'C/REAR PART ASS\'Y.GAMMA2 N/ISG', 5, 1, '2024-09-09 19:29:53', 'Prime', '', ''),
-(1158, 3857, 'PRA000022', 'PPA0000002', 'A466035', 'F/BRKT ASS\'Y. GAMMA2 INA.', 5, 1, '2024-09-09 19:29:53', 'Prime', '', ''),
-(1159, 3858, 'PRA000023', 'PPA0000002', 'S4001215783', 'M/SWITCH ASS\'Y. GAMMA2 N/ISG', 5, 1, '2024-09-09 19:29:53', 'Prime', '', ''),
-(1160, 3859, 'PRA000024', 'PPA0000002', 'A474429', 'N/PLATE. GAMMA2 INA. 2M600', 5, 1, '2024-09-09 19:29:53', 'Prime', '', ''),
-(1161, 3860, 'PRA000025', 'PPA0000003', 'S0041221794', 'LEVER. TSL14', 10, 1, '2024-09-09 20:22:05', 'Prime', '', ''),
-(1162, 3861, 'PRA000026', 'PPA0000003', 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', 20, 1, '2024-09-09 20:22:05', 'Prime', '', ''),
-(1163, 3862, 'PRA000027', 'PPA0000003', 'S0561217579', 'LEVER REST. TSL12', 10, 1, '2024-09-09 20:22:05', 'Prime', '', ''),
-(1164, 3863, 'PRA000028', 'PPA0000003', '1212347', 'SCREW M/SWITCH. ZnNi', 20, 1, '2024-09-09 20:22:05', 'Prime', '', ''),
-(1165, 3864, 'PRA000029', 'PPA0000003', 'S9221217787', 'FLANGE NUT. RSML14', 10, 1, '2024-09-09 20:22:05', 'Prime', '', ''),
-(1166, 3865, 'PRA000030', 'PPA0000003', 'S9311220298', 'ADJUST WASHER. TSL12', 10, 1, '2024-09-09 20:22:05', 'Prime', '', ''),
-(1167, 3866, 'PRA000031', 'PPA0000003', 'K306127', 'LIQUID GREASE.CM-55', 27.85, 1, '2024-09-09 20:22:05', 'Prime', '', ''),
-(1168, 3867, 'PRA000032', 'PPA0000003', 'S2001215878', 'ARMARURE ASSY. TSL12', 10, 1, '2024-09-09 20:22:05', 'Prime', '', ''),
-(1169, 3868, 'PRA000033', 'PPA0000003', 'S5001223287', 'C/REAR PART ASS\'Y.GAMMA2 N/ISG', 10, 1, '2024-09-09 20:22:05', 'Prime', '', ''),
-(1170, 3869, 'PRA000034', 'PPA0000003', 'A466035', 'F/BRKT ASS\'Y. GAMMA2 INA.', 10, 1, '2024-09-09 20:22:05', 'Prime', '', ''),
-(1171, 3870, 'PRA000035', 'PPA0000003', 'S4001215783', 'M/SWITCH ASS\'Y. GAMMA2 N/ISG', 10, 1, '2024-09-09 20:22:05', 'Prime', '', ''),
-(1172, 3871, 'PRA000036', 'PPA0000003', 'A474429', 'N/PLATE. GAMMA2 INA. 2M600', 10, 1, '2024-09-09 20:22:05', 'Prime', '', ''),
-(1173, NULL, 'PRA000037', 'PPA0000001', 'B0702655152', 'NUT HEX.Tightennning for Pulley.M16', 10, 1, '2024-09-09 20:22:42', 'Prime', '', ''),
-(1174, 3872, 'PRA000038', 'PPA0000004', 'S0041221794', 'LEVER. TSL14', 10, 1, '2024-09-09 20:37:11', 'Prime', '', ''),
-(1175, 3873, 'PRA000039', 'PPA0000004', 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', 20, 1, '2024-09-09 20:37:11', 'Prime', '', ''),
-(1176, 3874, 'PRA000040', 'PPA0000004', 'S0561217579', 'LEVER REST. TSL12', 10, 1, '2024-09-09 20:37:11', 'Prime', '', ''),
-(1177, 3875, 'PRA000041', 'PPA0000004', '1212347', 'SCREW M/SWITCH. ZnNi', 20, 1, '2024-09-09 20:37:11', 'Prime', '', ''),
-(1178, 3876, 'PRA000042', 'PPA0000004', 'S9221217787', 'FLANGE NUT. RSML14', 10, 1, '2024-09-09 20:37:11', 'Prime', '', ''),
-(1179, 3877, 'PRA000043', 'PPA0000004', 'S9311220298', 'ADJUST WASHER. TSL12', 10, 1, '2024-09-09 20:37:11', 'Prime', '', ''),
-(1180, 3878, 'PRA000044', 'PPA0000004', 'K306127', 'LIQUID GREASE.CM-55', 27.85, 1, '2024-09-09 20:37:11', 'Prime', '', ''),
-(1181, 3879, 'PRA000045', 'PPA0000004', 'S2001215878', 'ARMARURE ASSY. TSL12', 10, 1, '2024-09-09 20:37:11', 'Prime', '', ''),
-(1182, 3880, 'PRA000046', 'PPA0000004', 'S5001223287', 'C/REAR PART ASS\'Y.GAMMA2 N/ISG', 10, 1, '2024-09-09 20:37:11', 'Prime', '', ''),
-(1183, 3881, 'PRA000047', 'PPA0000004', 'A466035', 'F/BRKT ASS\'Y. GAMMA2 INA.', 10, 1, '2024-09-09 20:37:11', 'Prime', '', ''),
-(1184, 3882, 'PRA000048', 'PPA0000004', 'S4001215783', 'M/SWITCH ASS\'Y. GAMMA2 N/ISG', 10, 1, '2024-09-09 20:37:11', 'Prime', '', ''),
-(1185, 3883, 'PRA000049', 'PPA0000004', 'A474429', 'N/PLATE. GAMMA2 INA. 2M600', 10, 1, '2024-09-09 20:37:11', 'Prime', '', '');
+(1186, 3884, 'PRA000001', 'PPA0000001', 'S0041221794', 'LEVER. TSL14', 5, 1, '2024-09-10 12:21:01', 'Prime', '', ''),
+(1187, 3885, 'PRA000002', 'PPA0000001', 'S0191204877', 'THROUGH BOLT.A2 TQ EURO6', 10, 1, '2024-09-10 12:21:01', 'Prime', '', ''),
+(1188, 3886, 'PRA000003', 'PPA0000001', 'S0561217579', 'LEVER REST. TSL12', 5, 1, '2024-09-10 12:21:01', 'Prime', '', ''),
+(1189, 3887, 'PRA000004', 'PPA0000001', '1212347', 'SCREW M/SWITCH. ZnNi', 10, 1, '2024-09-10 12:21:01', 'Prime', '', ''),
+(1190, 3888, 'PRA000005', 'PPA0000001', 'S9221217787', 'FLANGE NUT. RSML14', 5, 1, '2024-09-10 12:21:01', 'Prime', '', ''),
+(1191, 3889, 'PRA000006', 'PPA0000001', 'S9311220298', 'ADJUST WASHER. TSL12', 5, 1, '2024-09-10 12:21:01', 'Prime', '', ''),
+(1192, 3890, 'PRA000007', 'PPA0000001', 'K306127', 'LIQUID GREASE.CM-55', 13.925, 1, '2024-09-10 12:21:01', 'Prime', '', ''),
+(1193, 3891, 'PRA000008', 'PPA0000001', 'S2001215878', 'ARMARURE ASSY. TSL12', 5, 1, '2024-09-10 12:21:01', 'Prime', '', ''),
+(1194, 3892, 'PRA000009', 'PPA0000001', 'S5001223287', 'C/REAR PART ASS\'Y.GAMMA2 N/ISG', 5, 1, '2024-09-10 12:21:01', 'Prime', '', ''),
+(1195, 3893, 'PRA000010', 'PPA0000001', 'A466035', 'F/BRKT ASS\'Y. GAMMA2 INA.', 5, 1, '2024-09-10 12:21:01', 'Prime', '', ''),
+(1196, 3894, 'PRA000011', 'PPA0000001', 'S4001215783', 'M/SWITCH ASS\'Y. GAMMA2 N/ISG', 5, 1, '2024-09-10 12:21:01', 'Prime', '', ''),
+(1197, 3895, 'PRA000012', 'PPA0000001', 'A474429', 'N/PLATE. GAMMA2 INA. 2M600', 5, 1, '2024-09-10 12:21:01', 'Prime', '', '');
 
 -- --------------------------------------------------------
 
@@ -10486,7 +10411,8 @@ INSERT INTO `user` (`id`, `name`, `username`, `password`, `gender`, `date_joined
 (20, 'Gesta', 'Gesta', '$2y$10$DMF.T6mKOkmOUmpuH9mTseHBoOtZj4hX2TVkt4B6DMieiROqdwXQi', 'Male', '2024-06-24 10:00', 1, 4, '', ''),
 (21, 'Amir', 'Amir', '$2y$10$DMF.T6mKOkmOUmpuH9mTseHBoOtZj4hX2TVkt4B6DMieiROqdwXQi', 'Male', '2024-06-24 10:00', 1, 6, '', ''),
 (22, 'Faisal', 'Faisal', '$2y$10$VIXBbOBUOM2/NDbCdMgC9uWMKdxFUycdkIWJBQkUo/h39kDACssgy', 'Male', '2024-06-24 10:00', 1, 6, '2024-09-06 04:07', ''),
-(23, 'Nurmala', 'Nurmala', '$2y$10$vcMUy2JAjVQCjoyvIuP0ae87y62bbKBMZ8/V.iXq8jds6idC4vRxa', 'Female', '2024-06-24 10:00', 1, 6, '2024-09-06 15:28', '');
+(23, 'Nurmala', 'Nurmala', '$2y$10$vcMUy2JAjVQCjoyvIuP0ae87y62bbKBMZ8/V.iXq8jds6idC4vRxa', 'Female', '2024-06-24 10:00', 1, 6, '2024-09-06 15:28', ''),
+(26, 'Cycler', 'Cycler', '$2y$10$iGzEynHSo1QPV7QTMSfk6e3cKYAJ8wCLGYuJA9NAC6NYi0Xu83s4y', 'Male', '12-09-2024 12:26', 1, 8, '', '');
 
 -- --------------------------------------------------------
 
@@ -10525,7 +10451,12 @@ INSERT INTO `user_access_menu` (`id`, `role_id`, `menu_id`) VALUES
 (30, 5, 5),
 (31, 6, 3),
 (32, 6, 6),
-(33, 1, 8);
+(33, 1, 8),
+(34, 8, 1),
+(35, 8, 2),
+(36, 8, 3),
+(37, 8, 5),
+(38, 8, 6);
 
 -- --------------------------------------------------------
 
@@ -10611,7 +10542,12 @@ INSERT INTO `user_access_submenu` (`id`, `role_id`, `menu_id`, `submenu_id`) VAL
 (105, 1, 1, 25),
 (106, 1, 2, 26),
 (107, 1, 2, 27),
-(108, 1, 8, 28);
+(108, 1, 8, 28),
+(109, 8, 1, 25),
+(110, 8, 2, 8),
+(111, 8, 2, 9),
+(112, 8, 2, 10),
+(113, 8, 2, 11);
 
 -- --------------------------------------------------------
 
@@ -10668,7 +10604,8 @@ INSERT INTO `user_role` (`id`, `role`, `crtdt`, `crtby`, `upddt`, `updby`) VALUE
 (4, 'Operator Production', '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
 (5, 'Operator Quality', '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
 (6, 'Admin Leader', '2024-05-04 01:00', 'System', '2024-05-04 01:00', 'System'),
-(7, 'Supplier', '12-08-2024 07:20', 'Prime', '12-08-2024 07:20', 'Prime');
+(7, 'Supplier', '12-08-2024 07:20', 'Prime', '12-08-2024 07:20', 'Prime'),
+(8, 'Cycle Count', '12-09-2024 12:23', 'Prime', '12-09-2024 12:23', 'Prime');
 
 -- --------------------------------------------------------
 
@@ -10902,19 +10839,19 @@ ALTER TABLE `material_list`
 -- AUTO_INCREMENT for table `production_plan`
 --
 ALTER TABLE `production_plan`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=121;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=122;
 
 --
 -- AUTO_INCREMENT for table `production_plan_detail`
 --
 ALTER TABLE `production_plan_detail`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3884;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=3896;
 
 --
 -- AUTO_INCREMENT for table `production_request`
 --
 ALTER TABLE `production_request`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1186;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=1198;
 
 --
 -- AUTO_INCREMENT for table `production_request_approve`
@@ -10968,19 +10905,19 @@ ALTER TABLE `storage`
 -- AUTO_INCREMENT for table `user`
 --
 ALTER TABLE `user`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=26;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=27;
 
 --
 -- AUTO_INCREMENT for table `user_access_menu`
 --
 ALTER TABLE `user_access_menu`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=34;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=39;
 
 --
 -- AUTO_INCREMENT for table `user_access_submenu`
 --
 ALTER TABLE `user_access_submenu`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=109;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=114;
 
 --
 -- AUTO_INCREMENT for table `user_menu`
@@ -10992,7 +10929,7 @@ ALTER TABLE `user_menu`
 -- AUTO_INCREMENT for table `user_role`
 --
 ALTER TABLE `user_role`
-  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=8;
+  MODIFY `id` int(11) NOT NULL AUTO_INCREMENT, AUTO_INCREMENT=9;
 
 --
 -- AUTO_INCREMENT for table `user_sub_menu`

@@ -1604,5 +1604,47 @@ class Warehouse extends CI_Controller
 
 	}
 
+	public function manage_box() {
+        $data['title'] = 'Manage Box';
+    
+        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+    
+        $config['base_url'] = base_url('admin/manage_box');
+        $config['total_rows'] = $this->AModel->countAllBoxes();
+        $config['per_page'] = 50;
+    
+        // Add these two lines for pagination styling (Bootstrap 4)
+        $config['full_tag_open'] = '<nav aria-label="Page navigation example"><ul class="pagination">';
+        $config['full_tag_close'] = '</ul></nav>';
+        $config['first_link'] = '&laquo;';
+        $config['first_tag_open'] = '<li class="page-item">';
+        $config['first_tag_close'] = '</li>';
+        $config['last_link'] = '&raquo;';
+        $config['last_tag_open'] = '<li class="page-item">';
+        $config['last_tag_close'] = '</li>';
+        $config['next_link'] = '&rsaquo;';
+        $config['next_tag_open'] = '<li class="page-item">';
+        $config['next_tag_close'] = '</li>';
+        $config['prev_link'] = '&lsaquo;';
+        $config['prev_tag_open'] = '<li class="page-item">';
+        $config['prev_tag_close'] = '</li>';
+        $config['cur_tag_open'] = '<li class="page-item active"><a class="page-link">';
+        $config['cur_tag_close'] = '</a></li>';
+        $config['num_tag_open'] = '<li class="page-item">';
+        $config['num_tag_close'] = '</li>';
+        $config['attributes'] = array('class' => 'page-link');
+    
+        $this->pagination->initialize($config);
+    
+        $data['start'] = $this->uri->segment(3, 0);
+        $data['list_box'] = $this->AModel->getBoxes($config['per_page'], $data['start']);
+    
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/navbar', $data);   
+        $this->load->view('templates/sidebar');   
+        $this->load->view('admin/manage_box', $data);
+        $this->load->view('templates/footer');
+    }
 }
 ?>
