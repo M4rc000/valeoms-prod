@@ -36,8 +36,7 @@
 
                     <?php } ?>
                     <h5 class="mt-2">Production Plan: <b><?= $production_plan->Production_plan ?></b></h5>
-                    <h5 class="mt-2">Product ID: <b><?= $production_plan->Id_fg ?></b></h5>
-                    <h5 class="mt-2">Product Description: <b><?= $production_plan->Fg_desc ?></b></h5>
+                    <h5 class="mt-2">Production Description: <b><?= $production_plan->Fg_desc ?></b></h5>
                 <h5 class="mt-2">Production Plan Qty: <b><?= $production_plan->Production_plan_qty ?></b></h5>
                     <!-- <button type="button" class="btn btn-primary mb-2 mt-4" style data-bs-toggle="modal"
                         data-bs-target="#addModal1" style="font-weight: bold;" id="addBtn">
@@ -121,14 +120,14 @@
                     </div>
                     <div class="col-5">
                         <label for="sloc" class="form-label">Material Description</label>
-                        <input type="text" class="form-control" id="material_desc" value="<?= $pr['Material_desc']?>" readonly>
-                        <input type="hidden" class="form-control" id="Production_plan_detail_id"  value="<?= $pr['Production_plan_detail_id']?>" readonly>
-                        <input type="hidden" class="form-control" id="id_request"  value="<?= $pr['Id_request']?>" readonly>
-                        <input type="hidden" class="form-control" id="production_plan"  value="<?= $pr['Production_plan']?>" readonly>
+                        <input type="text" class="form-control material_desc_<?= $pr['Id_material']?>"   value="<?= $pr['Material_desc']?>" readonly>
+                        <input type="hidden" class="form-control Production_plan_detail_id_<?= $pr['Id_material']?>"  value="<?= $pr['Production_plan_detail_id']?>" readonly>
+                        <input type="hidden" class="form-control id_request_<?= $pr['Id_material']?>"  value="<?= $pr['Id_request']?>" readonly>
+                        <input type="hidden" class="form-control production_plan_<?= $pr['Id_material']?>"  value="<?= $pr['Production_plan']?>" readonly>
                     </div>
                     <div class="col-3">
                         <label for="sloc" class="form-label">Qty Need</label>
-                       <input type="text" class="form-control" id="material_need" value="<?= $pr['Qty']?>" readonly>
+                       <input type="text" class="form-control material_need_<?= $pr['Id_material']?>" value="<?= $pr['Qty']?>" readonly>
                     </div>
                 </div>
                 <hr>
@@ -206,37 +205,37 @@
 <script>
     
 $(document).ready(function() {
-    let rowIndex = 0;
+    var rowIndex = 0;
     // Event listener for plus-row button click
     $(document).on('click', '.plus-row', function() {
         var id_material = $(this).data('id-material'); 
         rowIndex++;
         // Create a new setting block with a unique index
         var newSetting = `
-            <div class="row ps-2 pt-3 setting" data-index="${rowIndex}">
-                <div class="col-3" id="slocview_${rowIndex}">
-                    <label for="sloc_${rowIndex}" class="form-label">Sloc</label>
-                    <select class="form-control sloc-select sloc_${rowIndex}" name="sloc_name_${rowIndex}" id="sloc_${rowIndex}">
-                        <option value="">Select Sloc</option>
-                    </select>
+            <div class="row ps-2 pt-3 setting" data-index="${rowIndex}_${id_material}">
+                <div class="col-3" id="slocview_${rowIndex}_${id_material}">
+                    <label for="sloc_${rowIndex}_${id_material}" class="form-label">Sloc</label>
+                     <select class="form-control sloc-select sloc_${rowIndex}_${id_material}" name="sloc_name_${rowIndex}_${id_material}" id="sloc_${rowIndex}_${id_material}">
+                    <option value="">Select Sloc</option>
+                </select>
                 </div>
-                <div class="col-3" id="boxview_${rowIndex}">
-                    <label for="no_box_${rowIndex}" class="form-label">No box</label>
-                    <select class="form-control box-select box_${rowIndex}" name="no_box_${rowIndex}" id="box_${rowIndex}">
+                <div class="col-3" id="boxview_${rowIndex}_${id_material}">
+                    <label for="no_box_${rowIndex}_${id_material}" class="form-label">No box</label>
+                    <select class="form-control box-select box_${rowIndex}_${id_material}" name="no_box_${rowIndex}_${id_material}" id="box_${rowIndex}_${id_material}">
                         <option value="">Select Box</option>
                     </select>
                 </div>
                 <div class="col-2">
-                    <label for="qty_on_sloc_${rowIndex}" class="form-label">Qty</label>
-                    <input type="text" class="form-control qty_on_sloc_${rowIndex}" id="qty_on_sloc_${rowIndex}" name="qty_on_sloc_${rowIndex}[]" readonly>
+                    <label for="qty_on_sloc_${rowIndex}_${id_material}" class="form-label">Qty</label>
+                    <input type="text" class="form-control qty_on_sloc_${rowIndex}_${id_material}" id="qty_on_sloc_${rowIndex}_${id_material}" name="qty_on_sloc_${rowIndex}_${id_material}[]" readonly>
                 </div>
                 <div class="col-2">
-                    <label for="qty_need_${rowIndex}" class="form-label">Qty need</label>
-                    <input type="number" class="form-control qty_need_${rowIndex}" id="qty_need_${rowIndex}" name="qty_need_${rowIndex}[]" min="0" onchange="cekQtyNeed(this, ${rowIndex})">
+                    <label for="qty_need_${rowIndex}_${id_material}" class="form-label">Qty need</label>
+                    <input type="number" class="form-control qty_need_${rowIndex}_${id_material}" id="qty_need_${rowIndex}_${id_material}" name="qty_need_${rowIndex}_${id_material}[]" min="0" onchange="cekQtyNeed(this, ${rowIndex}, '${id_material}')">
                 </div>
                  <div class="col-2 p-4">
-                    <button class="btn btn-success setPR_${rowIndex}" id="setPR_${rowIndex}" onclick="setPR(${rowIndex}, '${id_material}')">Set</button>
-                    <button class="btn btn-success unsetPR_${rowIndex}" id="unsetPR_${rowIndex}" onclick="unsetPR(${rowIndex}, '${id_material}')" style="display:none">Unset</button>
+                    <button class="btn btn-success setPR_${rowIndex}_${id_material}" id="setPR_${rowIndex}_${id_material}" onclick="setPR(${rowIndex}, '${id_material}')">Set</button>
+                    <button class="btn btn-success unsetPR_${rowIndex}_${id_material}" id="unsetPR_${rowIndex}_${id_material}" onclick="unsetPR(${rowIndex}, '${id_material}')" style="display:none">Unset</button>
                 </div>
             </div>
         `;
@@ -248,7 +247,7 @@ $(document).ready(function() {
     });
 });
 
-let materialSlocArray = []; // Array to store material settings
+var materialSlocArray = []; // Array to store material settings
 
 function getSloc(idMaterial, rowIndex) {
     $.ajax({
@@ -257,7 +256,7 @@ function getSloc(idMaterial, rowIndex) {
         data: { id_material: idMaterial },
         success: function(response) {
             var data = JSON.parse(response);
-            var $select = $(`.sloc_${rowIndex}`);
+            var $select = $(`.sloc_${rowIndex}_${idMaterial}`);
             $select.empty();
             $select.append('<option value="">-- Select Sloc --</option>');
 
@@ -273,6 +272,7 @@ function getSloc(idMaterial, rowIndex) {
             // Attach change event listener to sloc-select
             $select.on('change', function() {
                 var selectedSlocId = $(this).val();
+                $(`.sloc_${rowIndex}_${idMaterial}`).val(selectedSlocId);
                 getIdBox(idMaterial, selectedSlocId, rowIndex);
             });
         },
@@ -289,12 +289,12 @@ function getIdBox(idMaterial, slocId, rowIndex) {
         data: { id_material: idMaterial, sloc_id: slocId },
         success: function(response) {
             var data = JSON.parse(response);
-            var $boxSelect = $(`.box_${rowIndex}`);
+            var $boxSelect = $(`.box_${rowIndex}_${idMaterial}`);
             $boxSelect.empty();
             $boxSelect.append('<option value="">-- Select Box --</option>');
 
             $.each(data, function(index, box) {
-                $boxSelect.append('<option value="' + box.id_box + '" data-total-qty="' + box.total_qty + '">' + box.no_box + '</option>');
+                $boxSelect.append('<option value="' + box.id_box + '" data-total-qty="' + box.total_qty_real + '">' + box.no_box + '</option>');
             });
 
             $boxSelect.select2({
@@ -306,6 +306,7 @@ function getIdBox(idMaterial, slocId, rowIndex) {
                  // Check for duplicate box selection
                 var selectedOption = $(this).find('option:selected');
                  var selectedBox = selectedOption.val();
+                $(`.box_${rowIndex}_${idMaterial}`).val(selectedBox);
                  if (materialSlocArray.some(item => item.box === selectedBox)) {
                     Swal.fire({
                         icon: 'error',
@@ -316,8 +317,8 @@ function getIdBox(idMaterial, slocId, rowIndex) {
                     return;
                 }
                 var totalQty = selectedOption.data('total-qty');
-                $(`.qty_on_sloc_${rowIndex}`).val(totalQty);
-                $(`.qty_need_${rowIndex}`).attr('max', totalQty);
+                $(`.qty_on_sloc_${rowIndex}_${idMaterial}`).val(totalQty);
+                $(`.qty_need_${rowIndex}_${idMaterial}`).attr('max', totalQty);
             });
         },
         error: function(xhr, status, error) {
@@ -326,33 +327,34 @@ function getIdBox(idMaterial, slocId, rowIndex) {
     });
 }
 
-function cekQtyNeed(that, rowIndex) {
+function cekQtyNeed(that, rowIndex, idMaterial) {
     var qty = $(that).val();
-    var qtyOnSloc = $(`.qty_on_sloc_${rowIndex}`).val();
+    var qtyOnSloc = $(`.qty_on_sloc_${rowIndex}_${idMaterial}`).val();
 
     if (parseFloat(qty) > parseFloat(qtyOnSloc)) {
+        $(`.qty_need_${rowIndex}_${idMaterial}`).val(qtyOnSloc);
         Swal.fire({
             icon: 'error',
             text: 'Quantity cannot exceed the available quantity on Box'
         });
-        $(that).val(qtyOnSloc); // Reset value to max
+    } else {
+        $(`.qty_need_${rowIndex}_${idMaterial}`).val(qty);
     }
+
 }
 
 
 
 function setPR(rowIndex, id_material) {
-    let slocValue = $(`.sloc_${rowIndex}`).val();
-    let boxValue = $(`.box_${rowIndex}`).val();
-    let qtyNeedValue = $(`.qty_need_${rowIndex}`).val();
+    var slocValue = $(`.sloc_${rowIndex}_${id_material}`).val();
+    var boxValue = $(`.box_${rowIndex}_${id_material}`).val();
+    var qtyNeedValue = $(`.qty_need_${rowIndex}_${id_material}`).val();
     var id_material = id_material;
-    var Production_plan_detail_id = $('#Production_plan_detail_id').val();
-    var material_desc = $('#material_desc').val();
-    var production_plan = $('#production_plan').val();
-    var id_request = $('#id_request').val();
-
-    console.log(rowIndex);
-
+    var Production_plan_detail_id = $(`.Production_plan_detail_id_${id_material}`).val();
+    var material_desc = $(`.material_desc_${id_material}`).val();
+    var production_plan = $(`.production_plan_${id_material}`).val();
+    var id_request = $(`.id_request_${id_material}`).val();
+    // Check if sloc, box, or qty_need values are empty
     if (!slocValue) {
         Swal.fire({
             icon: 'error',
@@ -389,15 +391,15 @@ function setPR(rowIndex, id_material) {
     console.log(materialSlocArray);
 
     // Disable the specific setPR button for this row
-    $(`.setPR_${rowIndex}`).css('display', 'none');
-    $(`.unsetPR_${rowIndex}`).css('display', 'block');
-    $(`.qty_need_${rowIndex}`).prop('readonly', true);
-    $(`.sloc_${rowIndex}`).prop('disabled', true);
-    $(`.box_${rowIndex}`).prop('disabled', true);
+    $(`.setPR_${rowIndex}_${id_material}`).css('display', 'none');
+    $(`.unsetPR_${rowIndex}_${id_material}`).css('display', 'block');
+    $(`.qty_need_${rowIndex}_${id_material}`).prop('readonly', true);
+    $(`.sloc_${rowIndex}_${id_material}`).prop('disabled', true);
+    $(`.box_${rowIndex}_${id_material}`).prop('disabled', true);
 
     // Calculate the total qty_need in the array
     var totalQtyNeed = materialSlocArray.reduce((sum, item) => sum + item.qty_need, 0);
-    var materialNeed = parseFloat($('#material_need').val());
+    var materialNeed = parseFloat($(`.material_need_${id_material}`).val());
 
     // Check if materialNeed is less than totalQtyNeed
     if (materialNeed > totalQtyNeed) {
@@ -406,38 +408,26 @@ function setPR(rowIndex, id_material) {
     console.log(materialSlocArray);
 }
 
-function cekQtyNeed(that, rowIndex) {
-    var qty = $(that).val();
-    var qtyOnSloc = $(`.qty_on_sloc_${rowIndex}`).val();
 
-    if (parseFloat(qty) > parseFloat(qtyOnSloc)) {
-        Swal.fire({
-            icon: 'error',
-            text: 'Quantity cannot exceed the available quantity on Box'
-        });
-        $(that).val(qtyOnSloc); // Reset value to max
-    }
-}
-
-function unsetPR(rowIndex){
-    var slocValue = $(`.sloc_${rowIndex}`).val();
-    var boxValue = $(`.box_${rowIndex}`).val();
-    var qtyNeedValue = parseFloat($(`.qty_need_${rowIndex}`).val());
+function unsetPR(rowIndex, id_material){
+    var slocValue = $(`.sloc_${rowIndex}_${id_material}`).val();
+    var boxValue = $(`.box_${rowIndex}_${id_material}`).val();
+    var qtyNeedValue = parseFloat($(`.qty_need_${rowIndex}_${id_material}`).val());
       // Find and remove the specific item from the materialSlocArray
       materialSlocArray = materialSlocArray.filter(item => 
         item.sloc !== slocValue || item.box !== boxValue || item.qty_need !== qtyNeedValue
     );
     // Disable the specific setPR button for this row
-    $(`.setPR_${rowIndex}`).css('display', 'block');
-    $(`.unsetPR_${rowIndex}`).css('display', 'none');
-    $(`.qty_need_${rowIndex}`).prop('readonly', false);
-    $(`.sloc_${rowIndex}`).prop('disabled', false);
-    $(`.box_${rowIndex}`).prop('disabled', false);
+    $(`.setPR_${rowIndex}_${id_material}`).css('display', 'block');
+    $(`.unsetPR_${rowIndex}_${id_material}`).css('display', 'none');
+    $(`.qty_need_${rowIndex}_${id_material}`).prop('readonly', false);
+    $(`.sloc_${rowIndex}_${id_material}`).prop('disabled', false);
+    $(`.box_${rowIndex}_${id_material}`).prop('disabled', false);
 
     console.log(materialSlocArray);
 }
 
-function savePRDetail(){
+function savePRDetail(id_material){
     if(materialSlocArray.length == 0){
         Swal.fire({
             icon: 'error',
@@ -447,7 +437,7 @@ function savePRDetail(){
     }
      // Calculate the total qty_need in the array
     var totalQtyNeed = materialSlocArray.reduce((sum, item) => sum + item.qty_need, 0);
-    var materialNeed = parseFloat($('#material_need').val());
+    var materialNeed = parseFloat($(`.material_need_${id_material}`).val());
 
     // Check if materialNeed is less than totalQtyNeed
     if (materialNeed != totalQtyNeed) {
@@ -470,6 +460,7 @@ function savePRDetail(){
                         // Reload the page after success message
                         window.location.reload();
                     });
+                    materialSlocArray = [];
                 }
             
         },
@@ -486,6 +477,7 @@ function closeModal(){
 
 
 function getdetailpr(Production_plan_detail_id){
+    $('.view-details').prop('disabled', true);
     $.ajax({
         url: '<?php echo base_url('warehouse/get_detail_approve_pr'); ?>',
         method: 'POST',

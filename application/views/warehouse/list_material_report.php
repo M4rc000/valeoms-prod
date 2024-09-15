@@ -1,12 +1,12 @@
 <style>
-    .select2-container {
-        z-index: 9999;
-    }
+.select2-container {
+    z-index: 9999;
+}
 
-    .select2-selection {
-        padding-top: 4px !important;
-        height: 38px !important;
-    }
+.select2-selection {
+    padding-top: 4px !important;
+    height: 38px !important;
+}
 </style>
 <section>
     <div class="row">
