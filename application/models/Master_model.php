@@ -27,6 +27,11 @@ class Master_model extends CI_Model {
         $this->db->where('is_active', 1); 
         return $this->db->get('bom')->result_array(); 
     }
+    
+    public function getMaterialList(){
+        $this->db->where('is_active', 1); 
+        return $this->db->get('material_list')->result_array(); 
+    }
 
     public function getBomDistinct() {
         $this->db->distinct();

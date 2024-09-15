@@ -18,6 +18,15 @@
     <div class="col-lg-12">
       <div class="card" style="height: 100%">
         <div class="card-body">
+          <div class="row mt-2">
+              <div class="col-md">
+                  <a href="<?=base_url('master/export_material_list');?>">
+                      <button class="btn btn-success">
+                          <i class="bx bxs-download"></i>
+                      </button> 
+                  </a>
+              </div>
+          </div>
           <div class="row">
             <div class="col-md-2 mt-3 mb-4">
               <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addModal">
@@ -59,7 +68,6 @@
                         <th class="text-center">Material Part Name</th>
                         <th class="text-center">Material Type</th>
                         <th class="text-center">Uom</th>
-                        <th class="text-center">Family</th>
                         <th class="text-center">Action</th>
                       </tr>
                     </thead>
@@ -70,7 +78,6 @@
                           <td class="text-start"><?= $mtr['Material_desc']; ?></td>
                           <td class="text-center"><?= $mtr['Material_type']; ?></td>
                           <td class="text-center"><?= $mtr['Uom']; ?></td>
-                          <td class="text-center"><?= $mtr['Family']; ?></td>
                           <td class="text-center">
                             <a href="#" data-bs-toggle="modal" data-bs-target="#editModal<?= $mtr['Id']; ?>">
                               <span class="badge bg-warning"><i class="bi bi-pencil-square"></i></span>

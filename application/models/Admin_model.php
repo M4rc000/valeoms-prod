@@ -228,4 +228,12 @@ class Admin_model extends CI_Model {
 
         return $qualityRequestData;
     }
+
+    public function getBox(){
+        $this->db->select('b.*, s.SLoc');
+        $this->db->from('box b');
+        $this->db->join('storage s', 's.Id_storage = b.sloc', 'left');
+        $query = $this->db->get();
+        return $query->result_array();
+    }
 }

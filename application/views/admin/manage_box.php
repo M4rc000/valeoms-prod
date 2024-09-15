@@ -15,33 +15,18 @@
                                     <th class="text-center">Action</th>
                                 </tr>
                             </thead>
-                            <tbody>
-                                <?php foreach ($list_box as $box): ?>
-                                <tr>
-                                    <td><input type="checkbox" class="selectBox" value="<?= $box['no_box']; ?>" /></td>
-                                    <td class="text-center"><?= $box['no_box']; ?></td>
-                                    <td class="text-center"><?= $box['box_type']; ?></td>
-                                    <td class="text-center"><?= $box['weight']; ?> Kg</td>
-                                    <td class="text-center"><?= $box['sloc_name']; ?></td>
-                                    <td class="text-center">
-                                        <button class="btn btn-primary" data-bs-toggle="modal"
-                                            data-bs-target="#detailModal1<?= $box['id_box']; ?>"
-                                            onclick="getDetailBox(<?= $box['id_box']; ?>, '<?= $box['no_box']; ?>')">
-                                            <i class="bx bx-show" style="color: white;"></i>
-                                        </button>
-                                        <button class="btn btn-success"
-                                            onclick="redirectToEditBox('<?= base_url('warehouse/edit_box_view'); ?>', '<?= $box['id_box']; ?>')">
-                                            <i class="bx bxs-edit" style="color: white;"></i>
-                                        </button>
-                                        <button class="btn btn-info" onclick="getBarcode('<?= $box['no_box']; ?>')">
-                                            <i class="bx bxs-printer" style="color: white;"></i>
-                                        </button>
-                                        <button class="btn btn-danger" onclick="deleteBox('<?= $box['id_box']; ?>')">
-                                            <i class="bx bxs-trash" style="color: white;"></i>
-                                        </button>
-                                    </td>
-                                </tr>
-                                <?php endforeach; ?>
+                            <tbody id="tbody-manage-box">
+                                 <!-- SPINNER LOADING -->
+                                 <div class="spinner-container" id="spinner-container">
+                                    <div class="spinner-grow text-success" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <div class="spinner-grow text-success" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
+                                    <div class="spinner-grow text-success" role="status">
+                                        <span class="visually-hidden">Loading...</span>
+                                    </div>
                             </tbody>
                         </table>
                     </div>
@@ -318,9 +303,65 @@ function generateBarcodeData(boxNumber, printSize) {
 <script src="<?=base_url('assets');?>/vendor/qr-code/qr-code.min.js"></script>
 <script>
 $(document).ready(function() {
-    $('#tbl-box').DataTable({
-        "paging": false,
-        "info": false,
+    $('#spinner-container').show();
+    $.ajax({
+        url: "<?= base_url('admin/get_box_data'); ?>",
+        method: "GET",
+        dataType: "json",
+        success: function(data) {
+            $('#spinner-container').hide();
+
+            var datas = data
+
+            // Append rows to the table body
+            for (var i = 0; i < data.length; i++) {
+                var bm = data[i];
+                var row = `
+                    <tr>
+                        <td><input type="checkbox" class="selectBox" value="${bm['no_box']}" /></td>
+                        <td>${bm['no_box']}</td>
+                        <td>${bm.box_type !== null ? bm.box_type : ''}</td>
+                        <td>${bm['weight']}</td>
+                        <td>${bm.SLoc !== null ? bm.SLoc : ''}</td>
+                        <td>
+                            <button class="btn btn-primary" data-bs-toggle="modal"
+                                data-bs-target="#detailModal1${bm['id_box']}"
+                                onclick="getDetailBox(${bm['id_box']}, '${bm['no_box']}')">
+                                <i class="bx bx-show" style="color: white;"></i>
+                            </button>
+                            <button class="btn btn-success"
+                                onclick="redirectToEditBox('<?= base_url('warehouse/edit_box_view'); ?>', '${bm['id_box']}')">
+                                <i class="bx bxs-edit" style="color: white;"></i>
+                            </button>
+                            <button class="btn btn-info" onclick="getBarcode('${bm['no_box']}')">
+                                <i class="bx bxs-printer" style="color: white;"></i>
+                            </button>
+                            <button class="btn btn-danger" onclick="deleteBox('${bm['id_box']}')">
+                                <i class="bx bxs-trash" style="color: white;"></i>
+                            </button>
+                        </td>
+                    </tr>
+                `;
+                $('#tbody-manage-box').append(row);
+            }
+
+            // Initialize DataTables
+            new DataTable('#tbl-box', {
+                "pageLength": 10,
+                // layout: {
+                //     topStart: {
+                //         buttons: [
+                //             {
+                //                 extend: 'excel',
+                //                 text: '<i class="bx bx-table"></i> Excel',
+                //                 title: '',
+                //                 className: 'btn-custom-excel'
+                //             }
+                //         ]   
+                //     }
+                // }
+            }); 
+        }
     });
 });
 

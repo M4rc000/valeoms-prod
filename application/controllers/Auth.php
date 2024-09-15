@@ -35,7 +35,6 @@ class Auth extends CI_Controller {
         $username = $this->input->post('username');
         $password = $this->input->post('password');
 
-        // $user = $this->db->get_where('user', ['username' => $username])->row_array();
         $sql = "SELECT * FROM `user` WHERE BINARY `username` = ?";
         $query = $this->db->query($sql, [$username]);
         $user = $query->row_array();
@@ -52,6 +51,7 @@ class Auth extends CI_Controller {
                         'role_id' => $user['role_id']
                     ];
                    $this->session->set_userdata($data);
+                //    $this->set_user_access_in_session($user['role_id']);
                     if ($user['role_id'] == 1) {
                         redirect('admin');
                     }
@@ -92,7 +92,6 @@ class Auth extends CI_Controller {
         }
     }
 
-
     public function logout()
     {
         $this->session->unset_userdata('username');
@@ -105,5 +104,4 @@ class Auth extends CI_Controller {
         </div>');
         redirect('auth');
     }
-
 }

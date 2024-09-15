@@ -2,22 +2,24 @@
     <div class="card">
         <div class="card-body">
             <div class="row">
-                <div class="col-md mt-4">   
+                <div class="col-md mt-4">
                     <div class="table-responsive">
                         <table class="table table-bordered display" id="tbl-storage">
                             <thead>
                                 <tr>
-                                    <th>ID</th>
-                                    <th>Product ID</th>
+                                    <th>#</th>
+                                    <th>Material Part Name</th>
                                     <th>Material Description</th>
-                                    <th>Total Quantity</th>
-                                    <th>Box Details</th>
+                                    <th class="text-center">Box</th>
+                                    <th class="text-center">SLoc</th>
+                                    <th class="text-center">Qty</th>
+                                    <th class="text-center">Uom</th>
                                 </tr>
                             </thead>
                             <tbody id="table-body">
                             </tbody>
                         </table>
-                    </div>
+                    </div>   
                 </div>
             </div>
         </div>
@@ -69,7 +71,7 @@
                     if (boxQtyDetails) {
                         boxDetailsHtml = boxQtyDetails.split(',').map(boxQty => {
                             let [id_box, qty] = boxQty.split(':');
-                            return `<div>ID Box: ${id_box}, Qty: ${qty}</div>`;
+                            return `<div><b> Box</b>: ${id_box} <b>Qty</b>: ${qty}</div>,`;
                         }).join('');
                     }
 
@@ -78,8 +80,10 @@
                             <td>${number++}</td>
                             <td>${data[i].product_id}</td>
                             <td>${data[i].material_desc}</td>
-                            <td>${data[i].total_qty_sum}</td>
-                            <td>${boxDetailsHtml}</td>
+                            <td class="text-center">${data[i].no_box}</td>
+                            <td class="text-center">${data[i].SLoc}</td>
+                            <td class="text-center">${data[i].total_qty}</td>
+                            <td class="text-center">${data[i].uom}</td>
                         </tr>
                     `;
                     tableBody.append(row);

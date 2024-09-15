@@ -5,17 +5,10 @@
   <meta charset="utf-8">
   <meta content="width=device-width, initial-scale=1.0" name="viewport">
 
-  <title><?=$title;?> | Valeo Management System</title>
+  <title><?=$title;?> | VMS Dev</title>
 
   <!-- Favicons -->
   <link rel="shortcut icon" href="<?=base_url('assets');?>/img/logo.ico" type="image/x-icon">
-
-
-  <!-- ICON HOME SCREEN -->
-  <link rel="manifest" href="<?=base_url('assets');?>/manifest.json">
-  <link rel="icon" href="<?=base_url('assets');?>/img/valeo.png">
-  <meta name="theme-color" content="#ffff">
-
 
   <!-- Google Fonts -->
   <link href="https://fonts.gstatic.com" rel="preconnect">

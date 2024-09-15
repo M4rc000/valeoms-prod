@@ -214,29 +214,31 @@ class Warehouse_model extends CI_Model
 	public function getListStorageExport()
 	{
 		$query = "SELECT
-				ls.id,
-				ls.product_id,
-				ls.material_desc,
-				ls.total_qty,
-				sub.total_qty_sum,
-				GROUP_CONCAT(CONCAT(b.no_box, ':', ls.total_qty) ORDER BY ls.id_box SEPARATOR ',') AS box_qty_details
+			ls.product_id,
+			ls.material_desc,
+			ls.total_qty,
+			b.no_box,
+			b.sloc,
+			s.SLoc,
+			ls.uom,
+			sub.total_qty_sum,
+			CONCAT('[', s.SLoc, ']-', b.no_box, ':', ls.total_qty) AS box_qty_details
+		FROM
+			list_storage ls
+		JOIN (
+			SELECT
+				product_id,
+				SUM(total_qty) AS total_qty_sum
 			FROM
-				list_storage ls
-			JOIN (
-				SELECT
-					product_id,
-					SUM(total_qty) AS total_qty_sum
-				FROM
-					list_storage
-				GROUP BY
-					product_id
-			) sub ON ls.product_id = sub.product_id
-			LEFT JOIN box b ON ls.id_box = b.id_box
+				list_storage
 			GROUP BY
-				ls.product_id, ls.material_desc, ls.total_qty, sub.total_qty_sum
-			ORDER BY
-				ls.id DESC;
-		";
+				product_id
+		) sub ON ls.product_id = sub.product_id
+		LEFT JOIN box b ON ls.id_box = b.id_box
+		JOIN storage s ON b.sloc = s.Id_storage  -- Use b.sloc from the box table instead of ls.sloc
+		ORDER BY
+			ls.product_id DESC, ls.id_box
+				";
 		return $this->db->query($query)->result_array();
 	}
 
@@ -542,8 +544,25 @@ AND p.status COLLATE utf8mb4_general_ci = 'REJECTED';
 		return $this->db->query("SELECT *
 			FROM storage
 			WHERE ($weight BETWEEN min_loads AND max_loads)
-			AND ((Id_storage BETWEEN 1 AND 452) OR (Id_storage IN (454, 455, 456)))
-			AND space_max > space_now")->result_array();
+			-- AND ((Id_storage BETWEEN 1 AND 452) OR (Id_storage IN (454, 455, 456)))
+			AND space_max > space_now
+			ORDER BY 
+			CASE
+				WHEN Rack = 'A' THEN 1
+				WHEN Rack = 'B' THEN 2
+				WHEN Rack = 'C' THEN 3
+				WHEN Rack = 'D' THEN 4
+				WHEN Rack = 'E' THEN 5
+				WHEN Rack = 'F' THEN 6
+				WHEN Rack = 'G' THEN 7
+				WHEN Rack = 'H' THEN 8
+				WHEN Rack = 'I' THEN 9
+				WHEN Rack = 'J' THEN 10
+				WHEN Rack = 'K' THEN 11
+				ELSE 12
+			END, 
+			SLoc ASC
+		")->result_array();
 	}
 
 	public function updatedataReturn($table, $id, $Data)

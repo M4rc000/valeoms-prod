@@ -503,6 +503,7 @@ class Production extends CI_Controller {
                 'no_box' => $no_box,
                 'weight' => $weight,
                 'box_type' => 'HIGH',
+                'sloc' => 461,
                 'crtby' => $user,
                 'crtdt' => date('Y-m-d H:i:s')
             ];
@@ -514,6 +515,7 @@ class Production extends CI_Controller {
                 'no_box' => $no_box,
                 'box_type' => 'HIGH',
                 'box_weight' => $weight,
+                'sloc' => 461,
                 'status' => 1, // 1: PENDING, 0: APPROVED
                 'Crtdt' => date('Y-m-d H:i:s'),
                 'Crtby' => $user,
@@ -584,6 +586,7 @@ class Production extends CI_Controller {
                 'no_box' => $no_box,
                 'weight' => $weight,
                 'box_type' => 'MEDIUM',
+                'sloc' => 461,
                 'crtby' => $user,
                 'crtdt' => date('Y-m-d H:i:s')
             ];
@@ -595,6 +598,7 @@ class Production extends CI_Controller {
                 'no_box' => $no_box,
                 'box_type' => 'MEDIUM',
                 'box_weight' => $weight,
+                'sloc' => 461,
                 'status' => 1, // 1: PENDING, 0: APPROVED
                 'Crtdt' => date('Y-m-d H:i:s'),
                 'Crtby' => $user,

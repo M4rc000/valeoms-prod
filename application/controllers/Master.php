@@ -52,14 +52,14 @@ class Master extends CI_Controller {
                 'Uom' => $this->input->post('uom'),
                 'Family' => $this->input->post('family'),
                 'is_active' => 1,
-                'Crtdt' => date('Y-d-m H:i'),
+                'Crtdt' => date('Y-m-d H:i'),
                 'Crtby' => $this->input->post('user'),
-                'Upddt' => date('Y-d-m H:i'),
+                'Upddt' => date('Y-m-d H:i:s'),
                 'Updby' => $this->input->post('user')
             );
 
             // CHECK DUPLICATE
-            $query = "SELECT * FROM `material_list` WHERE Id_material = ? OR Material_desc = ?";
+            $query = "SELECT * FROM `material_list` WHERE (Id_material = ? OR Material_desc = ? ) AND is_active = 1";
             $CheckDuplicate = $this->db->query($query, array($Id_material, $Material_desc))->num_rows();
 
             if ($CheckDuplicate > 0) {
@@ -71,6 +71,15 @@ class Master extends CI_Controller {
                 $check_insert = $this->db->affected_rows();
                 
                 if($check_insert > 0){
+                    // RECORD MATERIAL LIST LOG
+                    $query_log = $this->db->last_query();
+                    $log_data = [
+                        'affected_table' => 'material_list',
+                        'queries' => $query_log,
+                        'Crtdt' => date('Y-m-d H:i:s'),
+                        'Crtby' => $this->input->post('user')
+                    ];    
+                    $this->db->insert('material_list_log', $log_data);
                     $this->session->set_flashdata('SUCCESS_AddMaterialList','New Material has successfully added');
                 }
                 else{
@@ -83,7 +92,7 @@ class Master extends CI_Controller {
         // READ MATERIAL LIST
         public function getMaterialList(){
             $id_material = htmlspecialchars($this->input->post('Id_material'));
-            $result = $this->db->query("SELECT Id, Id_material, Material_desc, Material_type, Uom, Family FROM material_list WHERE Id_material = '$id_material'")->result_array();
+            $result = $this->db->query("SELECT Id, Id_material, Material_desc, Material_type, Uom, Family FROM material_list WHERE Id_material = '$id_material' AND is_active = 1")->result_array();
         
             echo json_encode($result);
         }
@@ -98,7 +107,7 @@ class Master extends CI_Controller {
                 'Material_type' => $this->input->post('material_type'),
                 'Uom' => $this->input->post('uom'),
                 'Family' => $this->input->post('family'),
-                'Upddt' => date('Y-d-m H:i'),
+                'Upddt' => date('Y-m-d H:i'),
                 'Updby' => $this->input->post('user')
             );
 
@@ -106,6 +115,15 @@ class Master extends CI_Controller {
             $check_insert = $this->db->affected_rows();
 
             if($check_insert > 0 ){
+                // RECORD MATERIAL LIST LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'material_list',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('material_list_log', $log_data);
                 $this->session->set_flashdata('SUCCESS_EditMaterialList','Material has successfully updated');
             }
             else{
@@ -119,10 +137,19 @@ class Master extends CI_Controller {
         public function DeleteMaterialID(){
             $id = $this->input->post('id');
             $user = $this->input->post('user');
-            $this->db->query("UPDATE `material_list` SET is_active = 0 WHERE Id = '$id' AND Updby = '$user'");
+            $this->db->query("UPDATE `material_list` SET is_active = 0, Updby = '$user' WHERE Id = '$id'");
             $check_delete = $this->db->affected_rows();
 
             if($check_delete > 0){
+                // RECORD MATERIAL LIST LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'material_list',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('material_list_log', $log_data);
                 $this->session->set_flashdata('SUCCESS_DeleteMaterialID','Material has successfully deleted');
             }
             else{
@@ -175,9 +202,9 @@ class Master extends CI_Controller {
                 'Material_type' => $this->input->post('material_type'),
                 'Uom' => $this->input->post('uom'),
                 'Qty' => floatval($this->input->post('qty')),
-                'Crtdt' => date('Y-d-m H:i'),
+                'Crtdt' => date('Y-m-d H:i'),
                 'Crtby' => $this->input->post('user'),
-                'Upddt' => date('Y-d-m H:i'),
+                'Upddt' => date('Y-m-d H:i'),
                 'Updby' => $this->input->post('user')
             );
 
@@ -185,6 +212,15 @@ class Master extends CI_Controller {
             $check_insert = $this->db->affected_rows();
 
             if($check_insert > 0){
+                // RECORD BOM LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'bom',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('bom_log', $log_data);
                 $this->session->set_flashdata('success_AddMaterialBom', 'Material Bom has been successfully added');
             }
             else{
@@ -218,15 +254,24 @@ class Master extends CI_Controller {
                     'Id_fg' => $this->input->post('products_id'),
                     'Fg_desc' => $this->input->post('product_desc'),
                     'is_active' => 1,
-                    'Crtdt' => date('Y-d-m H:i:s'),
+                    'Crtdt' => date('Y-m-d H:i:s'),
                     'Crtby' => $this->input->post('user'),
-                    'Upddt' => date('Y-d-m H:i:s'),
+                    'Upddt' => date('Y-m-d H:i:s'),
                     'Updby' => $this->input->post('user')
                 ];
         
                 $this->MModel->insertData('bom', $DataBOM);
                 $check_insert = $this->db->affected_rows();
                 if($check_insert > 0){
+                    // RECORD BOM LOG
+                    $query_log = $this->db->last_query();
+                    $log_data = [
+                        'affected_table' => 'bom',
+                        'queries' => $query_log,
+                        'Crtdt' => date('Y-m-d H:i:s'),
+                        'Crtby' => $this->input->post('user')
+                    ];    
+                    $this->db->insert('bom_log', $log_data);
                     $insert_bom += 1;
                 }
             }
@@ -306,6 +351,15 @@ class Master extends CI_Controller {
             $check_update = $this->db->affected_rows();
         
             if ($check_update > 0) {
+                // RECORD BOM LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'bom',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('bom_log', $log_data);
                 $this->session->set_flashdata('success_EditBomMaterial', 'Material ' . $materialID . ' has been successfully updated');
             } else {
                 $this->session->set_flashdata('failed_EditBomMaterial', 'Material ' . $materialID . ' failed to update');
@@ -321,13 +375,23 @@ class Master extends CI_Controller {
 
             $Data = [
                 'is_active' => 0,
-                'Upddt' => date('Y-d-m H:i'),
+                'Upddt' => date('Y-m-d H:i'),
                 'Updby' => $this->input->post('user')
             ];
 
 
             $this->db->where('Id_bom',$id);  
             $this->db->update('bom', $Data);
+
+            // RECORD BOM LOG
+            $query_log = $this->db->last_query();
+            $log_data = [
+                'affected_table' => 'bom',
+                'queries' => $query_log,
+                'Crtdt' => date('Y-m-d H:i:s'),
+                'Crtby' => $this->input->post('user')
+            ];    
+            $this->db->insert('bom_log', $log_data);
             $this->session->set_flashdata('DELETED',
             '
             <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%">
@@ -356,6 +420,16 @@ class Master extends CI_Controller {
                 $check_delete = $this->db->affected_rows();
                 
                 if ($check_delete > 0) {
+                    // RECORD BOM LOG
+                    $query_log = $this->db->last_query();
+                    $log_data = [
+                        'affected_table' => 'bom',
+                        'queries' => $query_log,
+                        'Crtdt' => date('Y-m-d H:i:s'),
+                        'Crtby' => $this->input->post('user')
+                    ];    
+                    $this->db->insert('bom_log', $log_data);
+                    
                     $DeleteDataBom += 1;
                 }
             }
@@ -379,9 +453,29 @@ class Master extends CI_Controller {
         $this->load->view('master/export-bom', $data);
         $this->load->view('templates/footer_export');
     }
+    
+    public function export_material_list()
+    {
+        $data['title'] = 'Export Material List';
+
+        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+        
+        $this->load->view('templates/header_export', $data);
+        $this->load->view('templates/navbar');   
+        $this->load->view('templates/sidebar');   
+        $this->load->view('master/export-material-list', $data);
+        $this->load->view('templates/footer_export');
+    }
 
     public function get_bom_data() {
         $data = $this->MModel->getBom();
+
+        echo json_encode($data);
+    }
+    
+    public function get_material_list_data() {
+        $data = $this->MModel->getMaterialList();
 
         echo json_encode($data);
     }

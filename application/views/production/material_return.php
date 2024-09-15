@@ -238,7 +238,7 @@
                         <input type="text" class="form-control text-center material-type" name="materials-hg[${rowIndexHG}][material_type]" aria-label="Material Type" style="width: 120px;" readonly>
                     </td>
                     <td>
-                        <input type="text" class="form-control material-qty" name="materials-hg[${rowIndexHG}][qty]" required aria-label="Quantity" style="width: 100px;">
+                        <input type="text" class="form-control material-qty text-center" name="materials-hg[${rowIndexHG}][qty]" required aria-label="Quantity" style="width: 100px;">
                     </td>
                     <td>
                         <input type="text" class="form-control text-center material-uom" name="materials-hg[${rowIndexHG}][uom]" required aria-label="Unit of Measure" style="width: 100px;" readonly>
@@ -479,7 +479,7 @@
                         <input type="text" class="form-control text-center material-type-mg" name="materials-mg[${rowIndexMG}][material_type]" aria-label="Material Type" style="width: 120px;" readonly>
                     </td>
                     <td>
-                        <input type="text" class="form-control material-qty-mg" name="materials-mg[${rowIndexMG}][qty]" required aria-label="Quantity" style="width: 100px;">
+                        <input type="text" class="form-control text-center material-qty-mg" name="materials-mg[${rowIndexMG}][qty]" required aria-label="Quantity" style="width: 100px;">
                     </td>
                     <td>
                         <input type="text" class="form-control text-center material-uom-mg" name="materials-mg[${rowIndexMG}][uom]" required aria-label="Unit of Measure" style="width: 100px;" readonly>

@@ -4,6 +4,7 @@
 }
 
 .select2-selection {
+
     padding-top: 4px !important;
     height: 38px !important;
     /* width: 367px !important; */
@@ -35,7 +36,9 @@
                     <?= $this->session->flashdata('ERROR'); ?>
 
                     <?php } ?>
-                    <h4 class="mt-2">Box Number : <b><?= $no_box ?></b></h4>
+                    <h4 class="mt-2">Box Number : <b>
+                            <?= $no_box ?>
+                        </b></h4>
                     <button type="button" class="btn btn-primary mb-2 mt-4" style data-bs-toggle="modal"
                         data-bs-target="#addModal1" style="font-weight: bold;" id="addBtn">
                         Add Material
@@ -60,10 +63,18 @@
                                 <td>
                                     <?= $number; ?>
                                 </td>
-                                <td><?php echo $material['id_material']; ?></td>
-                                <td><?php echo $material['material_desc']; ?></td>
-                                <td><?php echo $material['qty']; ?></td>
-                                <td><?php echo $material['uom']; ?></td>
+                                <td>
+                                    <?php echo $material['id_material']; ?>
+                                </td>
+                                <td>
+                                    <?php echo $material['material_desc']; ?>
+                                </td>
+                                <td>
+                                    <?php echo $material['qty']; ?>
+                                </td>
+                                <td>
+                                    <?php echo $material['uom']; ?>
+                                </td>
                                 <td>
                                     <!-- <button class="btn btn-success" data-bs-toggle="modal"
 										data-bs-target="#editModal<?= $material['id_box_detail']; ?>"
@@ -249,7 +260,7 @@ function getSloc() {
             } else if (data.status == 'empty') {
                 slocSelect.find('option:not(:selected)').remove();
                 if (slocSelect.find('option:selected').length === 0) {
-                    slocSelect.append('<option value="">Please select total weight first</option>');
+                    slocSelect.append('<option value="">Please select total weight first</option > ');
                 }
             }
         },
@@ -321,7 +332,9 @@ function deleteItem(id) {
                         <select class="form-select" id="reference_number" name="reference_number">
                             <option value="">Select Material Part No</option>
                             <?php foreach ($materials as $mtr): ?>
-                            <option value="<?= $mtr['Id_material']; ?>"><?= $mtr['Id_material']; ?></option>
+                            <option value="<?= $mtr['Id_material']; ?>">
+                                <?= $mtr['Id_material']; ?>
+                            </option>
                             <?php endforeach; ?>
                         </select>
                     </div>
@@ -441,8 +454,12 @@ function editBox(id_box, weight, sloc) {
             </div>
             <div class="modal-body">
                 <input type="text" name="id" id="id" value="<?= $usr['id']; ?>" style="display: none;">
-                <p><b>Username</b> : <?= $usr['username']; ?></p>
-                <p><b>Name</b> : <?= $usr['name']; ?></p>
+                <p><b>Username</b> :
+                    <?= $usr['username']; ?>
+                </p>
+                <p><b>Name</b> :
+                    <?= $usr['name']; ?>
+                </p>
                 <p><b>Role</b> :
                     <?php
 						if ($usr['role_id'] == 1) {
