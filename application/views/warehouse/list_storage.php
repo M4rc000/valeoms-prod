@@ -14,7 +14,7 @@
     .buttons-excel{
         background-color: #0d6efd !important;
         color: white !important;
-        border-radius: 5px !important;
+        border-radius: 5px !important;  
     }
     .buttons-print{
         background-color: #198754 !important;
