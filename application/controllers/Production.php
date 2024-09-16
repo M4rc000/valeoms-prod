@@ -510,6 +510,16 @@ class Production extends CI_Controller {
             
             $this->PModel->insertData('box', $DataBox);
             
+            // RECORD MATERIAL RETURN LOG
+            $query_log = $this->db->last_query();
+            $log_data = [
+                'affected_table' => 'box',
+                'queries' => $query_log,
+                'Crtdt' => date('Y-m-d H:i:s'),
+                'Crtby' => $this->input->post('user')
+            ];    
+            $this->db->insert('material_return_log', $log_data);
+            
             $DataReturnWarehouse = [
                 'id_return' => $id_return,
                 'no_box' => $no_box,
@@ -528,6 +538,17 @@ class Production extends CI_Controller {
 
             // JIKA TABLE RETURN WAREHOUSE BERHASIL DI INSERT
             if($queryDataReturnWarehouse > 0){
+                
+                // RECORD MATERIAL RETURN LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'return_warehouse',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('material_return_log', $log_data);
+
                 $queryDataReturnWarehouseDetail = 0;
                 foreach($materialData as $md){
                     $DataReturnWarehouseDetail = [
@@ -546,6 +567,16 @@ class Production extends CI_Controller {
                     
                     
                     if($checkinsert > 0){
+                        // RECORD MATERIAL RETURN LOG
+                        $query_log = $this->db->last_query();
+                        $log_data = [
+                            'affected_table' => 'return_warehouse_detail',
+                            'queries' => $query_log,
+                            'Crtdt' => date('Y-m-d H:i:s'),
+                            'Crtby' => $this->input->post('user')
+                        ];    
+                        $this->db->insert('material_return_log', $log_data);
+
                         $queryDataReturnWarehouseDetail+=1;
                     }
                 }
@@ -592,6 +623,16 @@ class Production extends CI_Controller {
             ];
             
             $this->PModel->insertData('box', $DataBox);
+
+            // RECORD MATERIAL RETURN LOG
+            $query_log = $this->db->last_query();
+            $log_data = [
+                'affected_table' => 'box',
+                'queries' => $query_log,
+                'Crtdt' => date('Y-m-d H:i:s'),
+                'Crtby' => $this->input->post('user')
+            ];    
+            $this->db->insert('material_return_log', $log_data);
             
             $DataReturnWarehouse = [
                 'id_return' => $id_return,
@@ -611,6 +652,15 @@ class Production extends CI_Controller {
 
             // JIKA TABLE RETURN WAREHOUSE BERHASIL DI INSERT
             if($queryDataReturnWarehouse > 0){
+                // RECORD MATERIAL RETURN LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'return_warehouse',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('material_return_log', $log_data);
                 $queryDataReturnWarehouseDetail = 0;
                 foreach($materialData as $md){
                     $DataReturnWarehouseDetail = [
@@ -629,6 +679,16 @@ class Production extends CI_Controller {
                     
                     
                     if($checkinsert > 0){
+                        // RECORD MATERIAL RETURN LOG
+                        $query_log = $this->db->last_query();
+                        $log_data = [
+                            'affected_table' => 'return_warehouse_detail',
+                            'queries' => $query_log,
+                            'Crtdt' => date('Y-m-d H:i:s'),
+                            'Crtby' => $this->input->post('user')
+                        ];    
+                        $this->db->insert('material_return_log', $log_data);
+                        
                         $queryDataReturnWarehouseDetail+=1;
                     }
                 }

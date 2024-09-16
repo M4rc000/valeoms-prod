@@ -111,23 +111,20 @@
 </section>
 <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
 
-
-<!-- ADD MODAL-->
+<<!-- ADD MODAL -->
 <div class="modal fade" id="addModal1" tabindex="-1">
     <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <form id="material">
                 <div class="modal-header">
                     <h5 class="modal-title">Add New Data Receiving</h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"
-                        onclick="closeModal()"></button>
+                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close" onclick="closeModal()"></button>
                 </div>
                 <div class="modal-body">
                     <div class="row ps-2">
                         <div class="col-6">
                             <label for="reference_number" class="form-label">Material Part Number</label>
-                            <input type="text" class="form-control" id="reference_number" name="reference_number"
-                                onblur="getMaterial()" required>
+                            <input type="text" class="form-control" id="reference_number" name="reference_number" onblur="getMaterial()" required>
                         </div>
                         <div class="col-6">
                             <label for="material" class="form-label">Material Part Name</label>
@@ -147,8 +144,7 @@
                     </div>
                 </div>
                 <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                        onclick="closeModal()">Close</button>
+                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" onclick="closeModal()">Close</button>
                     <button type="submit" class="btn btn-primary" onclick="setReceivingDate()">Save</button>
                 </div>
             </form>

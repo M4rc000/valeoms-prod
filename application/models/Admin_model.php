@@ -235,6 +235,5 @@ class Admin_model extends CI_Model {
         $this->db->join('storage s', 's.Id_storage = b.sloc', 'left');
         $query = $this->db->get();
         return $query->result_array();
-
     }
 }

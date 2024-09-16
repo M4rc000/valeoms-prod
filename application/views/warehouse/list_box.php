@@ -297,7 +297,10 @@ function generateBarcodeData(boxNumber, printSize) {
 </div>
 <?php endforeach; ?>
 
+<!-- <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script> -->
 <script src="<?= base_url('assets'); ?>/vendor/qr-code/qr-code.min.js"></script>
+<!-- <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script> -->
+<!-- <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script> -->
 <script>
 function closeModal() {
     $('#id_box').val("");

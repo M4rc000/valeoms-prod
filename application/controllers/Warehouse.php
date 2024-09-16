@@ -605,16 +605,6 @@ class Warehouse extends CI_Controller
 		$this->load->view('templates/footer');
 	}
 
-	public function cycle_count_view($id_box)
-	{
-		$data['box'] = $this->Warehouse_model->getBoxById($id_box);
-		$data['detail_box'] = $this->Warehouse_model->getBoxDetails($id_box);
-		$data['sloc_availability'] = $this->Warehouse_model->getSLocAvailability(); // Get SLoc availability data
-
-		$this->load->view('warehouse/cycle_count_view', $data);
-	}
-
-
 
 	public function edit_box()
 	{
@@ -699,30 +689,6 @@ class Warehouse extends CI_Controller
 		}
 	}
 
-	public function deleteBox()
-	{
-		$id_box = $this->input->post('id_box');
-
-		// Pastikan box ada di database sebelum dihapus
-		$this->db->where('id_box', $id_box);
-		$delete = $this->db->delete('box'); // Nama tabel box
-
-		if ($delete) {
-			$response = [
-				'status' => 'success',
-				'message' => 'Box deleted successfully'
-			];
-		} else {
-			$response = [
-				'status' => 'error',
-				'message' => 'Failed to delete box'
-			];
-		}
-
-		echo json_encode($response);
-	}
-
-
 
 	public function get_box()
 	{
@@ -746,60 +712,6 @@ class Warehouse extends CI_Controller
 		}
 
 		echo json_encode($data);
-	}
-
-	public function getBoxDetails()
-	{
-		$slocId = $this->input->post('sloc_id');
-
-		// Query to get the box details for the selected SLoc
-		$this->db->select('id_box, no_box');
-		$this->db->from('box');
-		$this->db->where('sloc', $slocId);
-
-		$query = $this->db->get();
-		if ($query->num_rows() > 0) {
-			$result = $query->result_array();
-			$response = [
-				'status' => 'success',
-				'boxes' => $result
-			];
-		} else {
-			$response = [
-				'status' => 'error',
-				'message' => 'No boxes found for this SLoc.'
-			];
-		}
-
-		echo json_encode($response);
-	}
-
-	public function getBoxDetailById()
-	{
-		$id_box = $this->input->post('id_box');
-
-		// Query untuk mendapatkan detail box
-		$this->db->select('box.no_box, box.weight, storage.SLoc as sloc_name, box.created_by, box.created_date');
-		$this->db->from('box');
-		$this->db->join('storage', 'storage.Id_storage = box.sloc');
-		$this->db->where('box.id_box', $id_box);
-
-		$query = $this->db->get();
-		if ($query->num_rows() > 0) {
-			$box = $query->row_array();
-
-			$response = [
-				'status' => 'success',
-				'box' => $box
-			];
-		} else {
-			$response = [
-				'status' => 'error',
-				'message' => 'Box not found'
-			];
-		}
-
-		echo json_encode($response);
 	}
 
 
@@ -832,58 +744,35 @@ class Warehouse extends CI_Controller
 		}
 		echo json_encode($data);
 	}
+
 	public function get_sloc()
 	{
 		$total_weight = $this->input->post('total_weight');
+		if ($total_weight == '') {
+			$data = [
+				'status' => 'empty',
+				'sloc' => [],
+				'msg' => 'No available Slocs for the specified total weight',
+			];
+			echo json_encode($data);
+			die;
+		}
+		$data = $this->db->query("SELECT * FROM storage WHERE $total_weight BETWEEN min_loads AND max_loads");
 
-		// Query untuk mengambil SLoc dan status
-		// $this->db->select('s.Id_storage, s.SLoc, s.space_max, IFNULL(SUM(b.weight), 0) as space_now');
-		// $this->db->from('storage s');
-		// $this->db->join('box b', 'b.sloc = s.Id_storage', 'left');
-		// $this->db->group_by('s.Id_storage');
-		// $this->db->having('space_now < s.space_max'); // Tampilkan SLoc yang belum penuh
-
-		$result = $this->db->query("SELECT * FROM storage
-			WHERE ($total_weight BETWEEN min_loads AND max_loads)
-			ORDER BY 
-			CASE
-				WHEN Rack = 'A' THEN 1
-				WHEN Rack = 'B' THEN 2
-				WHEN Rack = 'C' THEN 3
-				WHEN Rack = 'D' THEN 4
-				WHEN Rack = 'E' THEN 5
-				WHEN Rack = 'F' THEN 6
-				WHEN Rack = 'G' THEN 7
-				WHEN Rack = 'H' THEN 8
-				WHEN Rack = 'I' THEN 9
-				WHEN Rack = 'J' THEN 10
-				WHEN Rack = 'K' THEN 11
-				ELSE 12
-			END,
-			SLoc ASC;
-		")->result_array();
-
-
-		// $query = $this->db->get();
-
-		// if ($query->num_rows() > 0) {
-		// $result = $query->result_array();
-		$response = [
-			'status' => 'success',
-			'sloc' => $result
-		];
-		// } else {
-		// 	$response = [
-		// 		'status' => 'empty',
-		// 		'message' => 'No available SLocs for the specified total weight'
-		// 	];
-		// }
-
-		echo json_encode($response);
+		if ($data->result() !== null) {
+			$dt = $data->result();
+			$data = [
+				'status' => 'success',
+				'sloc' => $dt
+			];
+		} else {
+			$data = [
+				'status' => 'failed',
+				'msg' => 'No available Slocs for the specified total weight',
+			];
+		}
+		echo json_encode($data);
 	}
-
-
-
 	private function generateFormattedBoxNumber()
 	{
 		$last_box = $this->db->order_by('id_box', 'DESC')->get('box')->row();
@@ -1957,82 +1846,6 @@ class Warehouse extends CI_Controller
 		}
 	}
 
-	public function getBoxDetailsBySLoc()
-	{
-		$sloc = $this->input->post('sloc'); // Get SLoc from the request
 
-		// Fetch all box details for the given SLoc
-		$this->db->select('no_box, weight, box_type');
-		$this->db->from('box');
-		$this->db->where('sloc', $sloc);
-		$query = $this->db->get();
-		$box_details = $query->result_array();
-
-		if (!empty($box_details)) {
-			echo json_encode(['status' => 'success', 'box_details' => $box_details]);
-		} else {
-			echo json_encode(['status' => 'error', 'message' => 'No boxes found']);
-		}
-	}
-
-
-	public function editqty_cc()
-	{
-		$id_box_detail = $this->input->post('id_box_detail');
-		$qty = $this->input->post('qty');
-		$sloc = $this->input->post('sloc');
-		$weight = $this->input->post('total_weight');  // Retrieve weight (to update the box table)
-
-		// Start transaction
-		$this->db->trans_begin();
-
-		// Update the `receiving_material` table
-		$dtupdate = [
-			'qty' => $qty,
-			's_loc' => $sloc,
-			'updated_at' => date('Y-m-d H:i:s'),
-			'updated_by' => $this->session->userdata('username'),
-		];
-
-		$this->db->where('id_box_detail', $id_box_detail);
-		$update_receiving = $this->db->update('receiving_material', $dtupdate);
-
-		if ($update_receiving) {
-			// Get the associated id_box from `box_detail`
-			$id_box = $this->db->select('id_box')
-				->where('id_box_detail', $id_box_detail)
-				->get('box_detail')
-				->row()
-				->id_box;
-
-			// Update the `box` table (only `weight` and `sloc`)
-			$box_update = [
-				'weight' => $weight,
-				'sloc' => $sloc
-			];
-
-			$this->db->where('id_box', $id_box);
-			$update_box = $this->db->update('box', $box_update);
-
-			if ($update_box) {
-				// Commit transaction if all updates succeed
-				$this->db->trans_commit();
-				$data = ['status' => true];
-			} else {
-				// Log the error and rollback transaction if updating `box` fails
-				log_message('error', 'Failed to update the box table for id_box: ' . $id_box);
-				$this->db->trans_rollback();
-				$data = ['status' => false, 'message' => 'Failed to update the box table.'];
-			}
-		} else {
-			// Log the error and rollback transaction if updating `receiving_material` fails
-			log_message('error', 'Failed to update the receiving_material table for id_box_detail: ' . $id_box_detail);
-			$this->db->trans_rollback();
-			$data = ['status' => false, 'message' => 'Failed to update receiving_material table.'];
-		}
-
-		// Send the result as JSON
-		echo json_encode($data);
-	}
 }
 ?>
