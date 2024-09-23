@@ -551,11 +551,32 @@ class Admin extends CI_Controller {
         $this->load->view('templates/sidebar');   
         $this->load->view('admin/manage_box', $data);
         $this->load->view('templates/footer');
-    } 
+    }   
     
     public function get_box_data() {
         $data = $this->AModel->getBox();
 
         echo json_encode($data);
-    }  
+    }
+    
+    public function history_log() {
+        $data['title'] = 'History log';
+        
+        $data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
+        $data['name'] = $this->db->get_where('user', ['name' => $this->session->userdata('name')])->row_array();
+        
+        $this->load->view('templates/header', $data);
+        $this->load->view('templates/navbar', $data);   
+        $this->load->view('templates/sidebar');   
+        $this->load->view('admin/history_log', $data);
+        $this->load->view('templates/footer');
+    }
+    
+    public function get_log_data() {
+        $table = $this->input->post('data');
+        $data = $this->AModel->getLogData($table);
+
+        echo json_encode($data);
+    }
+    
 }

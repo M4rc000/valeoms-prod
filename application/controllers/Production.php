@@ -91,6 +91,16 @@ class Production extends CI_Controller {
             
             // Insert data into production_plan table
             $this->PModel->insertData('production_plan', $Data);
+
+            // RECORD QUALITY MATERIAL REQUEST LOG
+            $query_log = $this->db->last_query();
+            $log_data = [
+                'affected_table' => 'production_plan',
+                'queries' => $query_log,
+                'Crtdt' => date('Y-m-d H:i:s'),
+                'Crtby' => $this->input->post('user')
+            ];    
+            $this->db->insert('production_material_request_log', $log_data);
             
             // Retrieve BOM data
             $result = $this->db->query("SELECT * FROM bom WHERE Id_fg = '$productID'")->result_array();
@@ -114,6 +124,17 @@ class Production extends CI_Controller {
                 $this->db->insert('production_plan_detail', $detailData);
                 $Production_plan_detail_id = $this->db->insert_id();
                 
+                // RECORD PRODUCTION MATERIAL REQUEST LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'production_plan_detail',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('production_material_request_log', $log_data);
+                
+                
                 // Prepare and insert data into production_request table
                 $ProductionRequestData = [
                     'Production_plan_detail_id' => $Production_plan_detail_id,
@@ -127,6 +148,16 @@ class Production extends CI_Controller {
                 ];
         
                 $this->PModel->insertData('production_request', $ProductionRequestData);
+                
+                // RECORD PRODUCTION MATERIAL REQUEST LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'production_request',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('production_material_request_log', $log_data);
             }
 
             redirect('production/edit_production_plan/' . $production_plan);
@@ -157,6 +188,15 @@ class Production extends CI_Controller {
                 $checkinsert = $this->db->affected_rows();
 
                 if($checkinsert > 0){
+                    // RECORD PRODUCTION MATERIAL REQUEST LOG
+                    $query_log = $this->db->last_query();
+                    $log_data = [
+                        'affected_table' => 'production_request',
+                        'queries' => $query_log,
+                        'Crtdt' => date('Y-m-d H:i:s'),
+                        'Crtby' => $this->input->post('user')
+                    ];    
+                    $this->db->insert('production_material_request_log', $log_data);
                     $check_success += 1;
                 }
             } else {
@@ -171,7 +211,27 @@ class Production extends CI_Controller {
                 ]);
                 $this->PModel->insertData('production_request', $data);
 
+                // RECORD PRODUCTION MATERIAL REQUEST LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'production_request',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('production_material_request_log', $log_data);
+
                 $this->db->query("UPDATE `production_plan_detail` SET status = 1 WHERE id = '$Production_plan_detail_id'");
+
+                // RECORD PRODUCTION MATERIAL REQUEST LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'production_plan_detail',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('production_material_request_log', $log_data);
 
                 $checkinsert = $this->db->affected_rows();
 
@@ -201,6 +261,16 @@ class Production extends CI_Controller {
             $this->db->set('Updby', $user);
             $this->db->where('id', $id);
             $this->db->update('production_plan_detail');
+
+            // RECORD PRODUCTION MATERIAL REQUEST LOG
+            $query_log = $this->db->last_query();
+            $log_data = [
+                'affected_table' => 'production_plan_detail',
+                'queries' => $query_log,
+                'Crtdt' => date('Y-m-d H:i:s'),
+                'Crtby' => $this->input->post('user')
+            ];    
+            $this->db->insert('production_material_request_log', $log_data);
         
             $result = $this->db->affected_rows() > 0 ? 1 : 0;
             
@@ -250,6 +320,17 @@ class Production extends CI_Controller {
             ];
 
             $this->PModel->insertData('production_request', $Data);
+
+            // RECORD PRODUCTION MATERIAL REQUEST LOG
+            $query_log = $this->db->last_query();
+            $log_data = [
+                'affected_table' => 'production_request',
+                'queries' => $query_log,
+                'Crtdt' => date('Y-m-d H:i:s'),
+                'Crtby' => $this->input->post('user')
+            ];    
+            $this->db->insert('production_material_request_log', $log_data);
+            
             $result ='success';
             
             echo json_encode($result);
@@ -359,6 +440,15 @@ class Production extends CI_Controller {
             $Result = $this->PModel->insertData('kanban_box', $Data);
 
             if ($Result) {
+                // RECORD KANBAN BOX LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'kanban_box',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('kanban_box_log', $log_data);
                 // Success
                 $this->session->set_flashdata('ADD', '
                     <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%;">
@@ -397,6 +487,15 @@ class Production extends CI_Controller {
 
             // CHECK IF SUCCESS UPDATE OR NO
             if ($update == 1) {
+                // RECORD KANBAN BOX LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'kanban_box',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('kanban_box_log', $log_data);
                 $this->session->set_flashdata('success_edit_kanban_box', 'Kanban Box <b>' . $id . '</b> has been updated');
             } else {
                 $this->session->set_flashdata('failed_edit_kanban_box', 'Failed to update Kanban Box <b>' . $id . '</b>');

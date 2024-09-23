@@ -631,7 +631,6 @@ class CPDF implements Canvas
         return $filename;
     }
 
-
     public function image($img, $x, $y, $w, $h, $resolution = "normal")
     {
         [$width, $height, $type] = Helpers::dompdf_getimagesize($img, $this->get_dompdf()->getHttpContext());

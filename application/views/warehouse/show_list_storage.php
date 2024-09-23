@@ -78,12 +78,12 @@
                     let row = `
                         <tr>
                             <td>${number++}</td>
-                            <td>${data[i].reference_number.toUpperCase()}</td>
-                            <td>${data[i].material}</td>
+                            <td>${data[i].product_id}</td>
+                            <td>${data[i].material_desc}</td>
                             <td class="text-center">${data[i].no_box}</td>
                             <td class="text-center">${data[i].SLoc}</td>
-                            <td class="text-center">${data[i].qty}</td>
-                            <td class="text-center">${data[i].uom.toUpperCase()}</td>
+                            <td class="text-center">${data[i].total_qty}</td>
+                            <td class="text-center">${data[i].uom}</td>
                         </tr>
                     `;
                     tableBody.append(row);

@@ -76,18 +76,9 @@ class Warehouse_model extends CI_Model
 
 	public function getSLocAvailability()
 	{
-		// Query untuk menghitung jumlah sloc dari tabel box dan group by sloc
-		$this->db->select('storage.Id_storage, storage.SLoc, storage.space_max, IFNULL(box.space_now, 0) as space_now');
-		$this->db->from('storage');
-		$this->db->join(
-			"(SELECT sloc, COUNT(*) as space_now FROM box GROUP BY sloc) AS box",
-			"storage.Id_storage = box.sloc",
-			'left'
-		);
-		$this->db->order_by('storage.Id_storage', 'ASC');
-		$storage_data = $this->db->get()->result_array();
-
-		return $storage_data;
+		$this->db->select('Id_storage, SLoc, space_now, space_max');
+		$query = $this->db->get('storage');
+		return $query->result_array();
 	}
 
 
@@ -222,59 +213,32 @@ class Warehouse_model extends CI_Model
 
 	public function getListStorageExport()
 	{
-		// $query = "SELECT
-		// 	ls.product_id,
-		// 	ls.material_desc,
-		// 	ls.total_qty,
-		// 	b.no_box,
-		// 	b.sloc,
-		// 	s.SLoc,
-		// 	ls.uom,
-		// 	sub.total_qty_sum,
-		// 	CONCAT('[', s.SLoc, ']-', b.no_box, ':', ls.total_qty) AS box_qty_details
-		// FROM
-		// 	list_storage ls
-		// JOIN (
-		// 	SELECT
-		// 		product_id,
-		// 		SUM(total_qty) AS total_qty_sum
-		// 	FROM
-		// 		list_storage
-		// 	GROUP BY
-		// 		product_id
-		// ) sub ON ls.product_id = sub.product_id
-		// LEFT JOIN box b ON ls.id_box = b.id_box
-		// JOIN storage s ON b.sloc = s.Id_storage  -- Use b.sloc from the box table instead of ls.sloc
-		// ORDER BY
-		// 	ls.product_id DESC, ls.id_box
-		// 		";
-
 		$query = "SELECT
-				rm.reference_number,
-				rm.material,
-				rm.qty,
-				b.no_box,
-				b.sloc,
-				s.SLoc,
-				rm.uom,
-				sub.total_qty_sum,
-				CONCAT('[', s.SLoc, ']-', b.no_box, ':', rm.qty) AS box_qty_details
+			ls.product_id,
+			ls.material_desc,
+			ls.total_qty,
+			b.no_box,
+			b.sloc,
+			s.SLoc,
+			ls.uom,
+			sub.total_qty_sum,
+			CONCAT('[', s.SLoc, ']-', b.no_box, ':', ls.total_qty) AS box_qty_details
+		FROM
+			list_storage ls
+		JOIN (
+			SELECT
+				product_id,
+				SUM(total_qty) AS total_qty_sum
 			FROM
-				receiving_material rm
-			JOIN (
-				SELECT
-					reference_number,
-					SUM(qty) AS total_qty_sum
-				FROM
-					receiving_material
-				GROUP BY
-					reference_number
-			) sub ON rm.reference_number = sub.reference_number
-			LEFT JOIN box b ON rm.id_box = b.id_box
-			JOIN storage s ON b.sloc = s.Id_storage
-			ORDER BY
-				rm.reference_number DESC, rm.id_box";
-
+				list_storage
+			GROUP BY
+				product_id
+		) sub ON ls.product_id = sub.product_id
+		LEFT JOIN box b ON ls.id_box = b.id_box
+		JOIN storage s ON b.sloc = s.Id_storage  -- Use b.sloc from the box table instead of ls.sloc
+		ORDER BY
+			ls.product_id DESC, ls.id_box
+				";
 		return $this->db->query($query)->result_array();
 	}
 
@@ -308,11 +272,6 @@ class Warehouse_model extends CI_Model
 			LEFT JOIN storage s ON s.Id_storage = b.s_loc 
 			LEFT JOIN `box` h ON h.id_box = a.id_box  
 			WHERE a.id_box = ?";
-		// $query = "SELECT b.*, ls.product_id AS id_material, ls.material_desc, ls.uom, ls.total_qty as qty, ls.id as id_list_storage
-		// 	FROM box b
-		// 	LEFT JOIN list_storage ls ON ls.id_box = b.id_box
-		// 	LEFT JOIN storage s ON s.Id_storage = b.sloc 
-		// 	WHERE b.id_box = ?";
 		return $this->db->query($query, array($id_box))->result_array();
 	}
 
@@ -415,72 +374,9 @@ class Warehouse_model extends CI_Model
 		if ($delete) {
 			$this->db->where('id_box_detail', $id);
 			$delete_material = $this->db->delete('receiving_material');
-
 		}
 		return $delete_material;
 	}
-
-	public function deleteMaterial($id)
-	{
-		// Begin transaction to ensure consistency
-		$this->db->trans_start();
-
-		// First, retrieve the necessary information (e.g., id_box and product_id) before deleting the record
-		$this->db->select('id_box, id_material');
-		$this->db->from('box_detail');
-		$this->db->where('id_box_detail', $id);
-		$box_detail = $this->db->get()->row();
-
-		if ($box_detail) {
-			$id_box = $box_detail->id_box;
-			$id_material = $box_detail->id_material;
-
-			// Delete from `box_detail`
-			$this->db->where('id_box_detail', $id);
-			$delete_box_detail = $this->db->delete('box_detail');
-
-			// Delete related data from `receiving_material`
-			$this->db->where('id_box_detail', $id);
-			$delete_receiving_material = $this->db->delete('receiving_material');
-
-			// Now, delete from `list_storage`
-			// Make sure to use both `id_box` and `id_material` to identify the correct record
-			$this->db->where('id_box', $id_box);
-			$this->db->where('product_id', $id_material);
-			$delete_list_storage = $this->db->delete('list_storage');
-
-			// Commit transaction if all operations are successful
-			if ($delete_box_detail && $delete_receiving_material && $delete_list_storage) {
-				$this->db->trans_complete();
-				return $this->db->trans_status();
-			}
-		}
-
-		// If we reach here, something went wrong; rollback the transaction
-		$this->db->trans_rollback();
-		return false;
-	}
-
-	public function deleteMaterialBox2($id_box_detail)
-	{
-		// Begin transaction
-		$this->db->trans_start();
-
-		// Delete from `receiving_material`
-		$this->db->where('id_box_detail', $id_box_detail);
-		$this->db->delete('receiving_material');
-
-		// Delete from `box_detail`
-		$this->db->where('id_box_detail', $id_box_detail);
-		$this->db->delete('box_detail');
-
-		// Complete transaction
-		$this->db->trans_complete();
-
-		// Return transaction status
-		return $this->db->trans_status();
-	}
-
 
 	public function deleteData($table, $where)
 	{

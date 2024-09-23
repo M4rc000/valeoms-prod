@@ -54,6 +54,15 @@ class Quality extends CI_Controller {
             $query = $this->db->affected_rows();
             
             if($query == 1){
+                // RECORD QUALITY MATERIAL REQUEST LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'quality_request',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('quality_material_request_log', $log_data);
                 $result ='success';
             }
             else{
@@ -82,6 +91,16 @@ class Quality extends CI_Controller {
                 ];
 
                 $this->QModel->insertData('quality_request_detail', $DataRequest);
+                
+                // RECORD QUALITY MATERIAL REQUEST LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'quality_request_detail',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('quality_material_request_log', $log_data);
             }
 
             // Get the input data from AJAX request
