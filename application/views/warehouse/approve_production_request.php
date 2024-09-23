@@ -1,13 +1,13 @@
 <style>
-    .select2-container {
-        z-index: 9999;
-    }
+.select2-container {
+    z-index: 9999;
+}
 
-    .select2-selection {
-        padding-top: 4px !important;
-        height: 38px !important;
-        /* width: 367px !important; */
-    }
+.select2-selection {
+    padding-top: 4px !important;
+    height: 38px !important;
+    /* width: 367px !important; */
+}
 </style>
 <section>
     <div class="row">
@@ -36,9 +36,8 @@
 
                     <?php } ?>
                     <h5 class="mt-2">Production Plan: <b><?= $production_plan->Production_plan ?></b></h5>
-                    <h5 class="mt-2">Product ID: <b><?= $production_plan->Id_fg ?></b></h5>
-                    <h5 class="mt-2">Product Description: <b><?= $production_plan->Fg_desc ?></b></h5>
-                <h5 class="mt-2">Production Plan Qty: <b><?= $production_plan->Production_plan_qty ?></b></h5>
+                    <h5 class="mt-2">Production Description: <b><?= $production_plan->Fg_desc ?></b></h5>
+                    <h5 class="mt-2">Production Plan Qty: <b><?= $production_plan->Production_plan_qty ?></b></h5>
                     <!-- <button type="button" class="btn btn-primary mb-2 mt-4" style data-bs-toggle="modal"
                         data-bs-target="#addModal1" style="font-weight: bold;" id="addBtn">
                         + Add Material
@@ -67,15 +66,17 @@
                                 <td><?php echo $pr['Material_desc']; ?></td>
                                 <td><?php echo $pr['Qty']; ?></td>
                                 <td style="text-align:center">
-                                <?php if($pr['status'] == 0) { ?>
-                                <button class="btn btn-warning" class="choose-sloc-box" data-bs-toggle="modal" data-bs-target="#chooseSlocAndBox<?= $pr['Id_request']; ?>">
-                                   <i class="bx bx-pencil"></i></span>
+                                    <?php if($pr['status'] == 0) { ?>
+                                    <button class="btn btn-warning" class="choose-sloc-box" data-bs-toggle="modal"
+                                        data-bs-target="#chooseSlocAndBox<?= $pr['Id_request']; ?>">
+                                        <i class="bx bx-pencil"></i></span>
                                     </button>
-                                <?php } else { ?>
-                                    <button class="btn btn-primary" class="choose-sloc-box" data-bs-toggle="modal" data-bs-target="#detailSlocAndBox<?= $pr['Id_request']; ?>">
-                                   <i class="bx bx-show"></i></span>
+                                    <?php } else { ?>
+                                    <button class="btn btn-primary" class="choose-sloc-box" data-bs-toggle="modal"
+                                        data-bs-target="#detailSlocAndBox<?= $pr['Id_request']; ?>">
+                                        <i class="bx bx-show"></i></span>
                                     </button>
-                                <?php }  ?>
+                                    <?php }  ?>
 
                                 </td>
                             </tr>
@@ -87,11 +88,13 @@
                         <div class="col-md-10"></div>
                         <div class="col-md">
                             <?php if($production_plan->status == 'APPROVED') {?>
-                            <button class="btn btn-primary" id="saveEdit" onclick="saveApprove('<?= $production_plan->Production_plan ?>')"  disabled >
+                            <button class="btn btn-primary" id="saveEdit"
+                                onclick="saveApprove('<?= $production_plan->Production_plan ?>')" disabled>
                                 Approve
                             </button>
                             <?php } else { ?>
-                                <button class="btn btn-primary" id="saveEdit" onclick="saveApprove('<?= $production_plan->Production_plan ?>')"  >
+                            <button class="btn btn-primary" id="saveEdit"
+                                onclick="saveApprove('<?= $production_plan->Production_plan ?>')">
                                 Approve
                             </button>
                             <?php } ?>
@@ -117,18 +120,23 @@
                 <div class="row ps-2">
                     <div class="col-4">
                         <label for="sloc" class="form-label">Id Material</label>
-                       <input type="text" class="form-control id_material" value="<?= $pr['Id_material']?>" readonly>
+                        <input type="text" class="form-control id_material" value="<?= $pr['Id_material']?>" readonly>
                     </div>
                     <div class="col-5">
                         <label for="sloc" class="form-label">Material Description</label>
-                        <input type="text" class="form-control" id="material_desc" value="<?= $pr['Material_desc']?>" readonly>
-                        <input type="hidden" class="form-control" id="Production_plan_detail_id"  value="<?= $pr['Production_plan_detail_id']?>" readonly>
-                        <input type="hidden" class="form-control" id="id_request"  value="<?= $pr['Id_request']?>" readonly>
-                        <input type="hidden" class="form-control" id="production_plan"  value="<?= $pr['Production_plan']?>" readonly>
+                        <input type="text" class="form-control material_desc_<?= $pr['Id_material']?>"
+                            value="<?= $pr['Material_desc']?>" readonly>
+                        <input type="hidden" class="form-control Production_plan_detail_id_<?= $pr['Id_material']?>"
+                            value="<?= $pr['Production_plan_detail_id']?>" readonly>
+                        <input type="hidden" class="form-control id_request_<?= $pr['Id_material']?>"
+                            value="<?= $pr['Id_request']?>" readonly>
+                        <input type="hidden" class="form-control production_plan_<?= $pr['Id_material']?>"
+                            value="<?= $pr['Production_plan']?>" readonly>
                     </div>
                     <div class="col-3">
                         <label for="sloc" class="form-label">Qty Need</label>
-                       <input type="text" class="form-control" id="material_need" value="<?= $pr['Qty']?>" readonly>
+                        <input type="text" class="form-control material_need_<?= $pr['Id_material']?>"
+                            value="<?= $pr['Qty']?>" readonly>
                     </div>
                 </div>
                 <hr>
@@ -145,7 +153,8 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                     onclick="closeModal()">Close</button>
-                <button type="submit" class="btn btn-primary" onclick="savePRDetail('<?= $pr['Id_material']?>')">Save</button>
+                <button type="submit" class="btn btn-primary"
+                    onclick="savePRDetail('<?= $pr['Id_material']?>')">Save</button>
             </div>
         </div>
     </div>
@@ -167,22 +176,26 @@
                 <div class="row ps-2">
                     <div class="col-4">
                         <label for="sloc" class="form-label">Id Material</label>
-                       <input type="text" class="form-control id_material_detail" value="<?= $pr['Id_material']?>" readonly>
+                        <input type="text" class="form-control id_material_detail" value="<?= $pr['Id_material']?>"
+                            readonly>
                     </div>
                     <div class="col-5">
                         <label for="sloc" class="form-label">Material Description</label>
-                        <input type="text" class="form-control"  value="<?= $pr['Material_desc']?>" readonly>
-                        <input type="hidden" class="form-control"  value="<?= $pr['Production_plan_detail_id']?>" readonly>
-                        <input type="hidden" class="form-control"  value="<?= $pr['Id_request']?>" readonly>
+                        <input type="text" class="form-control" value="<?= $pr['Material_desc']?>" readonly>
+                        <input type="hidden" class="form-control" value="<?= $pr['Production_plan_detail_id']?>"
+                            readonly>
+                        <input type="hidden" class="form-control" value="<?= $pr['Id_request']?>" readonly>
                     </div>
                     <div class="col-3">
                         <label for="sloc" class="form-label">Qty Need</label>
-                       <input type="text" class="form-control"  value="<?= $pr['Qty']?>" readonly>
+                        <input type="text" class="form-control" value="<?= $pr['Qty']?>" readonly>
                     </div>
                 </div>
                 <hr>
-                <button type="button" class="btn btn-success view-details" onclick="getdetailpr(<?=$pr['Production_plan_detail_id']?>)" data-id-material="<?= $pr['Id_material']?>">
-                   View Details
+                <button type="button" class="btn btn-success view-details"
+                    onclick="getdetailpr(<?=$pr['Production_plan_detail_id']?>)"
+                    data-id-material="<?= $pr['Id_material']?>">
+                    View Details
                 </button>
 
                 <!-- Container for dynamic setting rows -->
@@ -204,39 +217,38 @@
 <script src="https://cdn.jsdelivr.net/npm/sweetalert2@10"></script>
 
 <script>
-    
 $(document).ready(function() {
-    let rowIndex = 0;
+    var rowIndex = 0;
     // Event listener for plus-row button click
     $(document).on('click', '.plus-row', function() {
-        var id_material = $(this).data('id-material'); 
+        var id_material = $(this).data('id-material');
         rowIndex++;
         // Create a new setting block with a unique index
         var newSetting = `
-            <div class="row ps-2 pt-3 setting" data-index="${rowIndex}">
-                <div class="col-3" id="slocview_${rowIndex}">
-                    <label for="sloc_${rowIndex}" class="form-label">Sloc</label>
-                    <select class="form-control sloc-select sloc_${rowIndex}" name="sloc_name_${rowIndex}" id="sloc_${rowIndex}">
-                        <option value="">Select Sloc</option>
-                    </select>
+            <div class="row ps-2 pt-3 setting" data-index="${rowIndex}_${id_material}">
+                <div class="col-3" id="slocview_${rowIndex}_${id_material}">
+                    <label for="sloc_${rowIndex}_${id_material}" class="form-label">Sloc</label>
+                     <select class="form-control sloc-select sloc_${rowIndex}_${id_material}" name="sloc_name_${rowIndex}_${id_material}" id="sloc_${rowIndex}_${id_material}">
+                    <option value="">Select Sloc</option>
+                </select>
                 </div>
-                <div class="col-3" id="boxview_${rowIndex}">
-                    <label for="no_box_${rowIndex}" class="form-label">No box</label>
-                    <select class="form-control box-select box_${rowIndex}" name="no_box_${rowIndex}" id="box_${rowIndex}">
+                <div class="col-3" id="boxview_${rowIndex}_${id_material}">
+                    <label for="no_box_${rowIndex}_${id_material}" class="form-label">No box</label>
+                    <select class="form-control box-select box_${rowIndex}_${id_material}" name="no_box_${rowIndex}_${id_material}" id="box_${rowIndex}_${id_material}">
                         <option value="">Select Box</option>
                     </select>
                 </div>
                 <div class="col-2">
-                    <label for="qty_on_sloc_${rowIndex}" class="form-label">Qty</label>
-                    <input type="text" class="form-control qty_on_sloc_${rowIndex}" id="qty_on_sloc_${rowIndex}" name="qty_on_sloc_${rowIndex}[]" readonly>
+                    <label for="qty_on_sloc_${rowIndex}_${id_material}" class="form-label">Qty</label>
+                    <input type="text" class="form-control qty_on_sloc_${rowIndex}_${id_material}" id="qty_on_sloc_${rowIndex}_${id_material}" name="qty_on_sloc_${rowIndex}_${id_material}[]" readonly>
                 </div>
                 <div class="col-2">
-                    <label for="qty_need_${rowIndex}" class="form-label">Qty need</label>
-                    <input type="number" class="form-control qty_need_${rowIndex}" id="qty_need_${rowIndex}" name="qty_need_${rowIndex}[]" min="0" onchange="cekQtyNeed(this, ${rowIndex})">
+                    <label for="qty_need_${rowIndex}_${id_material}" class="form-label">Qty need</label>
+                    <input type="number" class="form-control qty_need_${rowIndex}_${id_material}" id="qty_need_${rowIndex}_${id_material}" name="qty_need_${rowIndex}_${id_material}[]" min="0" onchange="cekQtyNeed(this, ${rowIndex}, '${id_material}')">
                 </div>
                  <div class="col-2 p-4">
-                    <button class="btn btn-success setPR_${rowIndex}" id="setPR_${rowIndex}" onclick="setPR(${rowIndex}, '${id_material}')">Set</button>
-                    <button class="btn btn-success unsetPR_${rowIndex}" id="unsetPR_${rowIndex}" onclick="unsetPR(${rowIndex}, '${id_material}')" style="display:none">Unset</button>
+                    <button class="btn btn-success setPR_${rowIndex}_${id_material}" id="setPR_${rowIndex}_${id_material}" onclick="setPR(${rowIndex}, '${id_material}')">Set</button>
+                    <button class="btn btn-success unsetPR_${rowIndex}_${id_material}" id="unsetPR_${rowIndex}_${id_material}" onclick="unsetPR(${rowIndex}, '${id_material}')" style="display:none">Unset</button>
                 </div>
             </div>
         `;
@@ -248,21 +260,47 @@ $(document).ready(function() {
     });
 });
 
-let materialSlocArray = []; // Array to store material settings
+var materialSlocArray = []; // Array to store material settings
+
+function getDetailRequest(id, production_plan) {
+    $.ajax({
+        url: '<?php echo base_url('warehouse/getApprovedDetail'); ?>',
+        type: 'POST',
+        data: {
+            Production_plan: production_plan
+        },
+        success: function(res) {
+            var data = JSON.parse(res);
+            $('#detailModal' + id + ' .sloc-name').text(data.sloc_name ||
+                'No Sloc Assigned'); // Tampilkan Sloc
+            $('#detailModal' + id).modal('show');
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'Failed to load approval details'
+            });
+        }
+    });
+}
 
 function getSloc(idMaterial, rowIndex) {
     $.ajax({
         url: '<?php echo base_url('warehouse/get_sloc_options'); ?>',
         method: 'POST',
-        data: { id_material: idMaterial },
+        data: {
+            id_material: idMaterial
+        },
         success: function(response) {
             var data = JSON.parse(response);
-            var $select = $(`.sloc_${rowIndex}`);
+            var $select = $(`.sloc_${rowIndex}_${idMaterial}`);
             $select.empty();
             $select.append('<option value="">-- Select Sloc --</option>');
 
             $.each(data, function(index, sloc) {
-                $select.append('<option value="' + sloc.sloc_id + '">' + sloc.sloc_name + '</option>');
+                $select.append('<option value="' + sloc.sloc_id + '">' + sloc.sloc_name +
+                    '</option>');
             });
 
             $select.select2({
@@ -273,6 +311,7 @@ function getSloc(idMaterial, rowIndex) {
             // Attach change event listener to sloc-select
             $select.on('change', function() {
                 var selectedSlocId = $(this).val();
+                $(`.sloc_${rowIndex}_${idMaterial}`).val(selectedSlocId);
                 getIdBox(idMaterial, selectedSlocId, rowIndex);
             });
         },
@@ -286,15 +325,19 @@ function getIdBox(idMaterial, slocId, rowIndex) {
     $.ajax({
         url: '<?php echo base_url('warehouse/get_id_box_options'); ?>',
         method: 'POST',
-        data: { id_material: idMaterial, sloc_id: slocId },
+        data: {
+            id_material: idMaterial,
+            sloc_id: slocId
+        },
         success: function(response) {
             var data = JSON.parse(response);
-            var $boxSelect = $(`.box_${rowIndex}`);
+            var $boxSelect = $(`.box_${rowIndex}_${idMaterial}`);
             $boxSelect.empty();
             $boxSelect.append('<option value="">-- Select Box --</option>');
 
             $.each(data, function(index, box) {
-                $boxSelect.append('<option value="' + box.id_box + '" data-total-qty="' + box.total_qty + '">' + box.no_box + '</option>');
+                $boxSelect.append('<option value="' + box.id_box + '" data-total-qty="' + box
+                    .total_qty_real + '">' + box.no_box + '</option>');
             });
 
             $boxSelect.select2({
@@ -303,10 +346,11 @@ function getIdBox(idMaterial, slocId, rowIndex) {
             });
 
             $boxSelect.on('change', function() {
-                 // Check for duplicate box selection
+                // Check for duplicate box selection
                 var selectedOption = $(this).find('option:selected');
-                 var selectedBox = selectedOption.val();
-                 if (materialSlocArray.some(item => item.box === selectedBox)) {
+                var selectedBox = selectedOption.val();
+                $(`.box_${rowIndex}_${idMaterial}`).val(selectedBox);
+                if (materialSlocArray.some(item => item.box === selectedBox)) {
                     Swal.fire({
                         icon: 'error',
                         text: 'This box has already been selected. Please choose a different box.'
@@ -316,8 +360,8 @@ function getIdBox(idMaterial, slocId, rowIndex) {
                     return;
                 }
                 var totalQty = selectedOption.data('total-qty');
-                $(`.qty_on_sloc_${rowIndex}`).val(totalQty);
-                $(`.qty_need_${rowIndex}`).attr('max', totalQty);
+                $(`.qty_on_sloc_${rowIndex}_${idMaterial}`).val(totalQty);
+                $(`.qty_need_${rowIndex}_${idMaterial}`).attr('max', totalQty);
             });
         },
         error: function(xhr, status, error) {
@@ -326,53 +370,54 @@ function getIdBox(idMaterial, slocId, rowIndex) {
     });
 }
 
-function cekQtyNeed(that, rowIndex) {
+function cekQtyNeed(that, rowIndex, idMaterial) {
     var qty = $(that).val();
-    var qtyOnSloc = $(`.qty_on_sloc_${rowIndex}`).val();
+    var qtyOnSloc = $(`.qty_on_sloc_${rowIndex}_${idMaterial}`).val();
 
     if (parseFloat(qty) > parseFloat(qtyOnSloc)) {
+        $(`.qty_need_${rowIndex}_${idMaterial}`).val(qtyOnSloc);
         Swal.fire({
             icon: 'error',
             text: 'Quantity cannot exceed the available quantity on Box'
         });
-        $(that).val(qtyOnSloc); // Reset value to max
+    } else {
+        $(`.qty_need_${rowIndex}_${idMaterial}`).val(qty);
     }
+
 }
 
 
 
 function setPR(rowIndex, id_material) {
-    let slocValue = $(`.sloc_${rowIndex}`).val();
-    let boxValue = $(`.box_${rowIndex}`).val();
-    let qtyNeedValue = $(`.qty_need_${rowIndex}`).val();
+    var slocValue = $(`.sloc_${rowIndex}_${id_material}`).val();
+    var boxValue = $(`.box_${rowIndex}_${id_material}`).val();
+    var qtyNeedValue = $(`.qty_need_${rowIndex}_${id_material}`).val();
     var id_material = id_material;
-    var Production_plan_detail_id = $('#Production_plan_detail_id').val();
-    var material_desc = $('#material_desc').val();
-    var production_plan = $('#production_plan').val();
-    var id_request = $('#id_request').val();
-
-    console.log(rowIndex);
-
+    var Production_plan_detail_id = $(`.Production_plan_detail_id_${id_material}`).val();
+    var material_desc = $(`.material_desc_${id_material}`).val();
+    var production_plan = $(`.production_plan_${id_material}`).val();
+    var id_request = $(`.id_request_${id_material}`).val();
+    // Check if sloc, box, or qty_need values are empty
     if (!slocValue) {
         Swal.fire({
             icon: 'error',
             text: 'Please select a Sloc.'
         });
-        return; 
+        return;
     }
     if (!boxValue) {
         Swal.fire({
             icon: 'error',
             text: 'Please select a Box.'
         });
-        return; 
+        return;
     }
     if (!qtyNeedValue || parseFloat(qtyNeedValue) <= 0) {
         Swal.fire({
             icon: 'error',
             text: 'Please enter a valid Quantity Need.'
         });
-        return; 
+        return;
     }
 
     // Push data to the array
@@ -389,15 +434,15 @@ function setPR(rowIndex, id_material) {
     console.log(materialSlocArray);
 
     // Disable the specific setPR button for this row
-    $(`.setPR_${rowIndex}`).css('display', 'none');
-    $(`.unsetPR_${rowIndex}`).css('display', 'block');
-    $(`.qty_need_${rowIndex}`).prop('readonly', true);
-    $(`.sloc_${rowIndex}`).prop('disabled', true);
-    $(`.box_${rowIndex}`).prop('disabled', true);
+    $(`.setPR_${rowIndex}_${id_material}`).css('display', 'none');
+    $(`.unsetPR_${rowIndex}_${id_material}`).css('display', 'block');
+    $(`.qty_need_${rowIndex}_${id_material}`).prop('readonly', true);
+    $(`.sloc_${rowIndex}_${id_material}`).prop('disabled', true);
+    $(`.box_${rowIndex}_${id_material}`).prop('disabled', true);
 
     // Calculate the total qty_need in the array
     var totalQtyNeed = materialSlocArray.reduce((sum, item) => sum + item.qty_need, 0);
-    var materialNeed = parseFloat($('#material_need').val());
+    var materialNeed = parseFloat($(`.material_need_${id_material}`).val());
 
     // Check if materialNeed is less than totalQtyNeed
     if (materialNeed > totalQtyNeed) {
@@ -406,48 +451,36 @@ function setPR(rowIndex, id_material) {
     console.log(materialSlocArray);
 }
 
-function cekQtyNeed(that, rowIndex) {
-    var qty = $(that).val();
-    var qtyOnSloc = $(`.qty_on_sloc_${rowIndex}`).val();
 
-    if (parseFloat(qty) > parseFloat(qtyOnSloc)) {
-        Swal.fire({
-            icon: 'error',
-            text: 'Quantity cannot exceed the available quantity on Box'
-        });
-        $(that).val(qtyOnSloc); // Reset value to max
-    }
-}
-
-function unsetPR(rowIndex){
-    var slocValue = $(`.sloc_${rowIndex}`).val();
-    var boxValue = $(`.box_${rowIndex}`).val();
-    var qtyNeedValue = parseFloat($(`.qty_need_${rowIndex}`).val());
-      // Find and remove the specific item from the materialSlocArray
-      materialSlocArray = materialSlocArray.filter(item => 
+function unsetPR(rowIndex, id_material) {
+    var slocValue = $(`.sloc_${rowIndex}_${id_material}`).val();
+    var boxValue = $(`.box_${rowIndex}_${id_material}`).val();
+    var qtyNeedValue = parseFloat($(`.qty_need_${rowIndex}_${id_material}`).val());
+    // Find and remove the specific item from the materialSlocArray
+    materialSlocArray = materialSlocArray.filter(item =>
         item.sloc !== slocValue || item.box !== boxValue || item.qty_need !== qtyNeedValue
     );
     // Disable the specific setPR button for this row
-    $(`.setPR_${rowIndex}`).css('display', 'block');
-    $(`.unsetPR_${rowIndex}`).css('display', 'none');
-    $(`.qty_need_${rowIndex}`).prop('readonly', false);
-    $(`.sloc_${rowIndex}`).prop('disabled', false);
-    $(`.box_${rowIndex}`).prop('disabled', false);
+    $(`.setPR_${rowIndex}_${id_material}`).css('display', 'block');
+    $(`.unsetPR_${rowIndex}_${id_material}`).css('display', 'none');
+    $(`.qty_need_${rowIndex}_${id_material}`).prop('readonly', false);
+    $(`.sloc_${rowIndex}_${id_material}`).prop('disabled', false);
+    $(`.box_${rowIndex}_${id_material}`).prop('disabled', false);
 
     console.log(materialSlocArray);
 }
 
-function savePRDetail(){
-    if(materialSlocArray.length == 0){
+function savePRDetail(id_material) {
+    if (materialSlocArray.length == 0) {
         Swal.fire({
             icon: 'error',
             text: 'Please Complete the proccess!'
         });
         return;
     }
-     // Calculate the total qty_need in the array
+    // Calculate the total qty_need in the array
     var totalQtyNeed = materialSlocArray.reduce((sum, item) => sum + item.qty_need, 0);
-    var materialNeed = parseFloat($('#material_need').val());
+    var materialNeed = parseFloat($(`.material_need_${id_material}`).val());
 
     // Check if materialNeed is less than totalQtyNeed
     if (materialNeed != totalQtyNeed) {
@@ -457,12 +490,14 @@ function savePRDetail(){
         });
     } else {
         $.ajax({
-        url: '<?php echo base_url('warehouse/save_production_request_detail'); ?>',
-        method: 'POST',
-        data: { materialSlocArray: materialSlocArray },
-        success: function(response) {
-            var data = JSON.parse(response);
-            if (data.status) {
+            url: '<?php echo base_url('warehouse/save_production_request_detail'); ?>',
+            method: 'POST',
+            data: {
+                materialSlocArray: materialSlocArray
+            },
+            success: function(response) {
+                var data = JSON.parse(response);
+                if (data.status) {
                     Swal.fire({
                         icon: 'success',
                         text: 'Save production request detail is successfully.'
@@ -470,26 +505,31 @@ function savePRDetail(){
                         // Reload the page after success message
                         window.location.reload();
                     });
+                    materialSlocArray = [];
                 }
-            
-        },
-        error: function(xhr, status, error) {
-            console.error('Error:', error);
-        }
-    });
+
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
     }
 }
-function closeModal(){
+
+function closeModal() {
     window.location.reload();
 }
 
 
 
-function getdetailpr(Production_plan_detail_id){
+function getdetailpr(Production_plan_detail_id) {
+    $('.view-details').prop('disabled', true);
     $.ajax({
         url: '<?php echo base_url('warehouse/get_detail_approve_pr'); ?>',
         method: 'POST',
-        data: { Production_plan_detail_id: Production_plan_detail_id},
+        data: {
+            Production_plan_detail_id: Production_plan_detail_id
+        },
         success: function(response) {
             var data = JSON.parse(response);
             var rowIndex = $('.detail-pr-container').length;
@@ -522,7 +562,7 @@ function getdetailpr(Production_plan_detail_id){
                 // Append the new setting block to the container
                 $('.detail-pr-container').append(newDetail);
             });
-           
+
         },
         error: function(xhr, status, error) {
             console.error('Error:', error);
@@ -530,28 +570,31 @@ function getdetailpr(Production_plan_detail_id){
     });
 }
 
-function saveApprove(production_plan){
+function saveApprove(production_plan) {
     $.ajax({
         url: '<?php echo base_url('warehouse/get_count_status_pr'); ?>',
         method: 'POST',
-        data: { production_plan: production_plan},
+        data: {
+            production_plan: production_plan
+        },
         success: function(response) {
             var data = JSON.parse(response);
-            if(data.status){
+            if (data.status) {
                 approveRequest(production_plan);
             } else {
                 Swal.fire({
-                icon: 'error',
-                text: 'Please Complete the sloc and box for All Materials!'
-            });
+                    icon: 'error',
+                    text: 'Please Complete the sloc and box for All Materials!'
+                });
             }
-            
+
         },
         error: function(xhr, status, error) {
             console.error('Error:', error);
         }
     });
 }
+
 function approveRequest(production_plan) {
     Swal.fire({
         title: "Are you sure?",

@@ -14,9 +14,6 @@
 	<div class="row">
 		<div class="card info-card" style="height: 2500px;">
 			<div class="card-body">
-                <?php if ($this->session->flashdata('Error') != '') { ?>
-                    <?= $this->session->flashdata('Error'); ?>
-                <?php } ?>
                 <div class="row mt-3">
                     <div class="col-md">
                         <ul class="nav nav-tabs d-flex" id="myTabjustified" role="tablist">
@@ -223,9 +220,7 @@
         $('#material_id').select2({
             width: '100%'
         });
-        $('#product_id').select2({
-            dropdownParent: $('#base-search') 
-        });
+        $('#product_id').select2();
     });
     
     let rowIndex = 1;

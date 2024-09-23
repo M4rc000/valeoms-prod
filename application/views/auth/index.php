@@ -2,13 +2,16 @@
 	<div class="container">
 		<div class="row justify-content-center">
 		<div class="col-lg-4 col-md-6 d-flex flex-column align-items-center justify-content-center">
+
 			<div class="d-flex justify-content-center py-4">
 			<a class="logo d-flex align-items-center w-auto">
 				<img src="<?=base_url('assets');?>/img/valeo.png">
 			</a>
 			</div><!-- End Logo -->
+
 			<div class="card mb-3">
 				<div class="card-body">
+
 					<div class="pt-3 pb-2">
 					<h5 class="card-title text-center pb-0 fs-4">Login to Your Account</h5>
 					<p class="text-center small">Enter your username & password</p>
@@ -49,7 +52,6 @@
 							<button class="btn btn-primary w-100" type="submit">Login</button>
 							<p></p>
 							<p class="text-center" style="font-size: 13px;">v1.0.0</p>
-							<p class="text-center" style="font-size: 30px;"><i class="bx bxl-dev-to"></i></p>
 						</div>
 					</form>
 				</div>
@@ -57,4 +59,5 @@
 		</div>
 		</div>
 	</div>
+
 </section>

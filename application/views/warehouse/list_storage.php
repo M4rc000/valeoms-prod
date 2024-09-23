@@ -14,7 +14,7 @@
     .buttons-excel{
         background-color: #0d6efd !important;
         color: white !important;
-        border-radius: 5px !important;
+        border-radius: 5px !important;  
     }
     .buttons-print{
         background-color: #198754 !important;
@@ -156,7 +156,6 @@
 
 <script>
     function getDetailStorage(id) {
-        console.log(id);
         $.ajax({
             url: '<?php echo base_url('warehouse/get_detail_storage'); ?>',
             type: 'POST',

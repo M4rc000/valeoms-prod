@@ -76,9 +76,18 @@ class Warehouse_model extends CI_Model
 
 	public function getSLocAvailability()
 	{
-		$this->db->select('Id_storage, SLoc, space_now, space_max');
-		$query = $this->db->get('storage');
-		return $query->result_array();
+		// Query untuk menghitung jumlah sloc dari tabel box dan group by sloc
+		$this->db->select('storage.Id_storage, storage.SLoc, storage.space_max, IFNULL(box.space_now, 0) as space_now');
+		$this->db->from('storage');
+		$this->db->join(
+			"(SELECT sloc, COUNT(*) as space_now FROM box GROUP BY sloc) AS box",
+			"storage.Id_storage = box.sloc",
+			'left'
+		);
+		$this->db->order_by('storage.Id_storage', 'ASC');
+		$storage_data = $this->db->get()->result_array();
+
+		return $storage_data;
 	}
 
 
@@ -213,32 +222,59 @@ class Warehouse_model extends CI_Model
 
 	public function getListStorageExport()
 	{
+		// $query = "SELECT
+		// 	ls.product_id,
+		// 	ls.material_desc,
+		// 	ls.total_qty,
+		// 	b.no_box,
+		// 	b.sloc,
+		// 	s.SLoc,
+		// 	ls.uom,
+		// 	sub.total_qty_sum,
+		// 	CONCAT('[', s.SLoc, ']-', b.no_box, ':', ls.total_qty) AS box_qty_details
+		// FROM
+		// 	list_storage ls
+		// JOIN (
+		// 	SELECT
+		// 		product_id,
+		// 		SUM(total_qty) AS total_qty_sum
+		// 	FROM
+		// 		list_storage
+		// 	GROUP BY
+		// 		product_id
+		// ) sub ON ls.product_id = sub.product_id
+		// LEFT JOIN box b ON ls.id_box = b.id_box
+		// JOIN storage s ON b.sloc = s.Id_storage  -- Use b.sloc from the box table instead of ls.sloc
+		// ORDER BY
+		// 	ls.product_id DESC, ls.id_box
+		// 		";
+
 		$query = "SELECT
-			ls.product_id,
-			ls.material_desc,
-			ls.total_qty,
-			b.no_box,
-			b.sloc,
-			s.SLoc,
-			ls.uom,
-			sub.total_qty_sum,
-			CONCAT('[', s.SLoc, ']-', b.no_box, ':', ls.total_qty) AS box_qty_details
-		FROM
-			list_storage ls
-		JOIN (
-			SELECT
-				product_id,
-				SUM(total_qty) AS total_qty_sum
+				rm.reference_number,
+				rm.material,
+				rm.qty,
+				b.no_box,
+				b.sloc,
+				s.SLoc,
+				rm.uom,
+				sub.total_qty_sum,
+				CONCAT('[', s.SLoc, ']-', b.no_box, ':', rm.qty) AS box_qty_details
 			FROM
-				list_storage
-			GROUP BY
-				product_id
-		) sub ON ls.product_id = sub.product_id
-		LEFT JOIN box b ON ls.id_box = b.id_box
-		JOIN storage s ON b.sloc = s.Id_storage  -- Use b.sloc from the box table instead of ls.sloc
-		ORDER BY
-			ls.product_id DESC, ls.id_box
-				";
+				receiving_material rm
+			JOIN (
+				SELECT
+					reference_number,
+					SUM(qty) AS total_qty_sum
+				FROM
+					receiving_material
+				GROUP BY
+					reference_number
+			) sub ON rm.reference_number = sub.reference_number
+			LEFT JOIN box b ON rm.id_box = b.id_box
+			JOIN storage s ON b.sloc = s.Id_storage
+			ORDER BY
+				rm.reference_number DESC, rm.id_box";
+
 		return $this->db->query($query)->result_array();
 	}
 
@@ -272,6 +308,11 @@ class Warehouse_model extends CI_Model
 			LEFT JOIN storage s ON s.Id_storage = b.s_loc 
 			LEFT JOIN `box` h ON h.id_box = a.id_box  
 			WHERE a.id_box = ?";
+		// $query = "SELECT b.*, ls.product_id AS id_material, ls.material_desc, ls.uom, ls.total_qty as qty, ls.id as id_list_storage
+		// 	FROM box b
+		// 	LEFT JOIN list_storage ls ON ls.id_box = b.id_box
+		// 	LEFT JOIN storage s ON s.Id_storage = b.sloc 
+		// 	WHERE b.id_box = ?";
 		return $this->db->query($query, array($id_box))->result_array();
 	}
 
@@ -374,9 +415,72 @@ class Warehouse_model extends CI_Model
 		if ($delete) {
 			$this->db->where('id_box_detail', $id);
 			$delete_material = $this->db->delete('receiving_material');
+
 		}
 		return $delete_material;
 	}
+
+	public function deleteMaterial($id)
+	{
+		// Begin transaction to ensure consistency
+		$this->db->trans_start();
+
+		// First, retrieve the necessary information (e.g., id_box and product_id) before deleting the record
+		$this->db->select('id_box, id_material');
+		$this->db->from('box_detail');
+		$this->db->where('id_box_detail', $id);
+		$box_detail = $this->db->get()->row();
+
+		if ($box_detail) {
+			$id_box = $box_detail->id_box;
+			$id_material = $box_detail->id_material;
+
+			// Delete from `box_detail`
+			$this->db->where('id_box_detail', $id);
+			$delete_box_detail = $this->db->delete('box_detail');
+
+			// Delete related data from `receiving_material`
+			$this->db->where('id_box_detail', $id);
+			$delete_receiving_material = $this->db->delete('receiving_material');
+
+			// Now, delete from `list_storage`
+			// Make sure to use both `id_box` and `id_material` to identify the correct record
+			$this->db->where('id_box', $id_box);
+			$this->db->where('product_id', $id_material);
+			$delete_list_storage = $this->db->delete('list_storage');
+
+			// Commit transaction if all operations are successful
+			if ($delete_box_detail && $delete_receiving_material && $delete_list_storage) {
+				$this->db->trans_complete();
+				return $this->db->trans_status();
+			}
+		}
+
+		// If we reach here, something went wrong; rollback the transaction
+		$this->db->trans_rollback();
+		return false;
+	}
+
+	public function deleteMaterialBox2($id_box_detail)
+	{
+		// Begin transaction
+		$this->db->trans_start();
+
+		// Delete from `receiving_material`
+		$this->db->where('id_box_detail', $id_box_detail);
+		$this->db->delete('receiving_material');
+
+		// Delete from `box_detail`
+		$this->db->where('id_box_detail', $id_box_detail);
+		$this->db->delete('box_detail');
+
+		// Complete transaction
+		$this->db->trans_complete();
+
+		// Return transaction status
+		return $this->db->trans_status();
+	}
+
 
 	public function deleteData($table, $where)
 	{
@@ -439,21 +543,16 @@ class Warehouse_model extends CI_Model
 	public function getProductionRequestDetailReject($Production_plan)
 	{
 		$query = "
-			SELECT a.*, pd.Material_need, p.Fg_Desc, p.Production_plan_qty, p.status as status_request
-FROM production_request a
-LEFT JOIN production_plan p 
-  ON p.Production_plan COLLATE utf8mb4_general_ci = a.Production_plan COLLATE utf8mb4_general_ci
-LEFT JOIN production_plan_detail pd 
-  ON pd.Production_plan COLLATE utf8mb4_general_ci = p.Production_plan COLLATE utf8mb4_general_ci
-  AND pd.Id_material COLLATE utf8mb4_general_ci = a.Id_material COLLATE utf8mb4_general_ci
-WHERE a.Production_plan COLLATE utf8mb4_general_ci = '1'
-AND p.status COLLATE utf8mb4_general_ci = 'REJECTED';
-
+			SELECT a.*,pd.Material_need, p.Fg_Desc, p.Production_plan_qty, 
+				p.status as status_request 
+			FROM production_request a 
+			LEFT JOIN production_plan p ON p.Production_plan = a.Production_plan 
+			LEFT JOIN production_plan_detail pd ON pd.Production_plan = p.Production_plan AND pd.Id_material = a.Id_material 
+			WHERE a.Production_plan = ? and p.status = 'REJECTED'
 		";
 		// print_r($query);die;
 		return $this->db->query($query, [$Production_plan])->result_array();
 	}
-
 
 
 
@@ -539,6 +638,23 @@ AND p.status COLLATE utf8mb4_general_ci = 'REJECTED';
 		$this->db->update($table, $Data);
 	}
 
+	public function countAllBoxes()
+	{
+		return $this->db->query("SELECT a.*, b.SLoc as sloc_name 
+			FROM `box` a 
+			LEFT JOIN storage b ON a.sloc = b.Id_storage")->num_rows();
+	}
+
+	public function getBoxes($limit, $start)
+	{
+		$this->db->select('a.*, b.SLoc as sloc_name');
+		$this->db->from('box a');
+		$this->db->join('storage b', 'a.sloc = b.Id_storage', 'left');
+		$this->db->limit($limit, $start);
+		$query = $this->db->get();
+		return $query->result_array();
+	}
+
 	public function getslocbyweight($weight)
 	{
 		return $this->db->query("SELECT *
@@ -588,6 +704,21 @@ AND p.status COLLATE utf8mb4_general_ci = 'REJECTED';
 		return $query->result_array();
 	}
 
+
+	function getQualityReqDetail($id_request)
+	{
+		$query = " SELECT a.*, b.Id_material,f.Sloc as sloc_name, c.no_box as box_name, b.Material_desc,d.total_qty as qty_on_box from quality_request_detail a 
+		LEFT JOIN quality_request b on b.Id_request = a.Id_Request 
+		LEFT JOIN storage f ON f.Id_storage = a.sloc
+		LEFT JOIN box c ON c.id_box = a.id_box
+		LEFT JOIN list_storage d ON d.sloc = a.sloc and d.id_box = a.id_box and d.product_id = b.Id_material
+		 where a.Id_request = ?
+		";
+		$data = $this->db->query($query, [$id_request])->result_array();
+		return $data;
+	}
+
+
 	public function getQualityRequest2($id_request)
 	{
 		return $this->db->query("SELECT a.* from quality_request a where a.Id_request = '$id_request' ")->row();
@@ -631,7 +762,27 @@ AND p.status COLLATE utf8mb4_general_ci = 'REJECTED';
 		// print_r($query);die;
 		return $this->db->query($query, [$Production_plan])->result_array();
 	}
+	public function getApprovedDetail($production_plan)
+	{
+		$query = "
+            SELECT a.*, b.Id_material, f.Sloc AS sloc_name, c.no_box AS box_name, b.Material_desc
+            FROM production_request a
+            LEFT JOIN production_plan b ON b.Production_plan = a.Production_plan
+            LEFT JOIN storage f ON f.Id_storage = a.Sloc
+            LEFT JOIN box c ON c.id_box = a.id_box
+            WHERE a.Production_plan = ?
+        ";
+		return $this->db->query($query, [$production_plan])->result_array();
+	}
 
+	// Fungsi untuk menyetujui rencana produksi dan memperbarui status
+	public function approveProduction($production_plan, $sloc)
+	{
+		$this->db->where('Production_plan', $production_plan);
+		$this->db->update('production_request', ['status' => 'APPROVED', 'Sloc' => $sloc]);
+
+		return $this->db->affected_rows() > 0;
+	}
 	public function getProductionRequest()
 	{
 		$query = "SELECT  a.* from production_plan a
