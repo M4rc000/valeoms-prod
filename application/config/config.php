@@ -29,7 +29,7 @@ defined('BASEPATH') or exit('No direct script access allowed');
         $base_url = (isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://" . $_SERVER['HTTP_HOST'];
         $base_url .= str_replace(basename($_SERVER['SCRIPT_NAME']), "", $_SERVER['SCRIPT_NAME']);
     } else {
-        $base_url = 'http://103.91.45.222:8080/Development/ValeoMS/';
+        $base_url = 'http://103.91.45.222:8080/2024/Development/ValeoMS/';
     }
 
     $config['base_url'] = $base_url;
@@ -387,7 +387,7 @@ $config['encryption_key'] = '';
 |
 */
 $config['sess_driver'] = 'files';
-$config['sess_cookie_name'] = 'valeo_dev_session';
+$config['sess_cookie_name'] = 'valeo_session';
 $config['sess_expiration'] = 3600;
 $config['sess_save_path'] = null;
 $config['sess_match_ip'] = false;

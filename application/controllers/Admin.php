@@ -551,14 +551,14 @@ class Admin extends CI_Controller {
         $this->load->view('templates/sidebar');   
         $this->load->view('admin/manage_box', $data);
         $this->load->view('templates/footer');
-    }   
+    } 
     
     public function get_box_data() {
         $data = $this->AModel->getBox();
 
         echo json_encode($data);
-    }
-    
+    }  
+
     public function history_log() {
         $data['title'] = 'History log';
         
@@ -578,5 +578,4 @@ class Admin extends CI_Controller {
 
         echo json_encode($data);
     }
-    
 }

@@ -14,7 +14,7 @@
     <title>Document</title>
     <style>
     .select2-container {
-        re z-index: 9999;
+        z-index: 9999;
     }
 
     .select2-selection {
@@ -66,8 +66,8 @@
                             </thead>
                             <tbody>
                                 <?php $number = 0;
-                                foreach ($receiving_material as $material):
-                                    $number++ ?>
+								foreach ($receiving_material as $material):
+									$number++ ?>
                                 <tr>
                                     <td>
                                         <?= $number; ?>
@@ -77,11 +77,9 @@
                                     <td><?php echo $material['qty']; ?></td>
                                     <td><?php echo $material['uom']; ?></td>
                                     <td>
-                                        <!-- <button class="btn btn-success btn-edit"
-                                            onclick="showModal('Edit Material', '<?= base_url('warehouse/formdetail') ?>', {'id': <?= $material['id'] ?>})"
-                                            data-id="<?= $material['id']; ?>">
+                                        <button class="btn btn-success btn-edit" data-id="<?= $material['id']; ?>">
                                             <i class="bx bxs-edit" style="color: white;"></i>
-                                        </button> -->
+                                        </button>
                                         <button class="btn btn-danger ms-1"
                                             onclick="deleteItem(<?= $material['id']; ?>)">
                                             <i class="bx bxs-trash"></i>
@@ -93,7 +91,7 @@
                         </table>
                         <div class="row mb-5 mt-2">
                             <label class="col-sm-2 col-form-label">
-                                <b>Total Weight (kg)</b>
+                                <b>Total weight (kg)</b>
                             </label>
                             <div class="col-sm-3">
                                 <input type="text" class="form-control" id="total_weight" onblur="getSloc()">
@@ -112,50 +110,35 @@
                                 </select>
                             </div>
                         </div>
-                        <div class="row mb-5 mt-2">
-                            <label class="col-sm-2 col-form-label">
-                                <b>Box Type</b>
-                            </label>
-                            <div class="form-check">
-                                <input class="form-check-input" id="box_type" type="radio" name="box_type"
-                                    id="box_type_high" value="HIGH" required>
-                                <label class="form-check-label" for="box_type_high">HIGH</label>
+                        <div class="row mt-2" style="text-align: right; margin-right: 5px;">
+                            <div class="col-md-10"></div>
+                            <div class="col-md">
+                                <button class="btn btn-primary" onclick="getBarcode()" id="approveBtn">
+                                    Approve
+                                </button>
                             </div>
-                            <div class="form-check">
-                                <input class="form-check-input" type="radio" name="box_type" id="box_type_medium"
-                                    value="MEDIUM" required>
-                                <label class="form-check-label" for="box_type_medium">MEDIUM</label>
+                        </div>
+                        <div class="row mt-2 mb-3">
+                            <div class="col-md" style="margin-left: 12px;">
+                                <b>Barcode</b>
                             </div>
-
-                            <div class="row mt-2" style="text-align: right; margin-right: 5px;">
-                                <div class="col-md-10"></div>
-                                <div class="col-md">
-                                    <button class="btn btn-primary" onclick="getBarcode()" id="approveBtn">
-                                        Approve
-                                    </button>
-                                </div>
-                            </div>
-                            <div class="row mt-2 mb-3">
-                                <div class="col-md" style="margin-left: 12px;">
-                                    <b>Barcode</b>
-                                </div>
-                            </div>
-                            <div class="col-md ms-5 mt-5">
-                                <div id="qrcode"></div>
-                                <div id="barcode-info" class="mt-3"></div>
-                            </div>
-                            <div class="row mt-5">
-                                <div class="col-md-10"></div>
-                                <div class="col-md">
-                                    <form action="<?= base_url('warehouse/clearData') ?>" method="post">
-                                        <!-- Kosong -->
-                                    </form>
-                                </div>
+                        </div>
+                        <div class="col-md ms-5 mt-5">
+                            <div id="qrcode"></div>
+                            <div id="barcode-info" class="mt-3"></div>
+                        </div>
+                        <div class="row mt-5">
+                            <div class="col-md-10"></div>
+                            <div class="col-md">
+                                <form action="<?= base_url('warehouse/clearData') ?>" method="post">
+                                    <!-- Kosong -->
+                                </form>
                             </div>
                         </div>
                     </div>
                 </div>
             </div>
+        </div>
     </section>
 
     <script src="https://cdn.rawgit.com/davidshimjs/qrcodejs/gh-pages/qrcode.min.js"></script>
@@ -169,10 +152,10 @@
             });
         });
 
-        // $('.btn-edit').on('click', function() {
-        //     var id = $(this).data('id');
-        //     $('#editModal' + id).modal('show');
-        // });
+        $('.btn-edit').on('click', function() {
+            var id = $(this).data('id');
+            $('#editModal' + id).modal('show');
+        });
     })
 
     function closeModal() {
@@ -326,7 +309,7 @@
     function getBarcode() {
         var slocSelect = $('#sloc_select').val();
         var total_weight = $('#total_weight').val();
-        var box_type = $('input[name="box_type"]:checked').val();
+
         if (slocSelect && total_weight) {
             Swal.fire({
                 title: "Are you sure?",
@@ -344,7 +327,6 @@
                         data: {
                             id_sloc: slocSelect,
                             total_weight: total_weight,
-                            box_type: box_type,
                         },
                         success: function(res) {
                             var data = JSON.parse(res);
@@ -364,9 +346,6 @@
 
                                 document.getElementById("approveBtn").disabled = true;
                                 document.getElementById("addBtn").disabled = true;
-                                $('#sloc_select').val("");
-                                $('#total_weight').val("");
-                                $('input[name="box_type"]').prop('checked', false)
                             } else {
                                 Swal.fire({
                                     icon: 'error',
@@ -528,23 +507,6 @@
     </div>
 
     <!-- EDIT MODAL-->
-    <div class="modal fade" id="modalglobal" tabindex="-1">
-        <div class="modal-dialog modal-lg">
-            <div class="modal-content">
-                <div class="modal-header">
-                    <h5 class="modal-title" id="modal-title"></h5>
-                    <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
-                </div>
-                <div class="modal-body" id="modal-form">
-                </div>
-                <div class="modal-footer">
-                    <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
-                        onclick="closeModal()">Close</button>
-                    <button type="button" id="btn-submit" class="btn btn-primary">Save</button>
-                </div>
-            </div>
-        </div>
-    </div>
     <?php foreach ($receiving_material as $material): ?>
     <div class="modal fade" id="editModal<?= $material['id']; ?>" tabindex="-1">
         <div class="modal-dialog modal-lg">
@@ -556,7 +518,8 @@
                         <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
                     </div>
                     <div class="modal-body">
-                        <input type="hidden" id="id_box_detail" name="id_box_detail" value="<?= $material['id']; ?>">
+                        <input type="hidden" id="id_box_detail" name="id_box_detail"
+                            value="<?= $material['id_box_detail']; ?>">
                         <div class="row ps-2">
                             <div class="col-6">
                                 <label for="reference_number" class="form-label">Material Part Number</label>
@@ -579,7 +542,6 @@
                                     value="<?= $material['qty']; ?>" required>
                             </div>
                         </div>
-
                     </div>
                     <div class="modal-footer">
                         <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
@@ -608,30 +570,6 @@
         $('#material').val(materialDesc);
         $('#uom').val(uom);
     }
-
-    function showModal(title = '', link = '', datas = {}) {
-        $.ajax({
-            url: link,
-            type: 'post',
-            dataType: 'json',
-            data: datas,
-            success: function(res) {
-                $('#modal-title').text(title);
-                $('#modal-form').html(res.view);
-                $('#modalglobal').modal('toggle');
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                console.log("Error: ", xhr.responseText);
-                console.log(thrownError);
-            }
-        })
-    }
-
-    $(document).ready(function() {
-        $('#btn-submit').click(function() {
-            $('#editForm').trigger('submit');
-        })
-    })
     </script>
 </body>
 

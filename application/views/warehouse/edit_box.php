@@ -144,6 +144,7 @@ $(document).ready(function() {
             width: '100%'
         });
     });
+    $('#sloc_select').select2();
 })
 
 function closeModal() {
@@ -184,7 +185,7 @@ function refreshAll() {
 }
 
 $(document).on('change', '#reference_number', function() {
-    $('#material').val("");
+    $('#material_desc').val("");
     $('#uom').val("");
     $('#material_edit').val('');
     $('#uom_edit').val('');
@@ -201,7 +202,7 @@ $(document).on('change', '#reference_number', function() {
         success: function(res) {
             var data = JSON.parse(res);
             if (data.status) {
-                $('#material').val(data.material);
+                $('#material_desc').val(data.material);
                 $('#uom').val(data.uom);
                 $('#material_edit').val(data.material);
                 $('#uom_edit').val(data.uom);
@@ -339,14 +340,15 @@ function deleteItem(id) {
                         </select>
                     </div>
                     <div class="col-6 mb-3">
-                        <label for="material" class="form-label">Material</label>
-                        <input type="text" class="form-control" id="material" name="material" required>
+                        <label for="material_desc" class="form-label">Material</label>
+                        <input type="text" class="form-control" id="material_desc" name="material_desc" readonly
+                            required>
                         <input type="hidden" class="form-control" id="id_box" name="id_box" value="<?= $id_box ?>">
                         <input type="hidden" class="form-control" id="id_sloc" name="id_sloc" value="<?= $id_sloc ?>">
                     </div>
                     <div class="col-6 mb-3">
                         <label for="uom" class="form-label">UOM</label>
-                        <input type="text" class="form-control" id="uom" name="uom" required>
+                        <input type="text" class="form-control" id="uom" name="uom" readonly required>
                     </div>
                     <div class="col-6 mb-3">
                         <label for="qty" class="form-label">Quantity</label>
@@ -365,7 +367,6 @@ function deleteItem(id) {
 </div>
 
 <?php foreach ($detail_box as $material): ?>
-<!-- EDIT MODAL -->
 <!-- EDIT MODAL -->
 <div class="modal fade" id="editModal1" tabindex="-1">
     <div class="modal-dialog modal-lg">
