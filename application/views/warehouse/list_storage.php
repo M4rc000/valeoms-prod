@@ -11,21 +11,23 @@
     }
 ?>
 <style>
-    .buttons-excel{
-        background-color: #0d6efd !important;
-        color: white !important;
-        border-radius: 5px !important;  
-    }
-    .buttons-print{
-        background-color: #198754 !important;
-        color: white !important;
-        border-radius: 5px !important;
-    }
-    .buttons-copy{
-        background-color: #ffc107 !important;
-        color: white !important;
-        border-radius: 5px !important;
-    }
+.buttons-excel {
+    background-color: #0d6efd !important;
+    color: white !important;
+    border-radius: 5px !important;
+}
+
+.buttons-print {
+    background-color: #198754 !important;
+    color: white !important;
+    border-radius: 5px !important;
+}
+
+.buttons-copy {
+    background-color: #ffc107 !important;
+    color: white !important;
+    border-radius: 5px !important;
+}
 </style>
 <section>
     <div class="row">
@@ -50,9 +52,9 @@
                     <div class="row">
                         <div class="col-md">
                             <a href="<?=base_url('warehouse/show_list_storage');?>">
-                               <button class="btn btn-success">
-                                   <i class="bx bxs-download"></i>
-                               </button> 
+                                <button class="btn btn-success">
+                                    <i class="bx bxs-download"></i>
+                                </button>
                             </a>
                         </div>
                     </div>
@@ -136,8 +138,8 @@
                     <thead>
                         <tr>
                             <th>#</th>
-                            <th>Location</th>
-                            <th>QTY</th>
+                            <th>Location (SLoc)</th>
+                            <th>Quantity</th>
                             <th>UOM</th>
                         </tr>
                     </thead>
@@ -155,42 +157,42 @@
 <?php endforeach; ?>
 
 <script>
-    function getDetailStorage(id) {
-        $.ajax({
-            url: '<?php echo base_url('warehouse/get_detail_storage'); ?>',
-            type: 'POST',
-            data: {
-                id: id,
-            },
-            success: function(res) {
-                var data = JSON.parse(res);
-                if (data.status) {
-                    $('#detailModal1_' + id).modal('show');
-                    $('#detailModal1_' + id + ' tbody').empty();
+function getDetailStorage(id) {
+    $.ajax({
+        url: '<?php echo base_url('warehouse/get_detail_storage'); ?>',
+        type: 'POST',
+        data: {
+            id: id,
+        },
+        success: function(res) {
+            var data = JSON.parse(res);
+            if (data.status) {
+                $('#detailModal1_' + id).modal('show');
+                $('#detailModal1_' + id + ' tbody').empty();
 
-                    var dt = data.dt;
-                    for (var i = 0; i < dt.length; i++) {
-                        var row = '<tr>' +
-                            '<td style="text-align: left;">' + (i + 1) + '</td>' +
-                            '<td style="text-align: left;">' + dt[i].sloc_name + '</td>' +
-                            '<td style="text-align: left;">' + dt[i].total_qty + '</td>' +
-                            '<td style="text-align: left;">' + dt[i].uom + '</td>' +
-                            '</tr>';
-                        $('#detailModal1_' + id + ' tbody').append(row);
-                    }
+                var dt = data.dt;
+                for (var i = 0; i < dt.length; i++) {
+                    var row = '<tr>' +
+                        '<td style="text-align: left;">' + (i + 1) + '</td>' +
+                        '<td style="text-align: left;">' + dt[i].sloc_name + '</td>' +
+                        '<td style="text-align: left;">' + dt[i].total_qty + '</td>' +
+                        '<td style="text-align: left;">' + dt[i].uom + '</td>' +
+                        '</tr>';
+                    $('#detailModal1_' + id + ' tbody').append(row);
                 }
-            },
-            error: function(xhr, ajaxOptions, thrownError) {
-                Swal.fire({
-                    icon: 'error',
-                    title: 'Error',
-                    text: 'An error occurred while processing your request.'
-                });
             }
-        });
-    }
+        },
+        error: function(xhr, ajaxOptions, thrownError) {
+            Swal.fire({
+                icon: 'error',
+                title: 'Error',
+                text: 'An error occurred while processing your request.'
+            });
+        }
+    });
+}
 
-    function closeModal(id) {
-        $('#detailModal1_' + id + ' tbody').empty();
-    }
+function closeModal(id) {
+    $('#detailModal1_' + id + ' tbody').empty();
+}
 </script>

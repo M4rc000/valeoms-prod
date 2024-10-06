@@ -765,15 +765,27 @@ class Warehouse_model extends CI_Model
 	public function getApprovedDetail($production_plan)
 	{
 		$query = "
-            SELECT a.*, b.Id_material, f.Sloc AS sloc_name, c.no_box AS box_name, b.Material_desc
-            FROM production_request a
-            LEFT JOIN production_plan b ON b.Production_plan = a.Production_plan
-            LEFT JOIN storage f ON f.Id_storage = a.Sloc
-            LEFT JOIN box c ON c.id_box = a.id_box
-            WHERE a.Production_plan = ?
-        ";
+        SELECT 
+            a.*, 
+            b.Id_material, 
+            f.Sloc AS sloc_name, 
+            c.no_box, 
+            b.Material_desc
+        FROM 
+            production_request a
+        LEFT JOIN 
+            production_plan b ON b.Production_plan = a.Production_plan
+        LEFT JOIN 
+            storage f ON f.Id_storage = a.Sloc
+        LEFT JOIN 
+            box c ON c.id_box = a.id_box
+        WHERE 
+            a.Production_plan = ?
+    ";
+
 		return $this->db->query($query, [$production_plan])->result_array();
 	}
+
 
 	// Fungsi untuk menyetujui rencana produksi dan memperbarui status
 	public function approveProduction($production_plan, $sloc)
@@ -807,5 +819,25 @@ class Warehouse_model extends CI_Model
 		// Mengambil semua data dari tabel production_plan
 		return $this->db->get('production_plan')->result_array();
 	}
+	public function updateBoxQuantity($box_id, $qty_to_reduce)
+	{
+		// Get the current quantity
+		$this->db->set('total_qty', 'total_qty - ' . $qty_to_reduce, FALSE);
+		$this->db->where('id_box', $box_id);
+		$this->db->update('box');
+	}
+	public function saveProductionRequestDetail($data)
+	{
+		// Insert into the production request detail table (or update if necessary)
+		$this->db->insert('production_request_detail', [
+			'production_plan' => $data['production_plan'],
+			'id_material' => $data['id_material'],
+			'id_request' => $data['id_request'],
+			'qty_need' => $data['qty_need'],
+			'box_id' => $data['box'],
+			'sloc_id' => $data['sloc']
+		]);
+	}
+
 }
 ?>

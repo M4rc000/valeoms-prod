@@ -86,6 +86,16 @@ class Admin extends CI_Controller {
                     'submenu_id' => $submenu_id,
                 ];
                 $this->db->insert('user_access_submenu', $data);
+                
+                // RECORD MANAGE ROLE LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'user_access_submenu',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('manage_role_log', $log_data);
             }
         }
     
@@ -176,6 +186,15 @@ class Admin extends CI_Controller {
             $check_insert = $this->db->affected_rows();
 
             if($check_insert > 0){
+                // RECORD MANAGE ROLE LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'user',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('manage_role_log', $log_data);
                 $this->session->set_flashdata('SUCCESS_EditUser','User has been successfully updated');
             }
             else{
@@ -192,6 +211,7 @@ class Admin extends CI_Controller {
             $check_insert = $this->db->affected_rows();
 
             if($check_insert > 0){
+
                 $this->session->set_flashdata('SUCCESS_deleteUser','User has been successfully deleted');
             }
             else{
@@ -220,6 +240,15 @@ class Admin extends CI_Controller {
             $check_insert = $this->db->affected_rows();
 
             if($check_insert > 0){
+                // RECORD MANAGE ROLE LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'user_role',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('manage_role_log', $log_data);
                 $this->session->set_flashdata('SUCCESS_addRole','New role has successfully added');
             }
             else{
@@ -229,19 +258,63 @@ class Admin extends CI_Controller {
             redirect('admin/manage_role');
         }
 
+        public function editRole() {
+            $id = $this->input->post('id');
+            $role = $this->input->post('role');
+
+            $Data = array(
+                'role' => $role,
+                'upddt' => date('d-m-Y h:i'),
+                'updby' => $this->input->post('user')
+            );
+
+            $this->AModel->updateData('user_role', $id, $Data);
+            $check_insert = $this->db->affected_rows();
+
+            if($check_insert > 0){
+                // RECORD MANAGE ROLE LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'user_role',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('manage_role_log', $log_data);
+                $this->session->set_flashdata('SUCCESS_updateRole','Role has successfully updated');
+            }
+            else{
+                $this->session->set_flashdata('FAILED_updateRole','Failed to update a role');
+            }
+
+            redirect('admin/manage_role');
+        }
 
         public function deleteRole() {
             $this->load->model('Admin_model','AModel');
         
             $id = $this->input->post('id');
+            $role = $this->input->post('role');
             $this->AModel->deleteData('user_role', $id);
 
-            $this->session->set_flashdata('DELETED','<div class="alert alert-success alert-dismissible fade show" role="alert">
-                Role successfully deleted
-                <button type="button" class="close" data-dismiss="alert" aria-label="Close">
-                <span aria-hidden="true">&times;</span>
-                </button>
-                </div>');
+            $check_insert = $this->db->affected_rows();
+
+            if($check_insert > 0){
+                // RECORD MANAGE ROLE LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'user_role',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('manage_role_log', $log_data);
+                $this->session->set_flashdata('SUCCESS_deleteRole', $role);
+            }
+            else{
+                $this->session->set_flashdata('FAILED_deleteRole', $role);
+            }
+
             header("Location: " . base_url('admin/manage_role'));       
         }
 
@@ -291,6 +364,16 @@ class Admin extends CI_Controller {
                 ];
 
                 $this->AModel->insertData('user_access_menu', $data);
+
+                // RECORD MANAGE ROLE LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'user_access_menu',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('manage_role_log', $log_data);
                 $this->session->set_flashdata('success', 'New menu Access permissions have been added');
                 redirect('admin/roleAccess/'. $role_id);
             }
@@ -299,6 +382,17 @@ class Admin extends CI_Controller {
                 $id = $this->input->post('id');
                 $role_id = $this->input->post('role_id');
                 $this->AModel->deleteData ('user_access_menu', $id);
+                
+                // RECORD MANAGE ROLE LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'user_access_menu',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('manage_role_log', $log_data);
+                
                 $this->session->set_flashdata('success', 'Menu Access permissions have been deleted');
                 redirect('admin/roleAccess/'. $role_id);
             }
@@ -312,6 +406,17 @@ class Admin extends CI_Controller {
                 ];
 
                 $this->AModel->insertData('user_access_submenu', $data);
+
+                // RECORD MANAGE ROLE LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'user_access_submenu',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('manage_role_log', $log_data);
+
                 $this->session->set_flashdata('success', 'New Submenu Access permissions have been added');
                 redirect('admin/roleAccess/'. $role_id);
             }
@@ -320,6 +425,17 @@ class Admin extends CI_Controller {
                 $id = $this->input->post('id');
                 $role_id = $this->input->post('role_id');
                 $this->AModel->deleteData ('user_access_submenu', $id);
+
+                // RECORD MANAGE ROLE LOG
+                $query_log = $this->db->last_query();
+                $log_data = [
+                    'affected_table' => 'user_access_submenu',
+                    'queries' => $query_log,
+                    'Crtdt' => date('Y-m-d H:i:s'),
+                    'Crtby' => $this->input->post('user')
+                ];    
+                $this->db->insert('manage_role_log', $log_data);
+
                 $this->session->set_flashdata('success', 'Submenu Access permissions have been deleted');
                 redirect('admin/roleAccess/'. $role_id);
             }
@@ -551,14 +667,14 @@ class Admin extends CI_Controller {
         $this->load->view('templates/sidebar');   
         $this->load->view('admin/manage_box', $data);
         $this->load->view('templates/footer');
-    } 
+    }   
     
     public function get_box_data() {
         $data = $this->AModel->getBox();
 
         echo json_encode($data);
-    }  
-
+    }
+    
     public function history_log() {
         $data['title'] = 'History log';
         
@@ -578,4 +694,5 @@ class Admin extends CI_Controller {
 
         echo json_encode($data);
     }
+    
 }

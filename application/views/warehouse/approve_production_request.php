@@ -262,29 +262,6 @@ $(document).ready(function() {
 
 var materialSlocArray = []; // Array to store material settings
 
-function getDetailRequest(id, production_plan) {
-    $.ajax({
-        url: '<?php echo base_url('warehouse/getApprovedDetail'); ?>',
-        type: 'POST',
-        data: {
-            Production_plan: production_plan
-        },
-        success: function(res) {
-            var data = JSON.parse(res);
-            $('#detailModal' + id + ' .sloc-name').text(data.sloc_name ||
-                'No Sloc Assigned'); // Tampilkan Sloc
-            $('#detailModal' + id).modal('show');
-        },
-        error: function(xhr, ajaxOptions, thrownError) {
-            Swal.fire({
-                icon: 'error',
-                title: 'Error',
-                text: 'Failed to load approval details'
-            });
-        }
-    });
-}
-
 function getSloc(idMaterial, rowIndex) {
     $.ajax({
         url: '<?php echo base_url('warehouse/get_sloc_options'); ?>',
@@ -481,9 +458,9 @@ function savePRDetail(id_material) {
     // Calculate the total qty_need in the array
     var totalQtyNeed = materialSlocArray.reduce((sum, item) => sum + item.qty_need, 0);
     var materialNeed = parseFloat($(`.material_need_${id_material}`).val());
-
+    var materialNeed2 = materialNeed.toString().replace(/\./g, '');
     // Check if materialNeed is less than totalQtyNeed
-    if (materialNeed != totalQtyNeed) {
+    if (materialNeed2 != totalQtyNeed) {
         Swal.fire({
             icon: 'error',
             text: 'Production plan quantity need must be equal to the total request quantity on boxes.'

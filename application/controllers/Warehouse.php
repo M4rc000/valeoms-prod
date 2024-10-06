@@ -51,13 +51,6 @@ class Warehouse extends CI_Controller
 		redirect('Warehouse/');
 	}
 
-	public function production_request()
-	{
-		$data['production_request'] = $this->WModel->getProductionRequest();
-		$data['users'] = $this->WModel->getAllUsers();
-		$this->load_common_views('Production Request', 'warehouse/production_request', $data);
-	}
-
 	private function load_common_views($title, $view, $data = [])
 	{
 		$data['title'] = $title;
@@ -69,6 +62,14 @@ class Warehouse extends CI_Controller
 		$this->load->view($view, $data);
 		$this->load->view('templates/footer');
 	}
+
+	public function production_request()
+	{
+		$data['production_request'] = $this->WModel->getProductionRequest();
+		$data['users'] = $this->WModel->getAllUsers();
+		$this->load_common_views('Production Request', 'warehouse/production_request', $data);
+	}
+
 	public function approve_production_plan($production_plan)
 	{
 		$data['production_request'] = $this->WModel->getProductionRequestDetail($production_plan);
@@ -77,6 +78,7 @@ class Warehouse extends CI_Controller
 
 		$this->load_common_views('Approve Production Request', 'warehouse/approve_production_request', $data);
 	}
+
 	public function get_detail_approve_pr()
 	{
 		$Production_plan_detail_id = $this->input->post('Production_plan_detail_id');
@@ -99,20 +101,20 @@ class Warehouse extends CI_Controller
 		// Ambil production_plan dan reject_description dari input post
 		$production_plan = $this->input->post('production_plan');
 		$reject_description = $this->input->post('reject_description'); // Ambil reject description dari form
-		
+
 		// Mulai transaksi untuk memastikan konsistensi
 		$this->db->trans_start();
-	
+
 		// Ambil data request yang sesuai dengan production_plan
 		$data_request = $this->db->query("SELECT * FROM production_request WHERE Production_plan = ?", [$production_plan])->result();
-	
+
 		// Looping untuk setiap data request
 		foreach ($data_request as $v) {
 			$id_material = $v->Id_material;
 			$sloc = $v->Sloc;
 			$id_box = $v->id_box;
 			$qty = $v->Qty;
-	
+
 			// Pastikan id_box tidak null sebelum melakukan update ke list_storage
 			if ($id_box) {
 				// Update jumlah qty di list_storage
@@ -122,21 +124,21 @@ class Warehouse extends CI_Controller
 				);
 			}
 		}
-	
+
 		// Update status ke REJECTED dan tambahkan reject_description di production_request tanpa mengubah SLoc
 		$this->db->where('Production_plan', $production_plan);
 		$this->db->update('production_request', [
 			'status' => 'REJECTED',
 			'reject_description' => $reject_description // Simpan reject description
 		]);
-	
+
 		// Update status ke REJECTED di production_plan
 		$this->db->where('Production_plan', $production_plan);
 		$this->db->update('production_plan', ['status' => 'REJECTED']);
-	
+
 		// Selesaikan transaksi dan cek status
 		$this->db->trans_complete();
-	
+
 		// Cek apakah transaksi berhasil
 		if ($this->db->trans_status() === FALSE) {
 			// Jika ada kegagalan, rollback perubahan dan kembalikan status false
@@ -146,7 +148,7 @@ class Warehouse extends CI_Controller
 			echo json_encode(['status' => true, 'message' => 'Request rejected successfully', 'production_plan' => $production_plan]);
 		}
 	}
-	
+
 	public function getApprovedDetail($production_plan)
 	{
 		$query = "
@@ -161,48 +163,22 @@ class Warehouse extends CI_Controller
 		return $data;
 	}
 
+
 	public function approveProductionRequest()
 	{
-		// Ambil data dari input POST
 		$production_plan = $this->input->post('production_plan', true);
-		$sloc = $this->input->post('sloc', true); // Ambil sloc dari input form atau database
-		
-		// Mulai transaksi untuk memastikan konsistensi data
-		$this->db->trans_start();
-	
-		// Ambil data dari tabel production_request_approve untuk rencana produksi yang diapprove
-		$data_request = $this->db->query("SELECT * FROM production_request_approve WHERE Production_plan = ?", [$production_plan])->result();
-	
-		// Looping untuk mengurangi total_qty dari list_storage
+
+		$data_request = $this->db->query("SELECT * from production_request_approve where Production_plan = ?", [$production_plan])->result();
 		foreach ($data_request as $v) {
-			$this->db->query(
-				"UPDATE list_storage SET total_qty = total_qty - ? WHERE product_id = ? AND sloc = ? AND id_box = ?",
-				array($v->Qty, $v->Id_material, $v->Sloc, $v->id_box)
-			);
+			$this->db->query("UPDATE list_storage SET total_qty = total_qty - ? WHERE product_id = ? AND sloc = ? AND id_box = ?", array($v->Qty, $v->Id_material, $v->Sloc, $v->id_box));
 		}
-	
-		// Update status produksi menjadi APPROVED dan menyimpan SLoc
-		$this->db->where('Production_plan', $production_plan);
-		$this->db->update('production_request', ['status' => 'APPROVED', 'Sloc' => $sloc]);
-	
-		// Update status di tabel production_plan
-		$this->db->where('Production_plan', $production_plan);
-		$this->db->update('production_plan', ['status' => 'APPROVED']);
-	
-		// Selesaikan transaksi
-		$this->db->trans_complete();
-	
-		// Cek apakah transaksi berhasil
-		if ($this->db->trans_status() === FALSE) {
-			// Jika ada kegagalan, rollback perubahan dan kembalikan status false
-			echo json_encode(['status' => false, 'message' => 'Failed to approve production plan']);
-		} else {
-			// Jika sukses, commit perubahan dan kembalikan status true
-			echo json_encode(['status' => true, 'message' => 'Production plan approved successfully']);
-		}
+
+		$approved1 = $this->db->query("UPDATE production_request SET status = 1 WHERE Production_plan = ?", [$production_plan]);
+		$approved2 = $this->db->query("UPDATE production_plan SET status = 'APPROVED' WHERE Production_plan = ?", [$production_plan]);
+
+		$response = ($approved1 && $approved2) ? ['status' => true] : ['status' => false];
+		echo json_encode($response);
 	}
-	
-	
 
 	public function rejectQualityRequest()
 	{
@@ -228,19 +204,19 @@ class Warehouse extends CI_Controller
 	public function print_request($production_plan)
 	{
 		$time = date('dmY');
-		$data['header'] = $this->Warehouse_model->getProductionRequest2($production_plan);
-		$data['detail'] = $this->Warehouse_model->getProductionRequestDetail($production_plan);
+		$data['header'] = $this->WModel->getProductionRequest2($production_plan);
+		$data['detail'] = $this->WModel->getProductionRequestDetailApprove($production_plan);
 
 		$namafile = "Production-Request-" . $production_plan . '-' . $time;
-		$dompdf = new Dompdf(array('enable_remote' => true));
+		$dompdf = new Dompdf(['enable_remote' => true]);
 		$html = $this->load->view('warehouse/print_request', $data, true);
 
 		$dompdf->loadHtml($html);
-		$dompdf->setPaper('A4', 'potrait');
+		$dompdf->setPaper('A4', 'portrait');
 		$dompdf->render();
-		$dompdf->stream($namafile . ".pdf", array('Attachment' => 0));
-
+		$dompdf->stream($namafile . ".pdf", ['Attachment' => 0]);
 	}
+
 	public function print_request_reject($production_plan)
 	{
 		$time = date('dmY');
@@ -1952,54 +1928,44 @@ class Warehouse extends CI_Controller
 		redirect('warehouse/return_request');
 	}
 
-	// Existing function for fetching SLOC based on id_material, leaving this unchanged
+	// Existing function for fetching SLOC based on id_material, leaving this unchanged// Function to fetch SLoc options where material is available
 	public function get_sloc_options()
 	{
 		$id_material = $this->input->post('id_material');
 
 		$query = "
-        SELECT a.sloc as sloc_id, b.Sloc as sloc_name
-        FROM list_storage a
-        LEFT JOIN storage b ON b.Id_storage = a.sloc
-        WHERE a.product_id = ? AND a.sloc is not null
-    ";
-		// Execute query with parameter binding
+			SELECT DISTINCT b.sloc as sloc_id, s.SLoc as sloc_name
+			FROM box_detail bd
+			JOIN box b ON bd.id_box = b.id_box
+			JOIN storage s ON b.sloc = s.Id_storage
+			WHERE bd.id_material = ?
+		";
+
 		$data = $this->db->query($query, [$id_material])->result_array();
 
 		echo json_encode($data);
 	}
-	public function get_all_sloc_options()
-	{
-		$query = "
-			SELECT Id_storage as sloc_id, SLoc as sloc_name
-			FROM storage
-			WHERE space_now < space_max  -- Ensure sloc has available space
-		";
-		// Execute query
-		$data = $this->db->query($query)->result_array();
-
-		echo json_encode($data);
-	}
-
-
-
 	public function get_id_box_options()
 	{
 		$id_material = $this->input->post('id_material');
 		$sloc_id = $this->input->post('sloc_id');
 
 		$query = "
-			SELECT a.id_box, b.no_box
-			FROM list_storage a
-			LEFT JOIN box b ON b.id_box = a.id_box
-			WHERE a.product_id = ? AND a.sloc = ?
-		";
+        SELECT b.id_box, b.no_box, SUM(r.qty_real) AS total_qty_real
+        FROM box b
+        JOIN box_detail bd ON b.id_box = bd.id_box
+        JOIN receiving_material r ON r.id_box = b.id_box
+        WHERE bd.id_material = ? AND b.sloc = ?
+        GROUP BY b.id_box, b.no_box
+    ";
 
 		$data = $this->db->query($query, [$id_material, $sloc_id])->result_array();
 
 		echo json_encode($data);
 	}
 
+
+	// Function to fetch boxes in selected SLoc where material is stored
 	public function sloc_availability()
 	{
 		$data['user'] = $this->db->get_where('user', ['username' => $this->session->userdata('username')])->row_array();
@@ -2147,6 +2113,58 @@ class Warehouse extends CI_Controller
 
 		// Send the result as JSON
 		echo json_encode($data);
+	}
+
+	function save_production_request_detail()
+	{
+		$data = $this->input->post('materialSlocArray');
+		// print_r($data);die;
+		foreach ($data as $dt) {
+			$pr = [
+				'Production_plan_detail_id' => $dt['Production_plan_detail_id'],
+				'Id_request' => $dt['id_request'],
+				'Id_material' => $dt['id_material'],
+				'Material_desc' => $dt['material_desc'],
+				'Production_plan' => $dt['production_plan'],
+				'Qty' => $dt['qty_need'],
+				'Sloc' => $dt['sloc'],
+				'id_box' => $dt['box'],
+				'Crtby' => $this->session->userdata('username'),
+				'Crtdt' => date('Y-m-d H:i:s')
+			];
+			$save = $this->db->insert('production_request_approve', $pr);
+			if ($save) {
+				$qty_need = $dt['qty_need'];
+				$update = $this->db->query(
+					"UPDATE list_storage SET total_qty_real = total_qty_real - ? WHERE product_id = ? AND sloc = ? AND id_box = ?",
+					array($qty_need, $dt['id_material'], $dt['sloc'], $dt['box'])
+				);
+				$update = $this->db->query("UPDATE production_request SET status = 1 WHERE Id_request = ?", array($dt['id_request']));
+			}
+		}
+		if ($save) {
+			echo json_encode(['status' => true]);
+		} else {
+			echo json_encode(['status' => false]);
+
+		}
+	}
+
+	public function get_count_status_pr()
+	{
+		$production_plan = $this->input->post('production_plan');
+		$query = "
+    SELECT count(*) as jml FROM production_request where Production_plan = ? and status = 0;
+    ";
+		// Execute query with parameter binding
+		$data = $this->db->query($query, [$production_plan])->row();
+
+		if ($data->jml == 0) {
+			echo json_encode(['status' => true]);
+		} else {
+			echo json_encode(['status' => false]);
+		}
+
 	}
 }
 ?>

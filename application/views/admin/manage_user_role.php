@@ -37,7 +37,7 @@
 						<button class="btn btn-success ms-1" data-bs-toggle="modal" data-bs-target="#editModal<?=$role['id'];?>">
 							<i class="bx bxs-edit" style="color: white;"></i>
 						</button>
-						<button class="btn btn-danger ms-1">
+						<button class="btn btn-danger ms-1" data-bs-toggle="modal" data-bs-target="#DeleteConfirmModal<?=$role['id'];?>">
 							<i class="bx bxs-trash"></i>
 						</button>
 					</td>
@@ -154,9 +154,11 @@
 	<div class="modal fade" id="editModal<?=$role['id'];?>" tabindex="-1">
 		<div class="modal-dialog modal-lg">
 			<div class="modal-content">
-		<?= form_open_multipart('admin/editUser'); ?>
+		<?= form_open_multipart('admin/editRole'); ?>
+			<!-- GET USER -->
+			<input type="text" class="form-control" id="user" name="user" value="<?=$name['username'];?>" hidden>
 			<div class="modal-header">
-				<h5 class="modal-title">Edit User</h5>
+				<h5 class="modal-title">Edit Role</h5>
 				<button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
 			</div>
 			<div class="modal-body">
@@ -173,7 +175,7 @@
 			</div>
 			<div class="modal-footer">
 				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
-				<button type="button" class="btn btn-primary">Save changes</button>
+				<button type="submit" class="btn btn-primary">Save changes</button>
 			</div>
 		</form>
 			</div>
@@ -183,14 +185,18 @@
 
 <!-- DELETE CONFIRM MODAL-->
 <?php foreach($roles as $role) : ?>
-	<?= form_open_multipart('admin/deleteUser'); ?>
-		<div class="modal fade" id="DeleteConfirmModal<?= $role['id']; ?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true" style="margin-top: -5rem">
+	<?= form_open_multipart('admin/deleteRole'); ?>
+		<div class="modal fade" id="DeleteConfirmModal<?= $role['id']; ?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
 			<div class="modal-dialog">
 				<div class="modal-content">
+				<!-- GET USER -->
+				<input type="text" class="form-control" id="user" name="user" value="<?=$name['username'];?>" hidden>
 				<div class="modal-header">
-					<h4 class="modal-title pb-0 mb-0" id="exampleModalLabel">Confirm to delete ?</h4>
+					<h4 class="modal-title pb-0 mb-0" id="exampleModalLabel">Confirm to delete Role?</h4>
 				</div>
+				<p class="px-2 mt-2">Role:  <?= $role['role']; ?> </p>
 				<input type="text" name="id" id="id" value="<?= $role['id']; ?>" style="display: none;">
+				<input type="text" name="role" id="role" value="<?= $role['role']; ?>" style="display: none;">
 				<div class="modal-footer">
 					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
 					<button type="submit" class="btn btn-primary" name="delete_user">Confirm</button>
@@ -229,9 +235,49 @@
     <script>
         document.addEventListener('DOMContentLoaded', function() {
             Swal.fire({
-                title: "Success",
+                title: "Error",
                 html: `<?=$this->session->flashdata('FAILED_addRole');?>`,
-                icon: "success"
+                icon: "error"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('SUCCESS_updateRole')): ?>
+    <script>
+        Swal.fire({
+            title: "Success",
+            html: `<?=$this->session->flashdata('SUCCESS_updateRole');?>`,
+            icon: "success"
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('FAILED_updateRole')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Error",
+                html: `<?=$this->session->flashdata('FAILED_updateRole');?>`,
+                icon: "error"
+            });
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('SUCCESS_deleteRole')): ?>
+    <script>
+        Swal.fire({
+            title: "Success",
+			html: `Role <b><?=$this->session->flashdata('SUCCESS_deleteRole');?></b> has successfully deleted`,
+            icon: "success"
+        });
+    </script>
+<?php endif; ?>
+<?php if ($this->session->flashdata('FAILED_deleteRole')): ?>
+    <script>
+        document.addEventListener('DOMContentLoaded', function() {
+            Swal.fire({
+                title: "Error",
+                html: `Role <b><?=$this->session->flashdata('FAILED_deleteRole');?></b> has successfully deleted`,
+                icon: "error"
             });
         });
     </script>

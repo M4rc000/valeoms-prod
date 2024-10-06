@@ -65,26 +65,23 @@
                                     <button type="button" class="btn btn-secondary" style="background-color:#3fb03f"
                                         disabled>Approved</button>
                                     <button type="button" class="btn btn-primary"
-                                        onclick="redirectTo('<?= base_url('warehouse/approve_production_plan'); ?>', '<?= $request['Production_plan']; ?>')">
-                                        <i class="bx bx-show"></i> Detail
-                                    </button>
+                                        onclick="redirectTo('<?= base_url('warehouse/approve_production_plan'); ?>', '<?= $request['Production_plan']; ?>')"><i
+                                            class="bx bx-show"></i> Detail</button>
                                     <button type="button" class="btn btn-warning"
-                                        onclick="printReq('<?= $request['Production_plan']; ?>')">
-                                        <i class="bi bi-printer"></i> Print
-                                    </button>
-                                    <?php } else if ($request['status'] == 'REJECTED') { ?>
+                                        onclick="printReq('<?= $request['Production_plan']; ?>')"><i
+                                            class="bi bi-printer"></i> Print</button>
+                                    <?php } else { ?>
                                     <button type="button" class="btn btn-danger" disabled>Rejected</button>
                                     <button class="btn btn-primary" class="choose-sloc-box" data-bs-toggle="modal"
                                         data-bs-target="#detailRejectSlocAndBox<?= $request['Production_plan']; ?>">
-                                        <i class="bx bx-show"></i> Detail
+                                        <i class="bx bx-show"></i></span> Detail
                                     </button>
                                     <button type="button" class="btn btn-warning"
-                                        onclick="printReqReject('<?= $request['Production_plan']; ?>')">
-                                        <i class="bi bi-printer"></i> View
-                                    </button>
+                                        onclick="printReqReject('<?= $request['Production_plan']; ?>')"><i
+                                            class="bi bi-printer"></i> View</button>
                                     <?php } ?>
-                                </td>
 
+                                </td>
                             </tr>
                             <?php endforeach; ?>
                         </tbody>
@@ -438,7 +435,7 @@ function approveRequest(production_plan) {
 
 function rejectRequest(production_plan) {
     var rejectDescription = $(`.keterangan-reject_${production_plan}`).val();
-
+    console.log(rejectDescription);
     if (!rejectDescription) {
         Swal.fire({
             icon: 'error',
@@ -446,7 +443,6 @@ function rejectRequest(production_plan) {
         });
         return;
     }
-
     Swal.fire({
         title: "Are you sure?",
         text: "You want to reject this production request?",
@@ -454,52 +450,32 @@ function rejectRequest(production_plan) {
         showCancelButton: true,
         confirmButtonColor: "#3085d6",
         cancelButtonColor: "#d33",
-        confirmButtonText: "Yes"
+        confirmButtonText: "yes"
     }).then((result) => {
         if (result.isConfirmed) {
             $.ajax({
-                url: '<?= base_url('warehouse/rejectProductionRequest'); ?>',
+                url: '<?php echo base_url('warehouse/rejectProductionRequest'); ?>',
                 type: 'POST',
                 data: {
                     production_plan: production_plan,
                     reject_description: rejectDescription,
                 },
                 success: function(res) {
-                    try {
-                        var data = JSON.parse(res);
-
-                        if (data.status) {
-                            Swal.fire({
-                                icon: 'success',
-                                title: 'Success!',
-                                text: data.message
-                            }).then(() => {
-                                // Update button dynamically without page reload
-                                let row = $(
-                                    `button[data-bs-target="#rejectModal${production_plan}"]`
-                                ).closest('tr');
-                                row.find('td:nth-child(5)').html(`
-                                    <button type="button" class="btn btn-danger" disabled>Rejected</button>
-                                    <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#detailRejectSlocAndBox${production_plan}">
-                                        <i class="bx bx-show"></i> Detail
-                                    </button>
-                                    <button type="button" class="btn btn-warning" onclick="printReqReject('${production_plan}')">
-                                        <i class="bi bi-printer"></i> View
-                                    </button>
-                                `);
-                            });
-                        } else {
-                            Swal.fire({
-                                icon: 'error',
-                                title: 'Error!',
-                                text: data.message || 'Failed to reject the request'
-                            });
-                        }
-                    } catch (e) {
+                    var data = JSON.parse(res);
+                    if (data.status) {
+                        Swal.fire({
+                            icon: 'success',
+                            title: 'Success!',
+                            text: 'Production Request Has Been Rejected.'
+                        }).then((result) => {
+                            if (result.isConfirmed || result.isDismissed) {
+                                location.reload();
+                            }
+                        });
+                    } else {
                         Swal.fire({
                             icon: 'error',
                             title: 'Error!',
-                            text: 'An error occurred while processing your request.'
                         });
                     }
                 },

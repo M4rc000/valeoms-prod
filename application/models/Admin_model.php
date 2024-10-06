@@ -27,14 +27,14 @@ class Admin_model extends CI_Model {
    }
 
    public function getSubMenuAccess($role_id){
-       return $this->db->query("SELECT user_access_submenu.id, user_role.id as role_id, user_role.role, user_menu.menu, user_sub_menu.title
+        return $this->db->query("SELECT user_access_submenu.id, user_sub_menu.icon, user_role.id as role_id, user_role.role, user_menu.menu, user_sub_menu.title
             FROM `user_access_submenu`
             LEFT JOIN `user_role` ON user_role.id = user_access_submenu.role_id
             LEFT JOIN `user_menu` ON user_menu.id = user_access_submenu.menu_id
             LEFT JOIN `user_sub_menu` ON user_sub_menu.id = user_access_submenu.submenu_id
             WHERE user_access_submenu.role_id = '$role_id'
             ORDER BY role_id")->result_array();
-   }
+    }
    
    public function getMenSub(){
        return $this->db->query('SELECT user_sub_menu.id AS submenu_id, user_sub_menu.title, user_menu.id AS menu_id, user_menu.menu

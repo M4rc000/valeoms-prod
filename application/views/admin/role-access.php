@@ -108,6 +108,26 @@
 				</div>
 			</div>
 		</div>
+		<div class="row mt-5 px-5">
+			<ul style="list-style-type: none">
+				<?php foreach ($accessmenu as $acm) : ?>
+					<?php if($acm['menu'] != 'User') : ?>
+						<li>
+							<strong><i class="bx bx-window"></i> <?= strtoupper($acm['menu']); ?></strong>
+							<ul style="list-style-type: none">
+								<?php foreach ($accesssubmenu as $acsm) : ?>
+									<?php if ($acsm['menu'] === $acm['menu']) : ?>
+										<li><i class="<?=$acsm['icon'];?>" style="color: #002e63"></i> <?= $acsm['title']; ?></li>
+									<?php endif; ?>
+								<?php endforeach; ?>
+							</ul>
+						</li>
+						<br>
+					<?php endif; ?>
+				<?php endforeach; ?>
+			</ul>
+		</div>
+
 	</div>
 </div>
 
@@ -144,7 +164,7 @@
 					role_id: role_id
 				},
 				success: function(res) {
-					console.log(res);
+					// console.log(res);
 
 					// Clear the existing options
 					$('#submenu_id').empty();
@@ -187,6 +207,7 @@
 </script>
 
 
+
 <!-- ADD ROLE MENU MODAL -->
 <div class="modal fade" id="addRoleMenuModal" tabindex="-1">
   <div class="modal-dialog modal-lg">
@@ -226,28 +247,28 @@
 
 <!-- DELETE ROLE MENU MODAL -->
 <?php $i = 1; foreach ($accessmenu as $acm) : ?>
-<div class="modal fade" id="deleteRoleMenuModal<?=$acm['id'];?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-		<?= form_open_multipart('admin/DeleteRoleAccessMenu'); ?>
-			<div class="modal-header">
-				<h4 class="modal-title pb-0 mb-0" id="exampleModalLabel">Confirm to delete?</h4>
+	<div class="modal fade" id="deleteRoleMenuModal<?=$acm['id'];?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+			<?= form_open_multipart('admin/DeleteRoleAccessMenu'); ?>
+				<div class="modal-header">
+					<h4 class="modal-title pb-0 mb-0" id="exampleModalLabel">Confirm to delete?</h4>
+				</div>
+				<div class="modal-body">
+					<input type="text" name="id" id="id" value="<?=$acm['id'];?>" hidden>
+					<input type="text" name="user" id="user" value="<?=$name['username'];?>" hidden>
+					<input type="text" name="role_id" id="role_id" value="<?=$acm['role_id'];?>" hidden>
+					<p><b>Role </b>: <?=$acm['role'];?></p>
+					<p><b>Menu</b>: <?=$acm['menu'];?></p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+					<button type="submit" class="btn btn-primary" name="delete_user">Confirm</button>
+				</div>
+			</form>
 			</div>
-			<div class="modal-body">
-				<input type="text" name="id" id="id" value="<?=$acm['id'];?>" hidden>
-				<input type="text" name="user" id="user" value="<?=$name['username'];?>" hidden>
-				<input type="text" name="role_id" id="role_id" value="<?=$acm['role_id'];?>" hidden>
-				<p><b>Role </b>: <?=$acm['role'];?></p>
-				<p><b>Menu</b>: <?=$acm['menu'];?></p>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-				<button type="submit" class="btn btn-primary" name="delete_user">Confirm</button>
-			</div>
-		</form>
 		</div>
 	</div>
-</div>
 <?php endforeach; ?>
 
 <!-- ADD ROLE SUBMENU MODAL -->
@@ -298,32 +319,34 @@
 
 <!-- DELETE ROLE SUBMENU MODAL -->
 <?php $i = 1; foreach ($accesssubmenu as $acsm) : ?>
-<div class="modal fade" id="deleteRoleSubMenuModal<?=$acsm['id'];?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
-	<div class="modal-dialog">
-		<div class="modal-content">
-		<?= form_open_multipart('admin/DeleteRoleAccessSubMenu'); ?>
-			<div class="modal-header">
-				<h4 class="modal-title pb-0 mb-0" id="exampleModalLabel">Confirm to delete?</h4>
+	<div class="modal fade" id="deleteRoleSubMenuModal<?=$acsm['id'];?>" tabindex="-1" aria-labelledby="exampleModalLabel" aria-hidden="true">
+		<div class="modal-dialog">
+			<div class="modal-content">
+			<?= form_open_multipart('admin/DeleteRoleAccessSubMenu'); ?>
+				<div class="modal-header">
+					<h4 class="modal-title pb-0 mb-0" id="exampleModalLabel">Confirm to delete?</h4>
+				</div>
+				<div class="modal-body">
+					<input type="text" name="id" id="id" value="<?=$acsm['id'];?>" hidden>
+					<input type="text" name="user" id="user" value="<?=$name['username'];?>" hidden>
+					<input type="text" name="role_id" id="role_id" value="<?=$acsm['role_id'];?>" hidden>
+					<p><b>Role </b>: <?=$acsm['role'];?></p>
+					<p><b>Menu</b>: <?=$acsm['menu'];?></p>
+					<p><b>SubMenu</b>: <?=$acsm['title'];?></p>
+				</div>
+				<div class="modal-footer">
+					<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+					<button type="submit" class="btn btn-primary" name="delete_user">Confirm</button>
+				</div>
+			</form>
 			</div>
-			<div class="modal-body">
-				<input type="text" name="id" id="id" value="<?=$acsm['id'];?>" hidden>
-				<input type="text" name="user" id="user" value="<?=$name['username'];?>" hidden>
-				<input type="text" name="role_id" id="role_id" value="<?=$acsm['role_id'];?>" hidden>
-				<p><b>Role </b>: <?=$acsm['role'];?></p>
-				<p><b>Menu</b>: <?=$acsm['menu'];?></p>
-				<p><b>SubMenu</b>: <?=$acsm['title'];?></p>
-			</div>
-			<div class="modal-footer">
-				<button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
-				<button type="submit" class="btn btn-primary" name="delete_user">Confirm</button>
-			</div>
-		</form>
 		</div>
 	</div>
-</div>
 <?php endforeach; ?>
 
 <script src="<?=base_url('assets');?>/vendor/sweet-alert/sweet-alert.js"></script>
+
+
 <?php if ($this->session->flashdata('success')): ?>
     <script>
         Swal.fire({
