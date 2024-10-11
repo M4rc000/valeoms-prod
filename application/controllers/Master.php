@@ -100,8 +100,70 @@ class Master extends CI_Controller {
         // UPDATE MATERIAL LIST
         public function EditMaterialList(){
             $id = $this->input->post('id');
+            $id_material = $this->input->post('material_id');
             
-            $Data = array(
+            $DataBoxDetail = [
+                'id_material' => $this->input->post('material_id'),
+                'material_desc' => $this->input->post('material_desc'),
+                'uptdt' => date('Y-m-d H:i'),
+                'uptby' => $this->input->post('user')
+            ];
+
+            $this->MModel->updateBoxDetailData('box_detail', $id_material, $DataBoxDetail);
+            
+            // RECORD MATERIAL LIST LOG
+            $query_log = $this->db->last_query();
+            $log_data = [
+                'affected_table' => 'box_detail',
+                'queries' => $query_log,
+                'Crtdt' => date('Y-m-d H:i:s'),
+                'Crtby' => $this->input->post('user')
+            ];    
+            $this->db->insert('material_list_log', $log_data);
+
+
+
+            $DataListStorage = [
+                'product_id' => $this->input->post('material_id'),
+                'material_desc' => $this->input->post('material_desc')
+            ];
+
+            $this->MModel->updateDataListStorage('list_storage', $id_material, $DataListStorage);
+            
+            // RECORD MATERIAL LIST LOG
+            $query_log = $this->db->last_query();
+            $log_data = [
+                'affected_table' => 'list_storage',
+                'queries' => $query_log,
+                'Crtdt' => date('Y-m-d H:i:s'),
+                'Crtby' => $this->input->post('user')
+            ];    
+            $this->db->insert('material_list_log', $log_data);
+            
+            
+            
+            $DataReceivingMaterial = [
+                'reference_number' => $this->input->post('material_id'),
+                'material' => $this->input->post('material_desc'),
+                'updated_at' => date('Y-m-d H:i:s'),
+                'updated_by' => $this->input->post('user')
+            ];
+
+            $this->MModel->updateDataReceivingMaterial('receiving_material', $id_material, $DataReceivingMaterial);
+            
+            // RECORD MATERIAL LIST LOG
+            $query_log = $this->db->last_query();
+            $log_data = [
+                'affected_table' => 'receiving_material',
+                'queries' => $query_log,
+                'Crtdt' => date('Y-m-d H:i:s'),
+                'Crtby' => $this->input->post('user')
+            ];    
+            $this->db->insert('material_list_log', $log_data);
+
+
+
+            $DataMaterialList = array(
                 'Id_material' => $this->input->post('material_id'),
                 'Material_desc' => $this->input->post('material_desc'),
                 'Material_type' => $this->input->post('material_type'),
@@ -111,7 +173,7 @@ class Master extends CI_Controller {
                 'Updby' => $this->input->post('user')
             );
 
-            $this->MModel->updateData('material_list', $id, $Data);
+            $this->MModel->updateData('material_list', $id, $DataMaterialList);
             $check_insert = $this->db->affected_rows();
 
             if($check_insert > 0 ){

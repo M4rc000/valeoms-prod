@@ -50,6 +50,21 @@ class Master_model extends CI_Model {
         $this->db->update($table, $Data);
     } 
     
+    public function updateBoxDetailData($table, $id_material, $Data){
+        $this->db->where('id_material',$id_material);  
+        $this->db->update($table, $Data);
+    } 
+
+    public function updateDataListStorage($table, $id_material, $Data){
+        $this->db->where('product_id',$id_material);  
+        $this->db->update($table, $Data);
+    } 
+
+    public function updateDataReceivingMaterial($table, $id_material, $Data){
+        $this->db->where('reference_number',$id_material);  
+        $this->db->update($table, $Data);
+    } 
+    
     public function updateMultipleDataBom($table, $id, $Data){
         $this->db->where('Id_bom',$id);  
         $this->db->update($table, $Data);

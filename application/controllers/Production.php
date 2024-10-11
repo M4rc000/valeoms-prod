@@ -22,7 +22,6 @@ class Production extends CI_Controller {
 
         $data['boms'] = $this->PModel->getAllBoms();
         $data['materials'] = $this->PModel->getMaterialList();
-        $data['request_history'] = $this->PModel->getProductionRequest();
 
         $this->load->view('templates/header', $data);
         $this->load->view('templates/navbar', $data);   
@@ -69,12 +68,11 @@ class Production extends CI_Controller {
             $productID = $this->input->post('productId');
             $productDesc = $this->input->post('productDescription');
             $product_plan_qty = $this->input->post('qty');
-            $production_plan_date = $this->input->post('production_plan_date');
             $user = $this->input->post('user');
-         
+ 
             // Get the last production plan
             $production_plan = $this->PModel->getLastProductionPlan();
-            
+        
             // Data for Table production_plan
             $Data = [
                 'Production_plan' => $production_plan,
@@ -82,29 +80,18 @@ class Production extends CI_Controller {
                 'Fg_desc' => $productDesc,
                 'Production_plan_qty' => $product_plan_qty,
                 'status' => 'NEW',
-                'production_plan_date' => $production_plan_date,
                 'Crtdt' => date('Y-m-d H:i'),
                 'Crtby' => $user,
                 'Upddt' => date('Y-m-d H:i'),
                 'Updby' => $user
             ];
-            
+        
             // Insert data into production_plan table
             $this->PModel->insertData('production_plan', $Data);
-
-            // RECORD QUALITY MATERIAL REQUEST LOG
-            $query_log = $this->db->last_query();
-            $log_data = [
-                'affected_table' => 'production_plan',
-                'queries' => $query_log,
-                'Crtdt' => date('Y-m-d H:i:s'),
-                'Crtby' => $this->input->post('user')
-            ];    
-            $this->db->insert('production_material_request_log', $log_data);
-            
+        
             // Retrieve BOM data
             $result = $this->db->query("SELECT * FROM bom WHERE Id_fg = '$productID'")->result_array();
-            
+        
             // Prepare and insert data into production_plan_detail table
             foreach ($result as $row) {
                 $detailData = [
@@ -120,44 +107,8 @@ class Production extends CI_Controller {
                     'Updby' => $user
                 ];
         
-                // Insert into production_plan_detail table and get last inserted ID
-                $this->db->insert('production_plan_detail', $detailData);
-                $Production_plan_detail_id = $this->db->insert_id();
-                
-                // RECORD PRODUCTION MATERIAL REQUEST LOG
-                $query_log = $this->db->last_query();
-                $log_data = [
-                    'affected_table' => 'production_plan_detail',
-                    'queries' => $query_log,
-                    'Crtdt' => date('Y-m-d H:i:s'),
-                    'Crtby' => $this->input->post('user')
-                ];    
-                $this->db->insert('production_material_request_log', $log_data);
-                
-                
-                // Prepare and insert data into production_request table
-                $ProductionRequestData = [
-                    'Production_plan_detail_id' => $Production_plan_detail_id,
-                    'Id_request' => $this->PModel->getLastReqNo(),
-                    'Id_material' => $row['Id_material'],
-                    'Material_desc' => $row['Material_desc'],
-                    'Qty' => $row['Qty'] * $product_plan_qty,
-                    'Production_plan' => $production_plan,
-                    'Crtdt' => date('Y-m-d H:i:s'), 
-                    'Crtby' => $user
-                ];
-        
-                $this->PModel->insertData('production_request', $ProductionRequestData);
-                
-                // RECORD PRODUCTION MATERIAL REQUEST LOG
-                $query_log = $this->db->last_query();
-                $log_data = [
-                    'affected_table' => 'production_request',
-                    'queries' => $query_log,
-                    'Crtdt' => date('Y-m-d H:i:s'),
-                    'Crtby' => $this->input->post('user')
-                ];    
-                $this->db->insert('production_material_request_log', $log_data);
+                // Insert into production_plan_detail table
+                $this->PModel->insertData('production_plan_detail', $detailData);
             }
 
             redirect('production/edit_production_plan/' . $production_plan);
@@ -167,8 +118,6 @@ class Production extends CI_Controller {
             $production_plan = $this->input->post('production_plan');
             $Production_plan_detail_id = $this->input->post('prod_plan_id');
             $id_material = $this->input->post('materials_id');
-            $user = $this->input->post('user');
-            $date = date('Y-m-d H:i:s');
 
             $data = [
                 'Qty' => $this->input->post('qty'),
@@ -179,26 +128,8 @@ class Production extends CI_Controller {
             // Check if the record already exists
             $existing_request = $this->PModel->getRequest($production_plan, $Production_plan_detail_id);
         
-            $check_success = 0;
-
             if ($existing_request) {
                 $this->PModel->updateDataPP('production_request', $data, ['Production_plan' => $production_plan, 'Production_plan_detail_id' => $Production_plan_detail_id]);
-                $this->db->query("UPDATE `production_plan_detail` SET status = 1, Updby = '$user', Upddt = '$date' WHERE id = '$Production_plan_detail_id'");
-                
-                $checkinsert = $this->db->affected_rows();
-
-                if($checkinsert > 0){
-                    // RECORD PRODUCTION MATERIAL REQUEST LOG
-                    $query_log = $this->db->last_query();
-                    $log_data = [
-                        'affected_table' => 'production_request',
-                        'queries' => $query_log,
-                        'Crtdt' => date('Y-m-d H:i:s'),
-                        'Crtby' => $this->input->post('user')
-                    ];    
-                    $this->db->insert('production_material_request_log', $log_data);
-                    $check_success += 1;
-                }
             } else {
                 $data = array_merge($data, [
                     'Production_plan_detail_id' => $Production_plan_detail_id,
@@ -210,73 +141,12 @@ class Production extends CI_Controller {
                     'Crtby' => $this->input->post('user')
                 ]);
                 $this->PModel->insertData('production_request', $data);
-
-                // RECORD PRODUCTION MATERIAL REQUEST LOG
-                $query_log = $this->db->last_query();
-                $log_data = [
-                    'affected_table' => 'production_request',
-                    'queries' => $query_log,
-                    'Crtdt' => date('Y-m-d H:i:s'),
-                    'Crtby' => $this->input->post('user')
-                ];    
-                $this->db->insert('production_material_request_log', $log_data);
-
-                $this->db->query("UPDATE `production_plan_detail` SET status = 1 WHERE id = '$Production_plan_detail_id'");
-
-                // RECORD PRODUCTION MATERIAL REQUEST LOG
-                $query_log = $this->db->last_query();
-                $log_data = [
-                    'affected_table' => 'production_plan_detail',
-                    'queries' => $query_log,
-                    'Crtdt' => date('Y-m-d H:i:s'),
-                    'Crtby' => $this->input->post('user')
-                ];    
-                $this->db->insert('production_material_request_log', $log_data);
-
-                $checkinsert = $this->db->affected_rows();
-
-                if($checkinsert > 0){
-                    $check_success += 1;
-                }
             }
-
-            if($check_success > 0){
-                $this->session->set_flashdata('SUCCESS_editProductionPlan', 'Material Qty have been updated');
-            }
-            else{
-                $this->session->set_flashdata('FAILED_editProductionPlan', 'Failed to update material qty');
-            }
-
+        
+            $this->session->set_flashdata('success', 'Material Qty have been updated');
             redirect('production/edit_production_plan/'. $production_plan);
         }        
         
-        function update_status_edit_production_plan() {
-            $data = $this->input->post('data');
-            $user = $this->input->post('user');
-            $id = $this->db->escape_str($data['id']);
-            $status = (int) $data['status'];
-        
-            $this->db->set('status', $status);
-            $this->db->set('Upddt', date('Y-m-d H:i:s'));
-            $this->db->set('Updby', $user);
-            $this->db->where('id', $id);
-            $this->db->update('production_plan_detail');
-
-            // RECORD PRODUCTION MATERIAL REQUEST LOG
-            $query_log = $this->db->last_query();
-            $log_data = [
-                'affected_table' => 'production_plan_detail',
-                'queries' => $query_log,
-                'Crtdt' => date('Y-m-d H:i:s'),
-                'Crtby' => $this->input->post('user')
-            ];    
-            $this->db->insert('production_material_request_log', $log_data);
-        
-            $result = $this->db->affected_rows() > 0 ? 1 : 0;
-            
-            echo json_encode($result);
-        }        
-
         function getSlocStorage(){
             $materialId = $this->input->post('materialId');
             $result = $this->db->query("SELECT 
@@ -314,23 +184,14 @@ class Production extends CI_Controller {
                 'Id_material' => $materialID,
                 'Material_desc' => $materialDesc,
                 'Qty' => $materialNeed,
+                // 'Sloc' => '',
+                // 'id_box' => '',
                 'Production_plan' => $production_plan,
                 'Crtdt' => date('Y-m-d H:i:s'), 
                 'Crtby' => $this->input->post('user')
             ];
 
             $this->PModel->insertData('production_request', $Data);
-
-            // RECORD PRODUCTION MATERIAL REQUEST LOG
-            $query_log = $this->db->last_query();
-            $log_data = [
-                'affected_table' => 'production_request',
-                'queries' => $query_log,
-                'Crtdt' => date('Y-m-d H:i:s'),
-                'Crtby' => $this->input->post('user')
-            ];    
-            $this->db->insert('production_material_request_log', $log_data);
-            
             $result ='success';
             
             echo json_encode($result);
@@ -430,9 +291,9 @@ class Production extends CI_Controller {
                 'Material_qty' => $this->input->post('qty'),
                 'Product_plan' => $production_plan,
                 'product_id' => $ProductID[0]['Id_fg'],
-                'crtdt' => date('Y-m-d H:i'),
+                'crtdt' => date('Y-d-m H:i'),
                 'crtby' => $this->input->post('user'),
-                'upddt' => date('Y-m-d H:i'),
+                'upddt' => date('Y-d-m H:i'),
                 'updby' => $this->input->post('user')
             );
 
@@ -440,15 +301,6 @@ class Production extends CI_Controller {
             $Result = $this->PModel->insertData('kanban_box', $Data);
 
             if ($Result) {
-                // RECORD KANBAN BOX LOG
-                $query_log = $this->db->last_query();
-                $log_data = [
-                    'affected_table' => 'kanban_box',
-                    'queries' => $query_log,
-                    'Crtdt' => date('Y-m-d H:i:s'),
-                    'Crtby' => $this->input->post('user')
-                ];    
-                $this->db->insert('kanban_box_log', $log_data);
                 // Success
                 $this->session->set_flashdata('ADD', '
                     <div class="alert alert-success alert-dismissible fade show" role="alert" style="width: 40%;">
@@ -487,15 +339,6 @@ class Production extends CI_Controller {
 
             // CHECK IF SUCCESS UPDATE OR NO
             if ($update == 1) {
-                // RECORD KANBAN BOX LOG
-                $query_log = $this->db->last_query();
-                $log_data = [
-                    'affected_table' => 'kanban_box',
-                    'queries' => $query_log,
-                    'Crtdt' => date('Y-m-d H:i:s'),
-                    'Crtby' => $this->input->post('user')
-                ];    
-                $this->db->insert('kanban_box_log', $log_data);
                 $this->session->set_flashdata('success_edit_kanban_box', 'Kanban Box <b>' . $id . '</b> has been updated');
             } else {
                 $this->session->set_flashdata('failed_edit_kanban_box', 'Failed to update Kanban Box <b>' . $id . '</b>');
@@ -595,59 +438,22 @@ class Production extends CI_Controller {
             $materialData = $this->input->post('materialData');
             $weight = $this->input->post('weight');
             $id_return = $this->PModel->getLastIdReturn();
-            
-            // GET LAST NO BOX
-            $no_box = $this->PModel->generateFormattedBoxNumber();
-            $DataBox = [
-                'no_box' => $no_box,
-                'weight' => $weight,
-                'box_type' => 'HIGH',
-                'sloc' => 461,
-                'crtby' => $user,
-                'crtdt' => date('Y-m-d H:i:s')
-            ];
-            
-            $this->PModel->insertData('box', $DataBox);
-            
-            // RECORD MATERIAL RETURN LOG
-            $query_log = $this->db->last_query();
-            $log_data = [
-                'affected_table' => 'box',
-                'queries' => $query_log,
-                'Crtdt' => date('Y-m-d H:i:s'),
-                'Crtby' => $this->input->post('user')
-            ];    
-            $this->db->insert('material_return_log', $log_data);
-            
+
             $DataReturnWarehouse = [
                 'id_return' => $id_return,
-                'no_box' => $no_box,
                 'box_type' => 'HIGH',
                 'box_weight' => $weight,
-                'sloc' => 461,
-                'status' => 1, // 1: PENDING, 0: APPROVED
+                'status' => 1, // 1: APPROVED, 0: PENDING
                 'Crtdt' => date('Y-m-d H:i:s'),
                 'Crtby' => $user,
                 'Upddt' => date('Y-m-d H:i:s'),
                 'Updby' => $user
             ];
-
             $this->PModel->insertData('return_warehouse', $DataReturnWarehouse);
             $queryDataReturnWarehouse = $this->db->affected_rows();
 
             // JIKA TABLE RETURN WAREHOUSE BERHASIL DI INSERT
             if($queryDataReturnWarehouse > 0){
-                
-                // RECORD MATERIAL RETURN LOG
-                $query_log = $this->db->last_query();
-                $log_data = [
-                    'affected_table' => 'return_warehouse',
-                    'queries' => $query_log,
-                    'Crtdt' => date('Y-m-d H:i:s'),
-                    'Crtby' => $this->input->post('user')
-                ];    
-                $this->db->insert('material_return_log', $log_data);
-
                 $queryDataReturnWarehouseDetail = 0;
                 foreach($materialData as $md){
                     $DataReturnWarehouseDetail = [
@@ -657,7 +463,7 @@ class Production extends CI_Controller {
                         'Material_qty' => $md['material_qty'],
                         'Material_uom' => $md['material_uom'],
                         'Crtdt' => date('Y-m-d H:i:s'),
-                        'Crtby' => $user,
+                        'Crtdt' => $user,
                         'Upddt' => date('Y-m-d H:i:s'),
                         'Updby' => $user
                     ];
@@ -666,100 +472,49 @@ class Production extends CI_Controller {
                     
                     
                     if($checkinsert > 0){
-                        // RECORD MATERIAL RETURN LOG
-                        $query_log = $this->db->last_query();
-                        $log_data = [
-                            'affected_table' => 'return_warehouse_detail',
-                            'queries' => $query_log,
-                            'Crtdt' => date('Y-m-d H:i:s'),
-                            'Crtby' => $this->input->post('user')
-                        ];    
-                        $this->db->insert('material_return_log', $log_data);
-
                         $queryDataReturnWarehouseDetail+=1;
                     }
                 }
 
                 // JIKA TABLE RETURN WAREHOUSE DETAIL BERHASIL DI INSERT
                 if($queryDataReturnWarehouseDetail > 0){
-                    $result = [
-                        'status' => 2,
-                        'no_box' => $no_box
-                    ];
+                    $result = 2;
                 }
                 // JIKA GAGAL INSERT TABLE RETURN WAREHOUSE DETAIL
                 else{
-                    $result = [
-                        'status' => 1,
-                    ];
+                    $result = 1; 
                 }
             }
             // JIKA GAGAL INSERT TABLE RETURN WAREHOUSE
             else{
-                $result = [
-                    'status' => 0,
-                ];
+                $result = 0;
             }
+
             
             echo json_encode($result);
         }
-
+    
         function AddMediumRack(){
             $user = $this->input->post('user');
             $materialData = $this->input->post('materialData');
             $weight = $this->input->post('weight');
             $id_return = $this->PModel->getLastIdReturn();
-            
-            // GET LAST NO BOX
-            $no_box = $this->PModel->generateFormattedBoxNumber();
-            $DataBox = [
-                'no_box' => $no_box,
-                'weight' => $weight,
-                'box_type' => 'MEDIUM',
-                'sloc' => 461,
-                'crtby' => $user,
-                'crtdt' => date('Y-m-d H:i:s')
-            ];
-            
-            $this->PModel->insertData('box', $DataBox);
 
-            // RECORD MATERIAL RETURN LOG
-            $query_log = $this->db->last_query();
-            $log_data = [
-                'affected_table' => 'box',
-                'queries' => $query_log,
-                'Crtdt' => date('Y-m-d H:i:s'),
-                'Crtby' => $this->input->post('user')
-            ];    
-            $this->db->insert('material_return_log', $log_data);
-            
             $DataReturnWarehouse = [
                 'id_return' => $id_return,
-                'no_box' => $no_box,
                 'box_type' => 'MEDIUM',
                 'box_weight' => $weight,
-                'sloc' => 461,
                 'status' => 1, // 1: PENDING, 0: APPROVED
                 'Crtdt' => date('Y-m-d H:i:s'),
                 'Crtby' => $user,
                 'Upddt' => date('Y-m-d H:i:s'),
                 'Updby' => $user
             ];
-
             $this->PModel->insertData('return_warehouse', $DataReturnWarehouse);
             $queryDataReturnWarehouse = $this->db->affected_rows();
 
             // JIKA TABLE RETURN WAREHOUSE BERHASIL DI INSERT
             if($queryDataReturnWarehouse > 0){
-                // RECORD MATERIAL RETURN LOG
-                $query_log = $this->db->last_query();
-                $log_data = [
-                    'affected_table' => 'return_warehouse',
-                    'queries' => $query_log,
-                    'Crtdt' => date('Y-m-d H:i:s'),
-                    'Crtby' => $this->input->post('user')
-                ];    
-                $this->db->insert('material_return_log', $log_data);
                 $queryDataReturnWarehouseDetail = 0;
                 foreach($materialData as $md){
                     $DataReturnWarehouseDetail = [
@@ -769,7 +524,7 @@ class Production extends CI_Controller {
                         'Material_qty' => $md['material_qty'],
                         'Material_uom' => $md['material_uom'],
                         'Crtdt' => date('Y-m-d H:i:s'),
-                        'Crtby' => $user,
+                        'Crtdt' => $user,
                         'Upddt' => date('Y-m-d H:i:s'),
                         'Updby' => $user
                     ];
@@ -778,40 +533,24 @@ class Production extends CI_Controller {
                     
                     
                     if($checkinsert > 0){
-                        // RECORD MATERIAL RETURN LOG
-                        $query_log = $this->db->last_query();
-                        $log_data = [
-                            'affected_table' => 'return_warehouse_detail',
-                            'queries' => $query_log,
-                            'Crtdt' => date('Y-m-d H:i:s'),
-                            'Crtby' => $this->input->post('user')
-                        ];    
-                        $this->db->insert('material_return_log', $log_data);
-                        
                         $queryDataReturnWarehouseDetail+=1;
                     }
                 }
 
                 // JIKA TABLE RETURN WAREHOUSE DETAIL BERHASIL DI INSERT
                 if($queryDataReturnWarehouseDetail > 0){
-                    $result = [
-                        'status' => 2,
-                        'no_box' => $no_box
-                    ];
+                    $result = 2;
                 }
                 // JIKA GAGAL INSERT TABLE RETURN WAREHOUSE DETAIL
                 else{
-                    $result = [
-                        'status' => 1,
-                    ];
+                    $result = 1; 
                 }
             }
             // JIKA GAGAL INSERT TABLE RETURN WAREHOUSE
             else{
-                $result = [
-                    'status' => 0,
-                ];
+                $result = 0;
             }
+
             
             echo json_encode($result);
         }
