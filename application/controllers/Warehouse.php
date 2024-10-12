@@ -233,6 +233,35 @@ class Warehouse extends CI_Controller
 		$dompdf->stream($namafile . ".pdf", ['Attachment' => 0]);
 	}
 
+	public function print_quality_request($id_request)
+	{
+		$time = date('dmY');
+		$data['header'] = $this->WModel->getQualityRequest2($id_request);
+		$data['detail'] = $this->getQualityReqDetail($id_request);
+
+		$namafile = "Quality-Request-" . $id_request . '-' . $time;
+		$dompdf = new Dompdf(['enable_remote' => true]);
+		$html = $this->load->view('warehouse/print_quality_request', $data, true);
+
+		$dompdf->loadHtml($html);
+		$dompdf->setPaper('A4', 'portrait');
+		$dompdf->render();
+		$dompdf->stream($namafile . ".pdf", ['Attachment' => 0]);
+	}
+
+	function getQualityReqDetail($id_request)
+	{
+		$query = " SELECT a.*, b.Id_material,f.Sloc as sloc_name, c.no_box as box_name, b.Material_desc,d.total_qty as qty_on_box from quality_request_detail a 
+		LEFT JOIN quality_request b on b.Id_request = a.Id_Request 
+		LEFT JOIN storage f ON f.Id_storage = a.sloc
+		LEFT JOIN box c ON c.id_box = a.id_box
+		LEFT JOIN list_storage d ON d.sloc = a.sloc and d.id_box = a.id_box and d.product_id = b.Id_material
+		 where a.Id_request = ?
+		";
+		$data = $this->db->query($query, [$id_request])->result_array();
+		return $data;
+	}
+
 	public function addItemBox()
 	{
 		$id_box = $this->input->post('id_box');
@@ -1571,6 +1600,43 @@ class Warehouse extends CI_Controller
 		$this->load->view('templates/footer');
 	}
 
+	function save_quality_request_detail()
+	{
+		$data = $this->input->post('materialSlocArray');
+		foreach ($data as $dt) {
+			// Insert ke dalam tabel quality_request_detail
+			$pr = [
+				'Id_request' => $dt['id_request'],
+				'qty_unpack' => $dt['qty_need'],
+				'Sloc' => $dt['sloc'],
+				'id_box' => $dt['box'],
+				'Crtby' => $this->session->userdata('username'),
+				'Crtdt' => date('Y-m-d H:i:s')
+			];
+			$save = $this->db->insert('quality_request_detail', $pr);
+
+			if ($save) {
+				// Mengurangi qty dari receiving_material berdasarkan reference_number dan id_box
+				$qty_need = $dt['qty_need'];
+				$update = $this->db->set('qty', 'qty - ' . (float) $qty_need, FALSE) // Mengurangi qty
+					->where('reference_number', $dt['id_material']) // Menggunakan id_material sebagai reference_number
+					->where('id_box', $dt['box'])
+					->update('receiving_material'); // Tabel receiving_material
+
+				// Update status quality_request menjadi 1 (Approved)
+				$updateStatus = $this->db->set('status', 1)
+					->where('Id_request', $dt['id_request'])
+					->update('quality_request');
+			}
+		}
+
+		if ($save) {
+			echo json_encode(['status' => true]);
+		} else {
+			echo json_encode(['status' => false]);
+		}
+	}
+
 
 	function getBox()
 	{
@@ -1945,33 +2011,29 @@ class Warehouse extends CI_Controller
 
 		echo json_encode($data);
 	}
-
 	public function get_id_box_options()
 	{
 		$id_material = $this->input->post('id_material');
 		$sloc_id = $this->input->post('sloc_id');
 
-		// Debugging: echo input to check if values are coming
-		// var_dump($id_material, $sloc_id); exit;
-
-		// Query to fetch the box options
+		// Query untuk mendapatkan total quantity dari receiving_material per material (berdasarkan reference_number) dalam box
 		$query = "
-        SELECT b.id_box, b.no_box, ls.qty_real AS total_qty_real
-        FROM box b
-        JOIN box_detail bd ON b.id_box = bd.id_box
-        JOIN list_storage ls ON ls.id_box = b.id_box
-        WHERE bd.id_material = ? AND b.sloc = ? AND ls.id_material = ?
-    ";
+			SELECT b.id_box, b.no_box, r.qty AS total_qty_real
+			FROM box b
+			JOIN box_detail bd ON b.id_box = bd.id_box
+			JOIN receiving_material r ON r.id_box = b.id_box
+			WHERE bd.id_material = ? 
+			AND b.sloc = ?
+			AND r.reference_number = bd.id_material
+		";
 
-		// Execute query
-		$data = $this->db->query($query, [$id_material, $sloc_id, $id_material])->result_array();
+		// Jalankan query dan lakukan binding dengan array yang berisi parameter
+		$data = $this->db->query($query, array($id_material, $sloc_id))->result_array();
 
-		// Debugging: Print the data to check the result
-		// var_dump($data); exit;
-
-		// Return result in JSON format
+		// Mengembalikan hasil dalam format JSON
 		echo json_encode($data);
 	}
+
 
 	// Function to fetch boxes in selected SLoc where material is stored
 	public function sloc_availability()
@@ -2123,40 +2185,53 @@ class Warehouse extends CI_Controller
 		echo json_encode($data);
 	}
 
-	function save_production_request_detail()
+	public function save_production_request_detail()
 	{
-		$data = $this->input->post('materialSlocArray');
-		// print_r($data);die;
-		foreach ($data as $dt) {
+		// Ambil data dari request
+		$materialSlocArray = $this->input->post('materialSlocArray');
+
+		foreach ($materialSlocArray as $item) {
+			// Ambil nilai dari array yang akan disimpan ke `production_request_approve`
 			$pr = [
-				'Production_plan_detail_id' => $dt['Production_plan_detail_id'],
-				'Id_request' => $dt['id_request'],
-				'Id_material' => $dt['id_material'],
-				'Material_desc' => $dt['material_desc'],
-				'Production_plan' => $dt['production_plan'],
-				'Qty' => $dt['qty_need'],
-				'Sloc' => $dt['sloc'],
-				'id_box' => $dt['box'],
+				'Production_plan_detail_id' => $item['Production_plan_detail_id'],
+				'Id_request' => $item['id_request'],
+				'Id_material' => $item['id_material'], // Sesuai dengan reference_number di receiving_material
+				'Material_desc' => $item['material_desc'],
+				'Production_plan' => $item['production_plan'],
+				'Qty' => $item['qty_need'],
+				'Sloc' => $item['sloc'],
+				'id_box' => $item['box'],
 				'Crtby' => $this->session->userdata('username'),
 				'Crtdt' => date('Y-m-d H:i:s')
 			];
+
+			// Simpan data ke `production_request_approve`
 			$save = $this->db->insert('production_request_approve', $pr);
+
 			if ($save) {
-				$qty_need = $dt['qty_need'];
-				$update = $this->db->query(
-					"UPDATE list_storage SET total_qty_real = total_qty_real - ? WHERE product_id = ? AND sloc = ? AND id_box = ?",
-					array($qty_need, $dt['id_material'], $dt['sloc'], $dt['box'])
-				);
-				$update = $this->db->query("UPDATE production_request SET status = 1 WHERE Id_request = ?", array($dt['id_request']));
+				// Ambil nilai dari array untuk mengurangi qty di tabel receiving_material
+				$reference_number = $item['id_material']; // id_material di frontend sesuai dengan reference_number
+				$box_id = $item['box'];
+				$qty_need = $item['qty_need'];
+
+				// Update qty di tabel receiving_material sesuai dengan reference_number dan id_box
+				$this->db->set('qty', 'qty - ' . (float) $qty_need, FALSE); // Mengurangi qty
+				$this->db->where('reference_number', $reference_number);
+				$this->db->where('id_box', $box_id);
+				$this->db->update('receiving_material');
+
+				// Update status di tabel production_request untuk menandai sebagai approved
+				$this->db->query("UPDATE production_request SET status = 1 WHERE Id_request = ?", array($item['id_request']));
 			}
 		}
+
 		if ($save) {
 			echo json_encode(['status' => true]);
 		} else {
 			echo json_encode(['status' => false]);
-
 		}
 	}
+
 
 	public function get_count_status_pr()
 	{

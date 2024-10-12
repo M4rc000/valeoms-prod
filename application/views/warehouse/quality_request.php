@@ -1,3 +1,14 @@
+<style>
+.select2-container {
+    z-index: 9999;
+}
+
+.select2-selection {
+    padding-top: 4px !important;
+    height: 38px !important;
+    /* width: 367px !important; */
+}
+</style>
 <!-- application/views/warehouse/quality_request.php -->
 <section>
     <div class="row">
@@ -40,27 +51,29 @@
                                 <td><?= $request['Material_need']; ?></td>
                                 <td>
                                     <?php if ($request['status'] == 0): ?>
-                                    <button class="btn btn-success"
-                                         class="choose-sloc-box" data-bs-toggle="modal" data-bs-target="#chooseSlocAndBox<?= $request['Id_request']; ?>">
+                                    <button class="btn btn-success" class="choose-sloc-box" data-bs-toggle="modal"
+                                        data-bs-target="#chooseSlocAndBox<?= $request['Id_request']; ?>">
                                         <i class="bx bxs-edit" style="color: white;"> </i>Approve
                                     </button>
-                                    <button class="btn btn-danger"
-                                        data-bs-toggle="modal"
+                                    <button class="btn btn-danger" data-bs-toggle="modal"
                                         data-bs-target="#rejectModal<?= $request['Id_request']; ?>">
                                         <i class="bi bi-dash-circle" style="color: white;"> </i> Reject
                                     </button>
                                     <?php elseif ($request['status'] == 1): ?>
-                                    <button type="button" class="btn btn-secondary"  style="background-color:#3fb03f" disabled>Approved</button>
-                                    <button class="btn btn-primary" class="choose-sloc-box" data-bs-toggle="modal" data-bs-target="#detailSlocAndBox<?= $request['Id_request']; ?>">
-                                   <i class="bx bx-show"></i></span> Detail
+                                    <button type="button" class="btn btn-secondary" style="background-color:#3fb03f"
+                                        disabled>Approved</button>
+                                    <button class="btn btn-primary" class="choose-sloc-box" data-bs-toggle="modal"
+                                        data-bs-target="#detailSlocAndBox<?= $request['Id_request']; ?>">
+                                        <i class="bx bx-show"></i></span> Detail
                                     </button>
                                     <button type="button" class="btn btn-warning"
                                         onclick="printReq('<?= $request['Id_request']; ?>')"><i
                                             class="bi bi-printer"></i> Print</button>
                                     <?php else: ?>
                                     <button type="button" class="btn btn-danger" disabled>Rejected</button>
-                                    <button class="btn btn-primary" class="choose-sloc-box" data-bs-toggle="modal" data-bs-target="#detailRejectSlocAndBox<?= $request['Id_request']; ?>">
-                                   <i class="bx bx-show"></i></span> Detail
+                                    <button class="btn btn-primary" class="choose-sloc-box" data-bs-toggle="modal"
+                                        data-bs-target="#detailRejectSlocAndBox<?= $request['Id_request']; ?>">
+                                        <i class="bx bx-show"></i></span> Detail
                                     </button>
                                     <?php endif; ?>
                                 </td>
@@ -93,21 +106,23 @@
                 <div class="row ps-2">
                     <div class="col-4">
                         <label for="sloc" class="form-label">Id Material</label>
-                       <input type="text" class="form-control id_material_detail" value="<?= $pr['Id_material']?>" readonly>
+                        <input type="text" class="form-control id_material_detail" value="<?= $pr['Id_material']?>"
+                            readonly>
                     </div>
                     <div class="col-5">
                         <label for="sloc" class="form-label">Material Description</label>
-                        <input type="text" class="form-control"  value="<?= $pr['Material_desc']?>" readonly>
-                        <input type="hidden" class="form-control"  value="<?= $pr['Id_request']?>" readonly>
+                        <input type="text" class="form-control" value="<?= $pr['Material_desc']?>" readonly>
+                        <input type="hidden" class="form-control" value="<?= $pr['Id_request']?>" readonly>
                     </div>
                     <div class="col-3">
                         <label for="sloc" class="form-label">Qty Need</label>
-                       <input type="text" class="form-control"  value="<?= $pr['Material_need']?>" readonly>
+                        <input type="text" class="form-control" value="<?= $pr['Material_need']?>" readonly>
                     </div>
                 </div>
                 <hr>
-                <button type="button" class="btn btn-success view-details" onclick="getdetailpr('<?=$pr['Id_request']?>')" data-id-material="<?= $pr['Id_material']?>">
-                   View Details
+                <button type="button" class="btn btn-success view-details"
+                    onclick="getdetailpr('<?=$pr['Id_request']?>')" data-id-material="<?= $pr['Id_material']?>">
+                    View Details
                 </button>
 
                 <!-- Container for dynamic setting rows -->
@@ -136,19 +151,18 @@
                     onclick="closeModal()"></button>
             </div>
             <div class="modal-body">
-            <div class="row">
+                <div class="row">
                     <label for="productId" class="col-sm-4 col-form-label"><b>Material ID</b></label>
                     <div class="col-sm-3">
-                        <input type="text" class="form-control" value="<?= $request['Id_material']; ?>"
-                            name="productId" readonly>
+                        <input type="text" class="form-control" value="<?= $request['Id_material']; ?>" name="productId"
+                            readonly>
                     </div>
                 </div>
                 <div class="row mt-2">
-                    <label for="productDescription" class="col-sm-4 col-form-label"><b>Material  Description</b></label>
+                    <label for="productDescription" class="col-sm-4 col-form-label"><b>Material Description</b></label>
                     <div class="col-sm-6">
                         <input type="text" class="form-control" value="<?= $request['Material_desc']; ?>"
-                           name="productDescription"
-                            value="${productDescription}" readonly>
+                            name="productDescription" value="${productDescription}" readonly>
                     </div>
                 </div>
                 <div class="row mt-2">
@@ -161,13 +175,13 @@
                 <div class="row mt-2">
                     <label for="reject" class="col-sm-4 col-form-label"><b>Reject Description</b></label>
                     <div class="col-lg-8 col-sm-8">
-                        <textarea type="text" style ="border-radius:10px; border: 1px solid #dc3545"
-                       min="1" readonly><?= $request['reject_description']; ?></textarea>
+                        <textarea type="text" style="border-radius:10px; border: 1px solid #dc3545" min="1"
+                            readonly><?= $request['reject_description']; ?></textarea>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-            <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close"
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal" aria-label="Close"
                     onclick="closeModal()"> Close</button>
             </div>
         </div>
@@ -185,19 +199,18 @@
                     onclick="closeModal()"></button>
             </div>
             <div class="modal-body">
-            <div class="row">
+                <div class="row">
                     <label for="productId" class="col-sm-4 col-form-label"><b>Material ID</b></label>
                     <div class="col-sm-3">
-                        <input type="text" class="form-control" value="<?= $request['Id_material']; ?>"
-                            name="productId" readonly>
+                        <input type="text" class="form-control" value="<?= $request['Id_material']; ?>" name="productId"
+                            readonly>
                     </div>
                 </div>
                 <div class="row mt-2">
-                    <label for="productDescription" class="col-sm-4 col-form-label"><b>Material  Description</b></label>
+                    <label for="productDescription" class="col-sm-4 col-form-label"><b>Material Description</b></label>
                     <div class="col-sm-6">
                         <input type="text" class="form-control" value="<?= $request['Material_desc']; ?>"
-                           name="productDescription"
-                            value="${productDescription}" readonly>
+                            name="productDescription" value="${productDescription}" readonly>
                     </div>
                 </div>
                 <div class="row mt-2">
@@ -210,14 +223,14 @@
                 <div class="row mt-2">
                     <label for="reject" class="col-sm-4 col-form-label"><b>Reject Description</b></label>
                     <div class="col-lg-6 col-sm-6">
-                        <textarea type="text" class="form-control keterangan-reject_<?= $request['Id_request']; ?>" 
-                            name="keterangan-reject_" min="1" required ></textarea>
+                        <textarea type="text" class="form-control keterangan-reject_<?= $request['Id_request']; ?>"
+                            name="keterangan-reject_" min="1" required></textarea>
                     </div>
                 </div>
             </div>
             <div class="modal-footer">
-            <button type="submit" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Reject"
-                onclick="rejectRequest('<?= $request['Id_request'] ?>')"> Reject</button>
+                <button type="submit" class="btn btn-danger" data-bs-dismiss="modal" aria-label="Reject"
+                    onclick="rejectRequest('<?= $request['Id_request'] ?>')"> Reject</button>
             </div>
         </div>
     </div>
@@ -239,20 +252,25 @@
                 <div class="row ps-2">
                     <div class="col-4">
                         <label for="sloc" class="form-label">Id Material</label>
-                       <input type="text" class="form-control id_material_<?= $pr['Id_request']?>" value="<?= $pr['Id_material']?>" readonly>
+                        <input type="text" class="form-control id_material_<?= $pr['Id_request']?>"
+                            value="<?= $pr['Id_material']?>" readonly>
                     </div>
                     <div class="col-5">
                         <label for="sloc" class="form-label">Material Description</label>
-                        <input type="text" class="form-control material_desc_<?= $pr['Id_request']?>"   value="<?= $pr['Material_desc']?>" readonly>
-                        <input type="hidden" class="form-control id_request_<?= $pr['Id_request']?>"  value="<?= $pr['Id_request']?>" readonly>
+                        <input type="text" class="form-control material_desc_<?= $pr['Id_request']?>"
+                            value="<?= $pr['Material_desc']?>" readonly>
+                        <input type="hidden" class="form-control id_request_<?= $pr['Id_request']?>"
+                            value="<?= $pr['Id_request']?>" readonly>
                     </div>
                     <div class="col-3">
                         <label for="sloc" class="form-label">Qty Need</label>
-                       <input type="text" class="form-control material_need_<?= $pr['Id_request']?>" value="<?= $pr['Material_need']?>" readonly>
+                        <input type="text" class="form-control material_need_<?= $pr['Id_request']?>"
+                            value="<?= $pr['Material_need']?>" readonly>
                     </div>
                 </div>
                 <hr>
-                <button type="button" class="btn btn-success plus-row" data-id-request="<?= $pr['Id_request']?>"  data-id-material="<?= $pr['Id_material']?>">
+                <button type="button" class="btn btn-success plus-row" data-id-request="<?= $pr['Id_request']?>"
+                    data-id-material="<?= $pr['Id_material']?>">
                     <i class="bi bi-plus-circle"></i>
                 </button>
 
@@ -265,7 +283,8 @@
             <div class="modal-footer">
                 <button type="button" class="btn btn-secondary" data-bs-dismiss="modal"
                     onclick="closeModal()">Close</button>
-                <button type="submit" class="btn btn-primary" onclick="savePRDetail('<?= $pr['Id_material']?>', '<?= $pr['Id_request']?>')">Save</button>
+                <button type="submit" class="btn btn-primary"
+                    onclick="savePRDetail('<?= $pr['Id_material']?>', '<?= $pr['Id_request']?>')">Save</button>
             </div>
         </div>
     </div>
@@ -273,7 +292,6 @@
 <?php endforeach; ?>
 
 <script>
-
 $(document).ready(function() {
     $(document).ready(function() {
         $('.modal').modal({
@@ -282,7 +300,7 @@ $(document).ready(function() {
         });
 
         // If you need to add additional logic to ensure it stays open
-        $('.modal').on('hide.bs.modal', function (e) {
+        $('.modal').on('hide.bs.modal', function(e) {
             e.preventDefault();
             // Optionally, you can add logic to handle what happens when trying to close
         });
@@ -295,8 +313,8 @@ $(document).ready(function() {
     var rowIndex = 0;
     // Event listener for plus-row button click
     $(document).on('click', '.plus-row', function() {
-        var id_request = $(this).data('id-request'); 
-        var Id_material = $(this).data('id-material'); 
+        var id_request = $(this).data('id-request');
+        var Id_material = $(this).data('id-material');
         console.log(Id_material);
         rowIndex++;
         // Create a new setting block with a unique index
@@ -342,7 +360,9 @@ function getSloc(idMaterial, rowIndex, id_request) {
     $.ajax({
         url: '<?php echo base_url('warehouse/get_sloc_options'); ?>',
         method: 'POST',
-        data: { id_material: idMaterial },
+        data: {
+            id_material: idMaterial
+        },
         success: function(response) {
             var data = JSON.parse(response);
             var $select = $(`.sloc_${rowIndex}_${id_request}`);
@@ -350,7 +370,8 @@ function getSloc(idMaterial, rowIndex, id_request) {
             $select.append('<option value="">-- Select Sloc --</option>');
 
             $.each(data, function(index, sloc) {
-                $select.append('<option value="' + sloc.sloc_id + '">' + sloc.sloc_name + '</option>');
+                $select.append('<option value="' + sloc.sloc_id + '">' + sloc.sloc_name +
+                    '</option>');
             });
 
             $select.select2({
@@ -375,7 +396,10 @@ function getIdBox(idMaterial, slocId, rowIndex, id_request) {
     $.ajax({
         url: '<?php echo base_url('warehouse/get_id_box_options'); ?>',
         method: 'POST',
-        data: { id_material: idMaterial, sloc_id: slocId },
+        data: {
+            id_material: idMaterial,
+            sloc_id: slocId
+        },
         success: function(response) {
             var data = JSON.parse(response);
             var $boxSelect = $(`.box_${rowIndex}_${id_request}`);
@@ -383,7 +407,8 @@ function getIdBox(idMaterial, slocId, rowIndex, id_request) {
             $boxSelect.append('<option value="">-- Select Box --</option>');
 
             $.each(data, function(index, box) {
-                $boxSelect.append('<option value="' + box.id_box + '" data-total-qty="' + box.total_qty_real + '">' + box.no_box + '</option>');
+                $boxSelect.append('<option value="' + box.id_box + '" data-total-qty="' + box
+                    .total_qty_real + '">' + box.no_box + '</option>');
             });
 
             $boxSelect.select2({
@@ -392,11 +417,11 @@ function getIdBox(idMaterial, slocId, rowIndex, id_request) {
             });
 
             $boxSelect.on('change', function() {
-                 // Check for duplicate box selection
+                // Check for duplicate box selection
                 var selectedOption = $(this).find('option:selected');
-                 var selectedBox = selectedOption.val();
+                var selectedBox = selectedOption.val();
                 $(`.box_${rowIndex}_${id_request}`).val(selectedBox);
-                 if (materialSlocArray.some(item => item.box === selectedBox)) {
+                if (materialSlocArray.some(item => item.box === selectedBox)) {
                     Swal.fire({
                         icon: 'error',
                         text: 'This box has already been selected. Please choose a different box.'
@@ -415,6 +440,7 @@ function getIdBox(idMaterial, slocId, rowIndex, id_request) {
         }
     });
 }
+
 function getDetailRequest(id, material_id) {
     $.ajax({
         url: '<?php echo base_url('warehouse/get_detail_quality_request'); ?>',
@@ -598,21 +624,21 @@ function setPR(rowIndex, id_material, id_request) {
             icon: 'error',
             text: 'Please select a Sloc.'
         });
-        return; 
+        return;
     }
     if (!boxValue) {
         Swal.fire({
             icon: 'error',
             text: 'Please select a Box.'
         });
-        return; 
+        return;
     }
     if (!qtyNeedValue || parseFloat(qtyNeedValue) <= 0) {
         Swal.fire({
             icon: 'error',
             text: 'Please enter a valid Quantity Need.'
         });
-        return; 
+        return;
     }
 
     // Push data to the array
@@ -646,12 +672,12 @@ function setPR(rowIndex, id_material, id_request) {
 }
 
 
-function unsetPR(rowIndex, id_material, id_request){
+function unsetPR(rowIndex, id_material, id_request) {
     var slocValue = $(`.sloc_${rowIndex}_${id_request}`).val();
     var boxValue = $(`.box_${rowIndex}_${id_request}`).val();
     var qtyNeedValue = parseFloat($(`.qty_need_${rowIndex}_${id_request}`).val());
-      // Find and remove the specific item from the materialSlocArray
-      materialSlocArray = materialSlocArray.filter(item => 
+    // Find and remove the specific item from the materialSlocArray
+    materialSlocArray = materialSlocArray.filter(item =>
         item.sloc !== slocValue || item.box !== boxValue || item.qty_need !== qtyNeedValue
     );
     // Disable the specific setPR button for this row
@@ -664,15 +690,15 @@ function unsetPR(rowIndex, id_material, id_request){
     console.log(materialSlocArray);
 }
 
-function savePRDetail(id_material, id_request){
-    if(materialSlocArray.length == 0){
+function savePRDetail(id_material, id_request) {
+    if (materialSlocArray.length == 0) {
         Swal.fire({
             icon: 'error',
             text: 'Please Complete the proccess!'
         });
         return;
     }
-     // Calculate the total qty_need in the array
+    // Calculate the total qty_need in the array
     var totalQtyNeed = materialSlocArray.reduce((sum, item) => sum + item.qty_need, 0);
     var materialNeed = parseFloat($(`.material_need_${id_request}`).val());
 
@@ -684,12 +710,14 @@ function savePRDetail(id_material, id_request){
         });
     } else {
         $.ajax({
-        url: '<?php echo base_url('warehouse/save_quality_request_detail'); ?>',
-        method: 'POST',
-        data: { materialSlocArray: materialSlocArray },
-        success: function(response) {
-            var data = JSON.parse(response);
-            if (data.status) {
+            url: '<?php echo base_url('warehouse/save_quality_request_detail'); ?>',
+            method: 'POST',
+            data: {
+                materialSlocArray: materialSlocArray
+            },
+            success: function(response) {
+                var data = JSON.parse(response);
+                if (data.status) {
                     Swal.fire({
                         icon: 'success',
                         text: 'Save quality request detail is successfully.'
@@ -699,26 +727,29 @@ function savePRDetail(id_material, id_request){
                     });
                     materialSlocArray = [];
                 }
-            
-        },
-        error: function(xhr, status, error) {
-            console.error('Error:', error);
-        }
-    });
+
+            },
+            error: function(xhr, status, error) {
+                console.error('Error:', error);
+            }
+        });
     }
 }
-function closeModal(){
+
+function closeModal() {
     window.location.reload();
 }
 
 
 
-function getdetailpr(id_request){
+function getdetailpr(id_request) {
     $('.view-details').prop('disabled', true);
     $.ajax({
         url: '<?php echo base_url('warehouse/get_detail_quality_req'); ?>',
         method: 'POST',
-        data: { id_request: id_request},
+        data: {
+            id_request: id_request
+        },
         success: function(response) {
             var data = JSON.parse(response);
             var rowIndex = $('.detail-pr-container').length;
@@ -751,7 +782,7 @@ function getdetailpr(id_request){
                 // Append the new setting block to the container
                 $('.detail-pr-container').append(newDetail);
             });
-           
+
         },
         error: function(xhr, status, error) {
             console.error('Error:', error);
@@ -763,7 +794,7 @@ function getdetailpr(id_request){
 function rejectRequest(id_request) {
     var rejectDescription = $(`.keterangan-reject_${id_request}`).val();
     console.log(rejectDescription);
-    if(!rejectDescription){
+    if (!rejectDescription) {
         Swal.fire({
             icon: 'error',
             text: 'Please fill out reject description form!',
@@ -817,7 +848,9 @@ function rejectRequest(id_request) {
         }
     });
 }
+
 function printReq(Id_request) {
-    window.open('<?php echo base_url() . $this->router->fetch_class(); ?>/print_quality_request/' + Id_request, '_blank');
+    window.open('<?php echo base_url() . $this->router->fetch_class(); ?>/print_quality_request/' + Id_request,
+        '_blank');
 }
 </script>

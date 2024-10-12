@@ -9,8 +9,6 @@ class ParserState
 {
     /**
      * @var null
-     *
-     * @internal
      */
     const EOF = null;
 

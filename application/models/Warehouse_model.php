@@ -222,58 +222,58 @@ class Warehouse_model extends CI_Model
 
 	public function getListStorageExport()
 	{
-		// $query = "SELECT
-		// 	ls.product_id,
-		// 	ls.material_desc,
-		// 	ls.total_qty,
-		// 	b.no_box,
-		// 	b.sloc,
-		// 	s.SLoc,
-		// 	ls.uom,
-		// 	sub.total_qty_sum,
-		// 	CONCAT('[', s.SLoc, ']-', b.no_box, ':', ls.total_qty) AS box_qty_details
-		// FROM
-		// 	list_storage ls
-		// JOIN (
-		// 	SELECT
-		// 		product_id,
-		// 		SUM(total_qty) AS total_qty_sum
-		// 	FROM
-		// 		list_storage
-		// 	GROUP BY
-		// 		product_id
-		// ) sub ON ls.product_id = sub.product_id
-		// LEFT JOIN box b ON ls.id_box = b.id_box
-		// JOIN storage s ON b.sloc = s.Id_storage  -- Use b.sloc from the box table instead of ls.sloc
-		// ORDER BY
-		// 	ls.product_id DESC, ls.id_box
-		// 		";
-
 		$query = "SELECT
-				rm.reference_number,
-				rm.material,
-				rm.qty,
-				b.no_box,
-				b.sloc,
-				s.SLoc,
-				rm.uom,
-				sub.total_qty_sum,
-				CONCAT('[', s.SLoc, ']-', b.no_box, ':', rm.qty) AS box_qty_details
+			ls.product_id,
+			ls.material_desc,
+			ls.total_qty,
+			b.no_box,
+			b.sloc,
+			s.SLoc,
+			ls.uom,
+			sub.total_qty_sum,
+			CONCAT('[', s.SLoc, ']-', b.no_box, ':', ls.total_qty) AS box_qty_details
+		FROM
+			list_storage ls
+		JOIN (
+			SELECT
+				product_id,
+				SUM(total_qty) AS total_qty_sum
 			FROM
-				receiving_material rm
-			JOIN (
-				SELECT
-					reference_number,
-					SUM(qty) AS total_qty_sum
-				FROM
-					receiving_material
-				GROUP BY
-					reference_number
-			) sub ON rm.reference_number = sub.reference_number
-			LEFT JOIN box b ON rm.id_box = b.id_box
-			JOIN storage s ON b.sloc = s.Id_storage
-			ORDER BY
-				rm.reference_number DESC, rm.id_box";
+				list_storage
+			GROUP BY
+				product_id
+		) sub ON ls.product_id = sub.product_id
+		LEFT JOIN box b ON ls.id_box = b.id_box
+		JOIN storage s ON b.sloc = s.Id_storage  -- Use b.sloc from the box table instead of ls.sloc
+		ORDER BY
+			ls.product_id DESC, ls.id_box
+				";
+
+		// $query = "SELECT
+		// 		rm.reference_number,
+		// 		rm.material,
+		// 		rm.qty,
+		// 		b.no_box,
+		// 		b.sloc,
+		// 		s.SLoc,
+		// 		rm.uom,
+		// 		sub.total_qty_sum,
+		// 		CONCAT('[', s.SLoc, ']-', b.no_box, ':', rm.qty) AS box_qty_details
+		// 	FROM
+		// 		receiving_material rm
+		// 	JOIN (
+		// 		SELECT
+		// 			reference_number,
+		// 			SUM(qty) AS total_qty_sum
+		// 		FROM
+		// 			receiving_material
+		// 		GROUP BY
+		// 			reference_number
+		// 	) sub ON rm.reference_number = sub.reference_number
+		// 	LEFT JOIN box b ON rm.id_box = b.id_box
+		// 	JOIN storage s ON b.sloc = s.Id_storage
+		// 	ORDER BY
+		// 		rm.reference_number DESC, rm.id_box";
 
 		return $this->db->query($query)->result_array();
 	}
@@ -840,4 +840,4 @@ class Warehouse_model extends CI_Model
 	}
 
 }
-?>
+?>	
