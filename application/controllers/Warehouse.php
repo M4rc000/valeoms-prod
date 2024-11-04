@@ -1422,31 +1422,18 @@ class Warehouse extends CI_Controller
 				AND 
 					pra.status_kitting = 1")->result_array();
 
-		$Request_result = $this->db->query("SELECT 
-					pr.Id_request, 
-					pr.Production_plan,
-					pp.Id_fg, 
-					pp.Fg_desc, 
-					pp.Production_plan_qty,
-					ppd.Id_material, 
-					ppd.Material_desc, 
-					ppd.Material_need, 
-					ppd.Uom
-				FROM 
-					production_request pr
-				LEFT JOIN 
-					production_plan pp 
-					ON pr.Production_plan = pp.production_plan
-				LEFT JOIN 
-					production_plan_detail ppd 
-					ON pr.Production_plan = ppd.production_plan
-				WHERE 
-					ppd.Production_plan = pr.Production_plan
-			AND pr.Id_request = '$reqNo'")->result_array();
+		$Request_result = $this->db->query("SELECT Id_request, Id_material, Material_desc, Production_plan FROM production_request WHERE Id_request = '$reqNo'")->result_array();
+
+		$Production_plan = $Request_result[0]['Production_plan'];
+
+		$FG_result = $this->db->query("SELECT ppd.Production_plan, ppd.Material_need, ppd.Uom, ppd.status, pp.Id_fg, pp.Fg_desc, pp.Production_plan_qty, pp.production_plan_date FROM `production_plan_detail` ppd
+		LEFT JOIN Production_plan pp
+		ON pp.Production_plan = '$Production_plan'")->result_array();
 
 
 		$data['Box_result'] = $Box_result;
 		$data['Request_result'] = $Request_result;
+		$data['FG_result'] = $FG_result;
 		$data['reqNo'] = $reqNo;
 
 		$this->load->view('templates/header', $data);
@@ -1476,7 +1463,9 @@ class Warehouse extends CI_Controller
 				LEFT JOIN 
 					box b ON qrd.id_box = b.id_box
 				WHERE 
-					qr.Id_request = '$reqNo'")->result_array();
+					qr.Id_request = '$reqNo'
+				AND 
+					qrd.status_kitting = 1")->result_array();
 
 		$data['Result'] = $result;
 		$data['reqNo'] = $reqNo;
@@ -1551,32 +1540,33 @@ class Warehouse extends CI_Controller
 				WHERE 
 					b.no_box = '$boxID'")->result_array();
 
-		$Quality_result = $this->db->query("SELECT 
-				pra.Id_request,
-				pra.Sloc,
-				pra.id_box, 
-				pra.Qty, 
-				pra.Production_plan,
-				pp.Id_fg, 
-				pp.Fg_desc, 
-				pp.Production_plan_qty,
-				ppd.Id_material, 
-				ppd.Material_desc, 
-				ppd.Material_need, 
-				ppd.Uom
-			FROM 
-				production_request_approve pra
-			LEFT JOIN 
-				production_plan pp 
-				ON pra.Production_plan = pp.production_plan
-			LEFT JOIN 
-				production_plan_detail ppd 
-				ON pra.Production_plan = ppd.production_plan
-			WHERE 
-				pra.Id_request = '$req_no'
-			AND 
-				pra.status_kitting = 1")->result_array();
+		// $Quality_result = $this->db->query("SELECT 
+		// 		pra.Id_request,
+		// 		pra.Sloc,
+		// 		pra.id_box, 
+		// 		pra.Qty, 
+		// 		pra.Production_plan,
+		// 		pp.Id_fg, 
+		// 		pp.Fg_desc, 
+		// 		pp.Production_plan_qty,
+		// 		ppd.Id_material, 
+		// 		ppd.Material_desc, 
+		// 		ppd.Material_need, 
+		// 		ppd.Uom
+		// 	FROM 
+		// 		production_request_approve pra
+		// 	LEFT JOIN 
+		// 		production_plan pp 
+		// 		ON pra.Production_plan = pp.production_plan
+		// 	LEFT JOIN 
+		// 		production_plan_detail ppd 
+		// 		ON pra.Production_plan = ppd.production_plan
+		// 	WHERE 
+		// 		pra.Id_request = '$req_no'
+		// 	AND 
+		// 		pra.status_kitting = 1")->result_array();
 
+		$Quality_result = $this->db->query("SELECT * FROM `production_request_approve` WHERE Id_request = '$req_no' AND status_kitting = 1")->result_array();
 
 		$result = [
 			'Box_result' => $Box_result,
@@ -1707,7 +1697,7 @@ class Warehouse extends CI_Controller
 		echo json_encode($result);
 	}
 
-	function save_kitting()
+	function save_kitting_production()
 	{
 		$checkedItems = $this->input->post('checkedItems');
 		$no_box = $this->input->post('fill');
@@ -1747,6 +1737,7 @@ class Warehouse extends CI_Controller
 		}
 
 		if ($check > 0) {
+
 			$this->db->query("UPDATE `production_request_approve` SET status_kitting = 0 WHERE id_box = '$no_box'");
 
 			$box = $this->db->query("SELECT * FROM `box` WHERE id_box = '$no_box'")->result_array();
@@ -1770,6 +1761,61 @@ class Warehouse extends CI_Controller
 		echo json_encode($result);
 	}
 
+	function save_kitting_quality()
+	{
+		$checkedItems = $this->input->post('checkedItems');
+		$no_box = $this->input->post('fill');
+		$reqNo = $this->input->post('reqNo');
+
+		$list_storage = $this->db->query("SELECT * FROM `list_storage` WHERE id_box = '$no_box'")->result_array();
+
+		$check = 0;
+
+		// MENGURANGI JUMLAH UNPACK
+		foreach ($list_storage as $storageItem) {
+			// Loop through each checked item
+			foreach ($checkedItems as $checkedItem) {
+				// Check if the product IDs match
+				if ($storageItem['product_id'] == $checkedItem['product_id']) {
+					// Calculate the new total quantity
+					$new_total_qty = $storageItem['total_qty'] - $checkedItem['material_need'];
+
+					// Update the list_storage item in the database
+					$this->db->set('total_qty', $new_total_qty)->where('product_id', $storageItem['product_id'])->update('list_storage');
+					$check_insert = $this->db->affected_rows();
+					if ($check_insert > 0) {
+
+						// RECORD KANBAN BOX LOG
+						$query_log = $this->db->last_query();
+						$log_data = [
+							'affected_table' => 'list_storage',
+							'queries' => $query_log,
+							'Crtdt' => date('Y-m-d H:i:s'),
+							'Crtby' => $this->input->post('user')
+						];
+						$this->db->insert('kitting_log', $log_data);
+						$check += 1;
+					}
+				}
+			}
+		}
+
+		if ($check > 0) {
+			$this->db->query("UPDATE `quality_request_detail` SET status_kitting = 0 WHERE id_box = '$no_box'");
+
+			$box = $this->db->query("SELECT * FROM `box` WHERE id_box = '$no_box'")->result_array();
+
+			$result = [
+				'Id_material' => $checkedItems[0]['product_id'],
+				'Material_desc' => $checkedItems[0]['material_desc'],
+				'Id_request' => $reqNo,
+				'no_box' => $box[0]['no_box'],
+			];
+		}
+
+		echo json_encode($result);
+	}
+
 	function AddKanbanBox()
 	{
 		$materialID = $this->input->post('materialID');
@@ -1777,7 +1823,7 @@ class Warehouse extends CI_Controller
 		$materialQty = $this->input->post('materialQty');
 		$production_plan = $this->input->post('proPlan');
 		$ProductID = $this->input->post('id_fg');
-		$kanban_id = $this->input->post('id_kanban');
+		$kanban_id = $this->PModel->getLastKanbanID();
 
 
 		$Data = array(
@@ -1808,10 +1854,16 @@ class Warehouse extends CI_Controller
 				'Crtby' => $this->input->post('user')
 			];
 			$this->db->insert('kanban_box_log', $log_data);
-			$result = 'ADD';
+			$result = [
+				'code' => 'ADD',
+				'kanban_id' => $kanban_id
+			];
 		} else {
 			// Failure
-			$result = 'ERROR';
+			$result = [
+				'code' => 'ERROR',
+				'kanban_id' => $kanban_id
+			];
 		}
 
 		echo json_encode($result);
@@ -1831,6 +1883,34 @@ class Warehouse extends CI_Controller
 		$this->load->view('templates/sidebar', $data);
 		$this->load->view('warehouse/return_request', $data);
 		$this->load->view('templates/footer');
+	}
+	public function return_material_qty()
+	{
+		// Ambil data yang dikirim dari AJAX
+		$sloc = $this->input->post('sloc');
+		$box = $this->input->post('box');
+		$qty_need = $this->input->post('qty_need');
+		$id_material = $this->input->post('id_material');
+
+		// Validasi data input
+		if (empty($sloc) || empty($box) || empty($qty_need) || empty($id_material)) {
+			echo json_encode(['status' => false, 'error' => 'Missing parameters.']);
+			return;
+		}
+
+		// Update kuantitas di tabel receiving_material untuk mengembalikan qty
+		$update = $this->db->set('total_qty_real', 'total_qty_real + ' . (float) $qty_need, FALSE)
+			->where('product_id', $id_material)
+			->where('sloc', $sloc)
+			->where('id_box', $box)
+			->update('receiving_material'); // Pastikan tabel dan kolom sesuai
+
+		// Cek apakah update berhasil
+		if ($update) {
+			echo json_encode(['status' => true]);
+		} else {
+			echo json_encode(['status' => false, 'error' => 'Failed to update quantity.']);
+		}
 	}
 
 	function approveReturnRequest($id)

@@ -72,21 +72,21 @@
             <div class="row mt-2 px-2">
                 <label for="Id_fg" class="col-sm-3 col-form-label"><b>FG Part No</b></label>
                 <div class="col-sm-3">
-                    <input type="text" id="Id_fg" class="form-control text-center" value="<?=$Request_result[0]['Id_fg'];?>"
+                    <input type="text" id="Id_fg" class="form-control text-center" value="<?=$FG_result[0]['Id_fg'];?>"
                         readonly>
                 </div>
             </div>
             <div class="row mt-2 px-2">
                 <label for="Fg_desc" class="col-sm-3 col-form-label"><b>FG Part Name</b></label>
                 <div class="col-sm-6">
-                    <input type="text" id="Fg_desc" class="form-control" value="<?=$Request_result[0]['Fg_desc'];?>" readonly>
+                    <input type="text" id="Fg_desc" class="form-control" value="<?=$FG_result[0]['Fg_desc'];?>" readonly>
                 </div>
             </div>
             <div class="row mt-2 px-2">
                 <label for="qty_prod_plan" class="col-sm-3 col-form-label"><b>Qty Production Planning</b></label>
                 <div class="col-sm-2">
                     <input type="text" id="qty_prod_plan" class="form-control text-center"
-                        value="<?=$Request_result[0]['Production_plan_qty'];?>" readonly>
+                        value="<?=$FG_result[0]['Production_plan_qty'];?>" readonly>
                 </div>
             </div>
             <div class="row mt-2 px-2">
@@ -108,10 +108,10 @@
                 <div class="col-sm-12 col-md-9">
                     <div class="row">
                         <div class="col-3 col-md-3 col-lg-3">
-                            <input type="text" id="qty_prod_plan" class="form-control text-center" value="<?=$Request_result[0]['Material_need'];?>" readonly>
+                            <input type="text" id="qty_prod_plan" class="form-control text-center" value="<?=$FG_result[0]['Material_need'];?>" readonly>
                         </div>
                         <div class="col-3 col-md-3 col-lg-3">
-                            <input type="text" id="qty_prod_plan_uom" class="form-control text-center" value="<?=$Request_result[0]['Uom'];?>" readonly>
+                            <input type="text" id="qty_prod_plan_uom" class="form-control text-center" value="<?=$FG_result[0]['Uom'];?>" readonly>
                         </div>
                     </div>
                 </div>
@@ -141,7 +141,13 @@
             <div class="row mt-3 mb-1">
                 <div id="data-box-prod"></div>
             </div>
-            <div class="row mt-4" id="kanban-card">
+            <div class="row mt-4" id="qty-remaining">
+                <div class="col-12 col-md-3 mb-3 mb-md-0">
+                    <label for="qty_remaining" class="form-label"><b>Qty Save to kanban</b></label>
+                    <input type="number" class="text-center form-control" id="qty_remaining" name="qty_remaining" readonly>
+                </div>
+            </div>
+            <div class="row mt-2" id="kanban-card">
                 <div class="col-12 col-md-3 mb-3 mb-md-0">
                     <!-- GET USER -->
                     <input type="text" class="form-control" id="user" name="user" value="<?=$name['username'];?>" hidden>
@@ -210,8 +216,10 @@
 <script>
     $(document).ready(function () {
         $('#box_id').select2();
+        $('#qty-remaining').hide();
         $('#kanban-card').hide();
         $('#kanban-card').children().hide();
+        $('#qty-remaining').children().hide();
 
         var rowBox = '';
         var Box_result = <?= json_encode($Box_result); ?>;
@@ -233,6 +241,22 @@
         }).join('');
 
         $('#box_id').html(`<option selected>Choose Box</option>` + boxOptions);
+
+
+        // AVOID GO OUT FROM PAGE
+            // Handle link clicks
+            $('a').on('click', function(event) {
+                var url = $(this).attr('href');
+                showConfirmation(event, url);
+            });
+
+            function handleBeforeUnload(event) {
+                event.preventDefault();
+                event.returnValue = ''; // For modern browsers
+                return ''; // For older browsers
+            }
+
+            window.addEventListener('beforeunload', handleBeforeUnload);
     });
 
     function getBoxP() {
@@ -273,6 +297,7 @@
 
                     var rows = '';
                     var fill = '';
+
                     for (let numbers = 0; numbers < res.Box_result.length; numbers++) {
                         var boxItem = res.Box_result[numbers];
                         var isChecked = false;
@@ -284,6 +309,7 @@
                             if (boxItem.product_id == qualityItem.Id_material && boxItem.id_box == qualityItem.id_box) {
                                 isChecked = true;
                                 materialNeed = qualityItem.Qty;
+                                $('#qty_remaining').val(materialNeed);
                                 fill = boxItem.id_box; 
                                 break;
                             }
@@ -354,7 +380,7 @@
                         
                         if(checkedItems){
                             $.ajax({
-                                url: '<?= base_url('warehouse/save_kitting'); ?>',
+                                url: '<?= base_url('warehouse/save_kitting_production'); ?>',
                                 type: 'post',
                                 dataType: 'json',
                                 data: {
@@ -369,10 +395,11 @@
                                         });
 
                                         
-                                        // $('#refresh-btn-prod').css('display', 'block');
                                         $('#print-btn').css('display', 'block');
                                         $('#kanban-card').show();
                                         $('#kanban-card').children().show();
+                                        $('#qty-remaining').show();
+                                        $('#qty-remaining').children().show();
                                         $('#unpackBtn-prod').hide();
                                         $('#table-unpack input[type="checkbox"]').prop('disabled', true);
                                         $('#btn-search-box').prop('disabled', true);
@@ -390,11 +417,6 @@
                                             var materialQty = $('#qty_kanban').val();
                                             var proPlan = res['Production_plan'];
                                             var id_fg = res['Id_fg'];
-                                            <?php
-                                                $this->load->model('Production_model','PModel');
-                                                $kanban = $this->PModel->getLastKanbanID();
-                                            ?>
-                                            var id_kanban = '<?=$kanban;?>';
                                             var user = $('#user').val();
 
                                             if(!materialQty){
@@ -406,20 +428,37 @@
                                                 return false;
                                             }
 
+                                            // QTY SAVE TO KANBAN REMAINING
+                                            var qty_remaining = parseFloat($('#qty_remaining').val());
+
+                                            if (qty_remaining < parseFloat(materialQty)) {
+                                                Swal.fire({
+                                                    title: "Warning",
+                                                    html: `<b>All Data qty</b> unpacked already saved to kanban or <b>Qty</b> is greater than <b>Qty remaining</b> to save`,
+                                                    icon: "warning"
+                                                });
+                                                return false;
+                                            } else {
+                                                var new_qty_remaining = qty_remaining - materialQty;
+                                                $('#qty_remaining').val(new_qty_remaining);
+                                            }
+
                                             $.ajax({
                                                 url: '<?= base_url('warehouse/AddKanbanBox'); ?>',
                                                 type: 'post',
                                                 dataType: 'json',
                                                 data: {
-                                                    materialID, materialDesc, materialQty, proPlan, id_fg, id_kanban, user
+                                                    materialID, materialDesc, materialQty, proPlan, id_fg, user
                                                 },
                                                 success: function(res) {
-                                                    if(res == 'ADD'){
+                                                    if(res.code == 'ADD'){
                                                         Swal.fire({
                                                             title: "Success",
                                                             html: `New Kanban Box successfully added`,
                                                             icon: "success"
                                                         });
+
+                                                        var id_kanban = res.kanban_id;
 
                                                         var printWindow = window.open('', '', 'height=400,width=600');
                                                         printWindow.document.write(`
@@ -521,6 +560,9 @@
 
                                         $('#refresh-btn-prod').on('click', function (){
                                             $('#qty_kanban').val('');
+                                            $('#material_id').val(res['Id_material']);
+                                            $('#material_desc').val(res['Material_desc']);
+                                            $('#production_planning').val(res['Production_plan']);
                                         });
                                     }
                                 },

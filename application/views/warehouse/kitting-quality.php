@@ -92,6 +92,21 @@
         }).join('');
 
         $('#box_id-q').html(`<option selected>Choose Box</option>` + boxOptions);
+
+        // AVOID GO OUT FROM PAGE
+            // Handle link clicks
+            $('a').on('click', function(event) {
+                var url = $(this).attr('href');
+                showConfirmation(event, url);
+            });
+            
+            function handleBeforeUnload(event) {
+                event.preventDefault();
+                event.returnValue = ''; // For modern browsers
+                return ''; // For older browsers
+            }
+
+            window.addEventListener('beforeunload', handleBeforeUnload);
     });
 
     function getBoxQ() {
@@ -188,7 +203,7 @@
                         </div>
                         <div class="row justify-content-center mt-3 gap-1">
                             <div class="col text-end">
-                                <button type="button" class="btn btn-warning" id="refresh-btn" data-bs-toggle="modal" data-bs-target="#refresh-page" disabled><i class="bx bx-revision"></i></button>
+                                <a href=""><button type="button" class="btn btn-warning" id="refresh-btn" disabled><i class="bx bx-revision"></i></button></a>
                             </div>
                         </div>
                     `;
@@ -214,29 +229,25 @@
 
                         
                         if(checkedItems){
+                            var reqNo = $('#req_no').val();
+
                             $.ajax({
-                                url: '<?= base_url('warehouse/save_kitting'); ?>',
+                                url: '<?= base_url('warehouse/save_kitting_quality'); ?>',
                                 type: 'post',
                                 dataType: 'json',
                                 data: {
-                                    checkedItems, fill, user
+                                    checkedItems, fill, user,reqNo
                                 },
                                 success: function(res) {
                                     if(res){
-                                        // Swal.fire({
-                                        //     title: "Success",
-                                        //     html: `Box <b>${res}</b> have been unpacked`,
-                                        //     icon: "success"
-                                        // });
-
                                         Swal.fire({
                                             title: "Success",
-                                            html: `Box <b>${res}</b> has been unpacked`,
+                                            html: `Box <b>${res.no_box}</b> has been unpacked`,
                                             icon: "success"
                                         }).then((result) => {
                                             if (result.isConfirmed) {
                                                 // Select and remove the specific box element by its unique ID
-                                                const element = $(`#boxq-${res}`);
+                                                const element = $(`#boxq-${res.no_box}`);
                                                 element.remove();
                                             }
                                         });

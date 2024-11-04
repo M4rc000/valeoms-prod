@@ -520,7 +520,7 @@ class Warehouse_model extends CI_Model
 
 	public function getAllReqNoQual()
 	{
-		return $this->db->get_where('quality_request', array('status' => 1))->result_array();
+		return $this->db->get_where('quality_request_detail', array('status_kitting' => 1))->result_array();
 	}
 
 	public function production_request()

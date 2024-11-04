@@ -434,19 +434,19 @@
 						.kanban-card {
 							border: 1px solid black;
 							padding: 20px;
-							width: 15cm;
-							height: 8.6cm;
+							width: 15.4cm;
+							height: 9cm;
 							margin: 0;
 							box-sizing: border-box;
 							page-break-inside: avoid;
 						}
 					}
 				</style>
-				<div class="kanban-card" style="border: 1px solid black; padding: 20px; width: 15cm; height: 8.6cm; margin: 15px auto; position: relative; box-sizing: border-box;">
+				<div class="kanban-card" style="border: 1px solid black; padding: 20px; width: 15.4cm; height: 9cm; margin: 15px auto; position: relative; box-sizing: border-box;">
 					<img src="<?=base_url('assets');?>/img/valeo-kanban-logo.png" alt="Logo" class="logo">
 					<h3 style="text-align: center; margin-top: -30px; margin-bottom: 5px; text-decoration: underline;">KANBAN CARD</h3>
 					<div class="row mt-5 me-0">
-						<div class="col-md-8" style="font-size: 16px; width: 55% !important;">
+						<div class="col-md-8" style="font-size: 20px; width: 70% !important;">
 							<ul style="list-style: none; padding: 0;">
 								<li style="display: flex; align-items: center; padding: 5px 0;">
 									<p style="margin: 0"><b>Material Part No :</b> ${materialID}</p>
